@@ -70,7 +70,7 @@ jobs:
 
 
 # ================= DEPLOY VPS =================
- deploy:
+deploy:
   name: Deploy ke VPS
   runs-on: ubuntu-latest
   needs: build
@@ -86,21 +86,22 @@ jobs:
 
         script: |
 
-          echo "🚀 mulai deploy"
+          echo "=== START DEPLOY ==="
 
           cd /home/${{ secrets.SERVER_USER }}/RPL2B-kelompok-4
 
-          echo "pull image terbaru"
           docker pull ghcr.io/umamkhoirul06/skilloka_backend:latest
 
-          echo "restart container"
-          docker compose down
+          docker compose down || true
+
           docker compose up -d
 
-          echo "tunggu postgres siap"
-          sleep 20
+          echo "waiting container..."
+          sleep 15
 
-          echo "run migrate"
-          docker compose exec -T app php artisan migrate --force || echo "skip migrate error"
+          docker compose ps
 
-          echo "deploy selesai"
+          echo "run migrate (optional)"
+          docker compose exec -T app php artisan migrate --force || true
+
+          echo "=== DEPLOY SUCCESS ==="
