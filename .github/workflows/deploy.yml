@@ -86,22 +86,16 @@ deploy:
 
         script: |
 
-          echo "=== START DEPLOY ==="
+          echo "START DEPLOY"
 
           cd /home/${{ secrets.SERVER_USER }}/RPL2B-kelompok-4
 
           docker pull ghcr.io/umamkhoirul06/skilloka_backend:latest
 
-          docker compose down || true
+          docker compose down
 
           docker compose up -d
 
-          echo "waiting container..."
-          sleep 15
-
           docker compose ps
 
-          echo "run migrate (optional)"
-          docker compose exec -T app php artisan migrate --force || true
-
-          echo "=== DEPLOY SUCCESS ==="
+          echo "DEPLOY SUCCESS"
