@@ -1,6 +1,5 @@
 FROM php:8.2-fpm
 
-# install dependency postgres
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     unzip \
@@ -8,7 +7,6 @@ RUN apt-get update && apt-get install -y \
     curl \
     && docker-php-ext-install pdo pdo_pgsql pgsql
 
-# install composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
