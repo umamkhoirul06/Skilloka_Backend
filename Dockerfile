@@ -1,50 +1,20 @@
-# Dockerfile
-FROM php:8.2-fpm-alpine
+FROM php:8.2-fpm
 
-# Install dependencies sistem
-RUN apk add --no-cache \
-    nginx \
-    nodejs \
-    npm \
-    curl \
-    zip \
+# install dependency postgres
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
     unzip \
     git \
-    supervisor \
-    libpng-dev \
-    libzip-dev \
-    oniguruma-dev \
-    libxml2-dev
+    curl \
+    && docker-php-ext-install pdo pdo_pgsql pgsql
 
-# Install ekstensi PHP
-RUN docker-php-ext-install \
-    pdo_mysql \
-    mbstring \
-    exif \
-    pcntl \
-    bcmath \
-    gd \
-    opcache \
-    zip
+# install composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+WORKDIR /var/www
 
-WORKDIR /var/www/html
-
-# Copy file project
 COPY . .
 
-# Install dependencies Laravel
-RUN composer install --optimize-autoloader --no-dev
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
-# Set permission
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-
-# Copy konfigurasi Nginx dan Supervisor
-COPY docker/nginx.conf /etc/nginx/nginx.conf
-COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
-EXPOSE 80
-
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+CMD ["php-fpm"]
