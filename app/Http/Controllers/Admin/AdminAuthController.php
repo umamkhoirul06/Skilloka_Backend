@@ -23,9 +23,7 @@ class AdminAuthController extends Controller
 
     public function showLogin()
     {
-
         return view('admin.auth.login');
-
     }
 
 
@@ -48,13 +46,11 @@ class AdminAuthController extends Controller
         ]);
 
 
-
         if (Auth::attempt($credentials)) {
 
             $request->session()->regenerate();
 
             $user = Auth::user();
-
 
 
             /*
@@ -72,7 +68,6 @@ class AdminAuthController extends Controller
             }
 
 
-
             // ADMIN LPK
             if ($user->role === 'admin_lpk') {
 
@@ -81,12 +76,10 @@ class AdminAuthController extends Controller
             }
 
 
-
             // USER BIASA
             return redirect('/');
 
         }
-
 
 
         throw ValidationException::withMessages([
@@ -129,8 +122,13 @@ class AdminAuthController extends Controller
     public function dashboard()
     {
 
+        // =====================
+        // STATISTIK
+        // =====================
+
         $totalCourses = Course::count();
 
+        // student dihitung dari booking
         $totalStudents = Booking::count();
 
         $upcomingClasses = CourseSchedule::count();
@@ -142,14 +140,69 @@ class AdminAuthController extends Controller
 
 
 
+        // =====================
+        // BOOKING TERBARU
+        // =====================
+
         $recentBookings = Booking::latest()
             ->take(5)
             ->get();
 
 
 
+        // =====================
+        // DATA CHART BULANAN
+        // =====================
+
+        $monthlyLabels = [
+
+            'Jan','Feb','Mar','Apr','May','Jun',
+            'Jul','Aug','Sep','Oct','Nov','Dec'
+
+        ];
+
+
+        $monthlyStudents = [];
+
+        $monthlyCourses = [];
+
+
+        foreach(range(1,12) as $month){
+
+            $monthlyStudents[] = Booking::whereYear(
+                'created_at',
+                now()->year
+            )
+            ->whereMonth(
+                'created_at',
+                $month
+            )
+            ->count();
+
+
+
+            $monthlyCourses[] = Course::whereYear(
+                'created_at',
+                now()->year
+            )
+            ->whereMonth(
+                'created_at',
+                $month
+            )
+            ->count();
+
+        }
+
+
+
+        // =====================
+        // RETURN VIEW
+        // =====================
+
         return view(
+
             'admin.dashboard',
+
             compact(
 
                 'totalCourses',
@@ -160,9 +213,16 @@ class AdminAuthController extends Controller
 
                 'pendingBookings',
 
-                'recentBookings'
+                'recentBookings',
+
+                'monthlyLabels',
+
+                'monthlyStudents',
+
+                'monthlyCourses'
 
             )
+
         );
 
     }
