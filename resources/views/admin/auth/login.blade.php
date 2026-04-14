@@ -349,31 +349,6 @@
                     </div>
                 </div>
 
-                <!-- Demo Credentials -->
-                <div class="mt-6 glass-card rounded-xl p-4 slide-up delay-400">
-                    <div class="flex items-center mb-3">
-                        <svg class="w-4 h-4 text-yellow-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <span class="text-yellow-400 text-sm font-medium">Demo Credentials</span>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3 text-xs">
-                        <div class="bg-white/5 rounded-lg p-2">
-                            <p class="text-gray-400 mb-1">Super Admin</p>
-                            <p class="text-white font-mono">god@skilloka.com</p>
-                        </div>
-                        <div class="bg-white/5 rounded-lg p-2">
-                            <p class="text-gray-400 mb-1">LPK Admin</p>
-                            <p class="text-white font-mono">admin@merahputih.com</p>
-                        </div>
-                    </div>
-                    <p class="text-gray-500 text-xs mt-2 text-center">Password: <span
-                            class="text-white font-mono">password</span></p>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Footer -->
     <div class="absolute bottom-4 left-0 right-0 text-center">

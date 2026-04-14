@@ -1,58 +1,151 @@
-@extends('layouts.super_admin')
+@extends('layouts.admin')
 
 @section('title','Finance')
 
 @section('content')
 
-<div class="grid grid-cols-2 gap-6 mb-6">
+<style>
 
-<div class="bg-gray-800 p-5 rounded">
+.stat{
+background:white;
+border-radius:12px;
+padding:18px;
+border:1px solid #e5e7eb;
+display:flex;
+align-items:center;
+justify-content:space-between;
+}
 
-<h4>Total Transaksi</h4>
+.stat-title{
+font-size:13px;
+color:#6b7280;
+}
 
-<p class="text-2xl text-blue-400">
+.stat-number{
+font-size:22px;
+font-weight:600;
+}
 
+.icon{
+width:42px;
+height:42px;
+border-radius:10px;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+.i1{
+background:#eef2ff;
+color:#4f46e5;
+}
+
+.i2{
+background:#ecfdf5;
+color:#059669;
+}
+
+.card{
+background:white;
+border-radius:12px;
+border:1px solid #e5e7eb;
+padding:20px;
+}
+
+.table th{
+font-size:13px;
+color:#6b7280;
+font-weight:500;
+}
+
+.table tr{
+border-bottom:1px solid #f1f5f9;
+}
+
+</style>
+
+
+
+<!-- statistik -->
+<div class="grid md:grid-cols-2 gap-6 mb-6">
+
+<div class="stat">
+
+<div>
+
+<p class="stat-title">
+Total Transaksi
+</p>
+
+<p class="stat-number">
 {{ $totalPayments }}
-
 </p>
+
+</div>
+
+<div class="icon i1">
+💳
+</div>
 
 </div>
 
 
 
-<div class="bg-gray-800 p-5 rounded">
+<div class="stat">
 
-<h4>Total Revenue</h4>
+<div>
 
-<p class="text-2xl text-green-400">
+<p class="stat-title">
+Total Revenue
+</p>
 
+<p class="stat-number text-emerald-600">
 Rp {{ number_format($totalRevenue) }}
-
 </p>
 
 </div>
 
+<div class="icon i2">
+💰
+</div>
+
+</div>
+
 </div>
 
 
 
-<div class="bg-gray-800 p-5 rounded">
 
-<h4 class="mb-4">
 
+<!-- tabel transaksi -->
+<div class="card">
+
+<h3 class="text-sm font-semibold mb-4">
 Transaksi Terbaru
+</h3>
 
-</h4>
 
-<table class="w-full">
+<table class="table w-full">
 
 <thead>
 
 <tr>
 
-<th>ID</th>
+<th class="p-2 text-left">
+ID
+</th>
 
-<th>Amount</th>
+<th class="p-2 text-left">
+User
+</th>
+
+<th class="p-2 text-left">
+Amount
+</th>
+
+<th class="p-2 text-left">
+Tanggal
+</th>
 
 </tr>
 
@@ -62,25 +155,42 @@ Transaksi Terbaru
 
 <tbody>
 
-@foreach($recentPayments as $payment)
+@forelse($recentPayments as $payment)
 
 <tr>
 
-<td>
-
-{{ $payment->id }}
-
+<td class="p-2">
+#{{ $payment->id }}
 </td>
 
-<td>
+<td class="p-2">
+{{ $payment->user->name ?? '-' }}
+</td>
 
+<td class="p-2 text-emerald-600 font-medium">
 Rp {{ number_format($payment->amount) }}
+</td>
+
+<td class="p-2 text-gray-500">
+{{ $payment->created_at->format('d M Y') }}
+</td>
+
+</tr>
+
+@empty
+
+<tr>
+
+<td colspan="4"
+class="text-center p-4 text-gray-400">
+
+Belum ada transaksi
 
 </td>
 
 </tr>
 
-@endforeach
+@endforelse
 
 
 </tbody>
@@ -88,5 +198,7 @@ Rp {{ number_format($payment->amount) }}
 </table>
 
 </div>
+
+
 
 @endsection

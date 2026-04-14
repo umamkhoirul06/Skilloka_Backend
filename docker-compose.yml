@@ -1,5 +1,7 @@
 version: '3.8'
+
 services:
+
   app:
     build: .
     ports:
@@ -7,7 +9,9 @@ services:
     environment:
       - APP_ENV=local
       - APP_KEY=${APP_KEY}
+      - DB_CONNECTION=pgsql
       - DB_HOST=db
+      - DB_PORT=5432
       - DB_DATABASE=${DB_DATABASE}
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
@@ -15,14 +19,15 @@ services:
       - db
 
   db:
-    image: mysql:8.0
+    image: postgres:15
     environment:
-      MYSQL_DATABASE: ${DB_DATABASE}
-      MYSQL_USER: ${DB_USERNAME}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_ROOT_PASSWORD: rootpassword
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"
     volumes:
-      - db_data:/var/lib/mysql
+      - db_data:/var/lib/postgresql/data
 
 volumes:
   db_data:

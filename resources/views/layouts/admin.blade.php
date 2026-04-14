@@ -6,9 +6,63 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>Skilloka Admin LPK</title>
+<title>Skilloka Dashboard</title>
 
 @vite(['resources/css/app.css','resources/js/app.js'])
+
+<style>
+
+.sidebar{
+background:linear-gradient(180deg,#0f172a,#1e3a8a,#312e81);
+color:white;
+}
+
+.logo-box{
+display:flex;
+align-items:center;
+gap:10px;
+padding:20px;
+border-bottom:1px solid rgba(255,255,255,0.08);
+}
+
+.logo-icon{
+width:38px;
+height:38px;
+border-radius:10px;
+display:flex;
+align-items:center;
+justify-content:center;
+background:linear-gradient(135deg,#667eea,#764ba2);
+font-size:18px;
+}
+
+.logo-text{
+font-size:18px;
+font-weight:600;
+}
+
+.menu-item{
+display:flex;
+align-items:center;
+gap:12px;
+padding:12px 16px;
+border-radius:10px;
+color:#c7d2fe;
+transition:.2s;
+text-decoration:none;
+}
+
+.menu-item:hover{
+background:rgba(255,255,255,0.08);
+color:white;
+}
+
+.menu-icon{
+width:18px;
+text-align:center;
+}
+
+</style>
 
 </head>
 
@@ -19,91 +73,153 @@
 <div class="flex h-screen">
 
 
+
+
 <!-- SIDEBAR -->
-<aside class="w-64 bg-slate-900 text-white">
+<aside class="w-64 sidebar shadow-lg">
 
-<div class="flex items-center justify-center h-16 bg-slate-800 shadow-md">
 
-<span class="text-xl font-bold text-blue-400">
+<div class="logo-box">
 
-SKILLOKA LPK
+<div class="logo-icon">
+📘
+</div>
 
-</span>
+<div class="logo-text">
+Skilloka
+</div>
 
 </div>
 
 
 
-<nav class="mt-5 px-4 space-y-2">
+
+@php
+$role = auth()->user()->role;
+@endphp
 
 
-<a href="{{ route('admin.dashboard') }}"
-class="block px-4 py-2 rounded hover:bg-slate-700">
 
+
+<nav class="mt-6 px-3 space-y-2">
+
+
+
+
+{{-- =====================
+ADMIN LPK MENU
+===================== --}}
+@if($role == 'admin' || $role == 'admin_lpk')
+
+<a href="{{ route('admin.dashboard') }}" class="menu-item">
+<span class="menu-icon">📊</span>
 Dashboard
-
 </a>
 
 
-
-<a href="{{ route('admin.profile') }}"
-class="block px-4 py-2 rounded hover:bg-slate-700">
-
+<a href="{{ route('admin.profile') }}" class="menu-item">
+<span class="menu-icon">🏢</span>
 LPK Profile
-
 </a>
 
 
-
-<a href="{{ route('admin.courses.index') }}"
-class="block px-4 py-2 rounded hover:bg-slate-700">
-
+<a href="{{ route('admin.courses.index') }}" class="menu-item">
+<span class="menu-icon">📚</span>
 Courses
-
 </a>
 
 
-
-<a href="{{ route('admin.students.index') }}"
-class="block px-4 py-2 rounded hover:bg-slate-700">
-
+<a href="{{ route('admin.students.index') }}" class="menu-item">
+<span class="menu-icon">👨‍🎓</span>
 Students
-
 </a>
 
 
-
-<a href="{{ route('admin.bookings.index') }}"
-class="block px-4 py-2 rounded hover:bg-slate-700">
-
+<a href="{{ route('admin.bookings.index') }}" class="menu-item">
+<span class="menu-icon">📝</span>
 Bookings
-
 </a>
 
 
-
-<a href="{{ route('admin.course-schedules.index') }}"
-class="block px-4 py-2 rounded hover:bg-slate-700">
-
+<a href="{{ route('admin.course-schedules.index') }}" class="menu-item">
+<span class="menu-icon">📅</span>
 Schedule
+</a>
 
+@endif
+
+
+
+
+
+
+{{-- =====================
+SUPER ADMIN MENU
+===================== --}}
+@if($role == 'super_admin')
+
+<a href="{{ route('super.dashboard') }}" class="menu-item">
+<span class="menu-icon">📊</span>
+Dashboard
 </a>
 
 
+<a href="{{ route('super.tenants') }}" class="menu-item">
+<span class="menu-icon">🏫</span>
+LPK
+</a>
 
-<!-- LOGOUT -->
+
+<a href="{{ route('super.verifications') }}" class="menu-item">
+<span class="menu-icon">✔</span>
+Verification
+</a>
+
+
+<a href="{{ route('super.users') }}" class="menu-item">
+<span class="menu-icon">👨‍💻</span>
+Users
+</a>
+
+
+<a href="{{ route('super.finance') }}" class="menu-item">
+<span class="menu-icon">💰</span>
+Finance
+</a>
+
+
+<a href="{{ route('super.logs') }}" class="menu-item">
+<span class="menu-icon">📑</span>
+Logs
+</a>
+
+
+<a href="{{ route('super.settings') }}" class="menu-item">
+<span class="menu-icon">⚙️</span>
+Settings
+</a>
+
+@endif
+
+
+
+
+
+
 <form method="POST" action="{{ route('logout') }}">
 
 @csrf
 
-<button
-class="w-full text-left px-4 py-2 text-red-400 hover:bg-slate-700">
+<button class="menu-item w-full text-left text-red-300">
+
+<span class="menu-icon">🚪</span>
 
 Logout
 
 </button>
 
 </form>
+
 
 
 </nav>
@@ -113,13 +229,17 @@ Logout
 
 
 
+
+
+
+
 <!-- CONTENT -->
 <div class="flex-1 flex flex-col">
 
 
-<header class="bg-white shadow px-6 py-4">
+<header class="bg-white border-b px-6 py-4">
 
-<h1 class="text-xl font-semibold">
+<h1 class="text-lg font-semibold text-gray-800">
 
 @yield('title')
 
@@ -129,7 +249,7 @@ Logout
 
 
 
-<main class="flex-1 p-6 overflow-y-auto">
+<main class="flex-1 p-6 overflow-y-auto bg-gray-50">
 
 @yield('content')
 
@@ -140,7 +260,9 @@ Logout
 </div>
 
 
+
 </div>
+
 
 
 </body>

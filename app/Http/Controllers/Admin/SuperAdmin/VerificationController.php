@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin\SuperAdmin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Lpk;
-use Illuminate\Http\Request;
 
 class VerificationController extends Controller
 {
@@ -33,9 +32,10 @@ $lpk->status_verifikasi = 'approved';
 $lpk->save();
 
 
-
-return back()
-->with('success','LPK approved');
+return back()->with(
+'success',
+'LPK berhasil di approve'
+);
 
 }
 
@@ -51,9 +51,10 @@ $lpk->status_verifikasi = 'rejected';
 $lpk->save();
 
 
-
-return back()
-->with('success','LPK rejected');
+return back()->with(
+'success',
+'LPK berhasil di reject'
+);
 
 }
 

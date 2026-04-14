@@ -1,245 +1,488 @@
 @extends('layouts.admin')
 
-@section('header', 'Dashboard Overview')
+@section('title','Admin LPK Dashboard')
 
 @section('content')
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- total siswa -->
-    <div class="bg-white rounded-lg shadow p-5 border-l-4 border-blue-500">
-        <div class="flex items-center">
+<style>
 
-            <div class="flex-shrink-0 bg-blue-100 p-3 rounded-full">
-
-                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
-                    </path>
-
-                </svg>
-
-            </div>
-
-            <div class="ml-4">
-
-                <h4 class="text-gray-500 text-sm font-medium">
-                    Total Students
-                </h4>
-
-                <p class="text-2xl font-bold text-gray-800">
-
-                    {{ $totalStudents }}
-
-                </p>
-
-            </div>
-
-        </div>
-    </div>
+/* background sama */
+body{
+background:#f3f4f6;
+font-family:Inter,sans-serif;
+}
 
 
+/* statistik card */
 
-    <!-- total kursus -->
-    <div class="bg-white rounded-lg shadow p-5 border-l-4 border-green-500">
-        <div class="flex items-center">
+.stat{
+background:white;
+border-radius:14px;
+padding:16px 18px;
+border:1px solid #e5e7eb;
+display:flex;
+align-items:center;
+justify-content:space-between;
+}
 
-            <div class="flex-shrink-0 bg-green-100 p-3 rounded-full">
 
-                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+.stat-title{
+font-size:12px;
+color:#6b7280;
+margin-bottom:4px;
+}
 
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-                    </path>
 
-                </svg>
+.stat-number{
+font-size:20px;
+font-weight:600;
+color:#111827;
+}
 
-            </div>
 
-            <div class="ml-4">
+/* icon soft box */
 
-                <h4 class="text-gray-500 text-sm font-medium">
-                    Total Courses
-                </h4>
+.icon{
+width:38px;
+height:38px;
+border-radius:10px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:16px;
+}
 
-                <p class="text-2xl font-bold text-gray-800">
 
-                    {{ $totalCourses }}
-
-                </p>
-
-            </div>
-
-        </div>
-    </div>
+.i1{background:#eef2ff;color:#6366f1;}
+.i2{background:#ecfeff;color:#06b6d4;}
+.i3{background:#f5f3ff;color:#8b5cf6;}
+.i4{background:#fff7ed;color:#f59e0b;}
 
 
 
-    <!-- jadwal -->
-    <div class="bg-white rounded-lg shadow p-5 border-l-4 border-purple-500">
-        <div class="flex items-center">
+/* card section */
 
-            <div class="flex-shrink-0 bg-purple-100 p-3 rounded-full">
+.card{
+background:white;
+border-radius:14px;
+border:1px solid #e5e7eb;
+padding:20px;
+}
 
-                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
-                    </path>
+/* table */
 
-                </svg>
+.table th{
+font-size:13px;
+color:#6b7280;
+font-weight:500;
+}
 
-            </div>
 
-            <div class="ml-4">
+.table tr{
+border-bottom:1px solid #f1f5f9;
+}
 
-                <h4 class="text-gray-500 text-sm font-medium">
-                    Upcoming Classes
-                </h4>
-
-                <p class="text-2xl font-bold text-gray-800">
-
-                    {{ $upcomingClasses }}
-
-                </p>
-
-            </div>
-
-        </div>
-    </div>
+</style>
 
 
 
-    <!-- pending -->
-    <div class="bg-white rounded-lg shadow p-5 border-l-4 border-orange-500">
-        <div class="flex items-center">
 
-            <div class="flex-shrink-0 bg-orange-100 p-3 rounded-full">
+<!-- ======================
+STATISTIK
+====================== -->
 
-                <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<div class="grid md:grid-cols-4 gap-5 mb-6">
 
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M5 13l4 4L19 7"></path>
 
-                </svg>
+<div class="stat">
 
-            </div>
+<div>
 
-            <div class="ml-4">
+<p class="stat-title">
+Total Students
+</p>
 
-                <h4 class="text-gray-500 text-sm font-medium">
-                    Pending Bookings
-                </h4>
+<p class="stat-number">
+{{ $totalStudents }}
+</p>
 
-                <p class="text-2xl font-bold text-gray-800">
+</div>
 
-                    {{ $pendingBookings }}
 
-                </p>
+<div class="icon i1">
+👨‍🎓
+</div>
 
-            </div>
-
-        </div>
-    </div>
 
 </div>
 
 
 
-<!-- quick actions -->
-<div class="bg-white rounded-lg shadow mb-8">
-
-    <div class="px-6 py-4 border-b">
-
-        <h3 class="font-semibold">
-            Quick Actions
-        </h3>
-
-    </div>
 
 
-    <div class="p-6 grid grid-cols-2 gap-4">
+<div class="stat">
 
-        <a href="{{ route('admin.courses.create') }}"
-           class="flex flex-col items-center justify-center p-4 bg-blue-50 hover:bg-blue-100 rounded-lg">
+<div>
 
-            Tambah Kursus
+<p class="stat-title">
+Total Courses
+</p>
 
-        </a>
+<p class="stat-number">
+{{ $totalCourses }}
+</p>
+
+</div>
 
 
+<div class="icon i2">
+📚
+</div>
 
-        <a href="{{ route('admin.bookings.index') }}"
-           class="flex flex-col items-center justify-center p-4 bg-green-50 hover:bg-green-100 rounded-lg">
-
-            Lihat Booking
-
-        </a>
-
-    </div>
 
 </div>
 
 
 
-<!-- recent booking -->
-<div class="bg-white rounded-lg shadow">
-
-    <div class="px-6 py-4 border-b">
-
-        <h3 class="font-semibold">
-            Recent Bookings
-        </h3>
-
-    </div>
 
 
-    <table class="w-full">
 
-        <thead>
+<div class="stat">
 
-            <tr class="border-b">
+<div>
 
-                <th class="p-3 text-left">
-                    Booking ID
-                </th>
+<p class="stat-title">
+Upcoming Classes
+</p>
 
-                <th class="p-3 text-left">
-                    Status
-                </th>
-
-            </tr>
-
-        </thead>
-
-
-        <tbody>
-
-        @foreach($recentBookings as $booking)
-
-            <tr class="border-b">
-
-                <td class="p-3">
-
-                    {{ $booking->id }}
-
-                </td>
-
-                <td class="p-3">
-
-                    {{ $booking->status }}
-
-                </td>
-
-            </tr>
-
-        @endforeach
-
-        </tbody>
-
-    </table>
+<p class="stat-number">
+{{ $upcomingClasses }}
+</p>
 
 </div>
+
+
+<div class="icon i3">
+📅
+</div>
+
+
+</div>
+
+
+
+
+
+
+<div class="stat">
+
+<div>
+
+<p class="stat-title">
+Pending Booking
+</p>
+
+<p class="stat-number">
+{{ $pendingBookings }}
+</p>
+
+</div>
+
+
+<div class="icon i4">
+📝
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+<!-- ======================
+CHART
+====================== -->
+
+<div class="grid lg:grid-cols-2 gap-6 mb-6">
+
+
+<div class="card">
+
+<p class="text-sm text-gray-500 mb-3">
+Statistik Aktivitas
+</p>
+
+
+<div style="height:280px">
+
+<canvas id="chartLine"></canvas>
+
+</div>
+
+
+</div>
+
+
+
+
+
+<div class="card">
+
+<p class="text-sm text-gray-500 mb-3">
+Ringkasan Data
+</p>
+
+
+<div style="height:280px" class="flex items-center justify-center">
+
+<canvas id="chartPie"></canvas>
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+<!-- ======================
+BOOKING TERBARU
+====================== -->
+
+<div class="card">
+
+
+<p class="text-sm text-gray-500 mb-3">
+Booking Terbaru
+</p>
+
+
+
+<table class="table w-full">
+
+<thead>
+
+<tr>
+
+<th class="p-2 text-left">
+ID
+</th>
+
+
+<th class="p-2 text-left">
+Status
+</th>
+
+
+</tr>
+
+
+</thead>
+
+
+
+<tbody>
+
+
+@foreach($recentBookings as $booking)
+
+<tr>
+
+<td class="p-2">
+{{ $booking->id }}
+</td>
+
+
+
+<td class="p-2">
+
+<span class="px-2 py-1 rounded bg-gray-100 text-xs">
+
+{{ $booking->status }}
+
+</span>
+
+
+</td>
+
+
+</tr>
+
+
+@endforeach
+
+
+</tbody>
+
+
+</table>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<script>
+
+
+new Chart(document.getElementById('chartLine'),{
+
+type:'line',
+
+data:{
+
+
+labels:[
+'Jan','Feb','Mar','Apr','May','Jun'
+],
+
+
+datasets:[
+
+
+{
+label:'Students',
+
+data:[10,20,15,30,22,35],
+
+tension:0.4
+
+},
+
+
+
+{
+label:'Courses',
+
+data:[5,12,8,15,18,20],
+
+tension:0.4
+
+}
+
+
+
+]
+
+
+},
+
+
+options:{
+
+
+maintainAspectRatio:false,
+
+
+plugins:{
+
+
+legend:{
+
+
+position:'bottom'
+
+
+}
+
+
+}
+
+
+}
+
+
+})
+
+
+
+
+
+
+new Chart(document.getElementById('chartPie'),{
+
+
+type:'doughnut',
+
+
+data:{
+
+
+labels:[
+'Students',
+'Courses',
+'Bookings'
+],
+
+
+datasets:[{
+
+
+data:[
+
+{{ $totalStudents }},
+{{ $totalCourses }},
+{{ $pendingBookings }}
+
+]
+
+
+}]
+
+
+},
+
+
+options:{
+
+
+maintainAspectRatio:false,
+
+
+plugins:{
+
+
+legend:{
+
+
+position:'bottom'
+
+
+}
+
+
+}
+
+
+}
+
+
+})
+
+
+</script>
+
+
 
 @endsection

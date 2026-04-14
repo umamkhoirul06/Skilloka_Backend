@@ -26,13 +26,47 @@ $pendingVerifications = Lpk::where(
 )->count();
 
 
-
 $pendingLpks = Lpk::where(
 'status_verifikasi',
 'pending'
-)->latest()
+)
+->latest()
 ->take(5)
 ->get();
+
+
+
+$monthlyLabels = [
+'Jan','Feb','Mar','Apr','May','Jun',
+'Jul','Aug','Sep','Oct','Nov','Dec'
+];
+
+
+$monthlyLpk = [];
+$monthlyUsers = [];
+$monthlyCourses = [];
+
+
+foreach(range(1,12) as $month){
+
+$monthlyLpk[] = Lpk::whereMonth(
+'created_at',
+$month
+)->count();
+
+
+$monthlyUsers[] = User::whereMonth(
+'created_at',
+$month
+)->count();
+
+
+$monthlyCourses[] = Course::whereMonth(
+'created_at',
+$month
+)->count();
+
+}
 
 
 
@@ -46,11 +80,17 @@ compact(
 'totalCourses',
 'totalUsers',
 'pendingVerifications',
-'pendingLpks'
+'pendingLpks',
+
+'monthlyLabels',
+'monthlyLpk',
+'monthlyUsers',
+'monthlyCourses'
 
 )
 
 );
+
 
 }
 

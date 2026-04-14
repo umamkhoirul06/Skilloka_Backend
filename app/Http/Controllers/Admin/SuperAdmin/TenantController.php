@@ -8,16 +8,19 @@ use App\Models\Lpk;
 class TenantController extends Controller
 {
 
-    public function index()
-    {
+public function index()
+{
 
-        $lpks = Lpk::latest()->get();
+$tenants = Lpk::latest()->get();
 
-        return view(
-            'super_admin.tenants.index',
-            compact('lpks')
-        );
+return view(
 
-    }
+'super_admin.tenants.index',
+
+compact('tenants')
+
+);
+
+}
 
 }
