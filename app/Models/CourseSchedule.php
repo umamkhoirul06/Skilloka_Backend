@@ -9,26 +9,57 @@ class CourseSchedule extends Model
 {
     use HasUuids;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
 
-    protected $casts = [
-        'start_date' => 'date',
-        'end_date' => 'date',
+        'course_id',
+
+        'start_date',
+
+        'end_date',
+
+        'days_of_week',
+
+        'daily_start',
+
+        'daily_end',
+
+        'max_capacity'
+
     ];
 
-    /*
-    |--------------------------------------------------------------------------
-    | RELATION
-    |--------------------------------------------------------------------------
-    */
 
+    protected $casts = [
+
+        'start_date' => 'date',
+
+        'end_date' => 'date',
+
+        'daily_start' => 'datetime:H:i',
+
+        'daily_end' => 'datetime:H:i',
+
+    ];
+
+
+    /*
+    relasi ke course
+    */
     public function course()
     {
+
         return $this->belongsTo(Course::class);
+
     }
 
-    public function tenant()
+
+    /*
+    relasi ke booking
+    */
+    public function bookings()
     {
-        return $this->belongsTo(Tenant::class);
+
+        return $this->hasMany(Booking::class);
+
     }
+
 }

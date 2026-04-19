@@ -6,47 +6,95 @@
 
 <div class="bg-white p-6 rounded shadow">
 
-<h2 class="text-lg font-semibold mb-4">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
 
+<h2 style="font-size:18px;font-weight:600">
 Course Schedule
-
 </h2>
 
-<table class="w-full border">
+<a href="{{ route('admin.course-schedules.create') }}"
+style="background:#7c3aed;color:white;padding:8px 14px;border-radius:6px;text-decoration:none;font-size:14px">
++ Tambah Schedule
+</a>
 
-<thead class="bg-gray-100">
+</div>
+
+
+
+<table style="width:100%;border-collapse:collapse">
+
+<thead style="background:#f3f4f6">
 
 <tr>
 
-<th class="p-2 border">ID</th>
-<th class="p-2 border">Course</th>
-<th class="p-2 border">Date</th>
-<th class="p-2 border">Time</th>
+<th style="padding:10px;border:1px solid #e5e7eb">Course</th>
+
+<th style="padding:10px;border:1px solid #e5e7eb">Tanggal</th>
+
+<th style="padding:10px;border:1px solid #e5e7eb">Hari</th>
+
+<th style="padding:10px;border:1px solid #e5e7eb">Jam</th>
+
+<th style="padding:10px;border:1px solid #e5e7eb">Kuota</th>
 
 </tr>
 
 </thead>
 
+
+
 <tbody>
 
-@forelse($courseSchedules ?? [] as $schedule)
+@forelse($schedules as $schedule)
 
 <tr>
 
-<td class="p-2 border">
-{{ $schedule->id }}
-</td>
+<td style="padding:10px;border:1px solid #e5e7eb">
 
-<td class="p-2 border">
 {{ $schedule->course->title ?? '-' }}
+
 </td>
 
-<td class="p-2 border">
-{{ $schedule->date ?? '-' }}
+
+
+<td style="padding:10px;border:1px solid #e5e7eb">
+
+{{ \Carbon\Carbon::parse($schedule->start_date)->format('d M Y') }}
+
+-
+
+{{ \Carbon\Carbon::parse($schedule->end_date)->format('d M Y') }}
+
 </td>
 
-<td class="p-2 border">
-{{ $schedule->time ?? '-' }}
+
+
+<td style="padding:10px;border:1px solid #e5e7eb">
+
+{{ $schedule->days_of_week }}
+
+</td>
+
+
+
+<td style="padding:10px;border:1px solid #e5e7eb">
+
+{{ substr($schedule->daily_start,0,5) }}
+
+-
+
+{{ substr($schedule->daily_end,0,5) }}
+
+</td>
+
+
+
+<td style="padding:10px;border:1px solid #e5e7eb">
+
+{{ $schedule->max_capacity }}
+
+orang
+
 </td>
 
 </tr>
@@ -55,7 +103,8 @@ Course Schedule
 
 <tr>
 
-<td colspan="4" class="p-4 text-center">
+<td colspan="5"
+style="padding:20px;text-align:center;color:#6b7280">
 
 Belum ada jadwal
 

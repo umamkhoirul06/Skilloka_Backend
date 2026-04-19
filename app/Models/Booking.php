@@ -27,48 +27,52 @@ class Booking extends Model
         'expires_at' => 'datetime',
     ];
 
-    /**
-     * Boot function to generate booking code.
-     */
     protected static function boot()
     {
         parent::boot();
 
         static::creating(function ($booking) {
-            if (empty($booking->code)) {
-                $booking->code = 'BK' . date('Ymd') . strtoupper(substr(uniqid(), -6));
+
+            if(empty($booking->code)){
+
+                $booking->code =
+                    'BK'
+                    .date('Ymd')
+                    .strtoupper(substr(uniqid(), -6));
+
             }
+
         });
     }
 
-    /**
-     * Get the student who made the booking.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | RELATION
+    |--------------------------------------------------------------------------
+    */
+
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Get the schedule being booked.
-     */
     public function schedule()
     {
-        return $this->belongsTo(CourseSchedule::class, 'schedule_id');
+        return $this->belongsTo(
+            CourseSchedule::class,
+            'schedule_id'
+        );
     }
 
-    /**
-     * Get the course through schedule.
-     */
     public function course()
     {
         return $this->hasOneThrough(
             Course::class,
             CourseSchedule::class,
-            'id', // Foreign key on CourseSchedule
-            'id', // Foreign key on Course
-            'schedule_id', // Local key on Booking
-            'course_id' // Local key on CourseSchedule
+            'id',
+            'id',
+            'schedule_id',
+            'course_id'
         );
     }
 }

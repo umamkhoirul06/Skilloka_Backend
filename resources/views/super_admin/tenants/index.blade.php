@@ -80,24 +80,25 @@ Daftar LPK
 <tr>
 
 <td class="p-2">
+{{ $tenant->lpk_name ?? '-' }}
+</td>
 
-{{ $tenant->nama }}
 
+<td class="p-2">
+{{ $tenant->users->first()->email ?? '-' }}
 </td>
 
 
 <td class="p-2">
 
-{{ $tenant->email }}
+<span class="badge 
+@if($tenant->status_verification == 'approved') approved
+@elseif($tenant->status_verification == 'rejected') rejected
+@else pending
+@endif
+">
 
-</td>
-
-
-<td class="p-2">
-
-<span class="badge {{ $tenant->status_verifikasi }}">
-
-{{ $tenant->status_verifikasi }}
+{{ $tenant->status_verification ?? 'pending' }}
 
 </span>
 

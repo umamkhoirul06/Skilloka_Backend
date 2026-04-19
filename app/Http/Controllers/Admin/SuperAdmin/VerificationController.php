@@ -3,59 +3,59 @@
 namespace App\Http\Controllers\Admin\SuperAdmin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Lpk;
+use App\Models\Tenant;
 
 class VerificationController extends Controller
 {
 
-public function index()
-{
+    public function index()
+    {
 
-$lpks = Lpk::latest()->get();
+        $tenants = Tenant::with('users')
+            ->latest()
+            ->get();
 
-return view(
-'super_admin.verifications.index',
-compact('lpks')
-);
+        return view(
+            'super_admin.verifications.index',
+            compact('tenants')
+        );
 
-}
-
-
-
-public function approve($id)
-{
-
-$lpk = Lpk::findOrFail($id);
-
-$lpk->status_verifikasi = 'approved';
-
-$lpk->save();
-
-
-return back()->with(
-'success',
-'LPK berhasil di approve'
-);
-
-}
+    }
 
 
 
-public function reject($id)
-{
+    public function approve($id)
+    {
 
-$lpk = Lpk::findOrFail($id);
+        $tenant = Tenant::findOrFail($id);
 
-$lpk->status_verifikasi = 'rejected';
+        $tenant->status_verification = 'approved';
 
-$lpk->save();
+        $tenant->save();
+
+        return back()->with(
+            'success',
+            'LPK berhasil di approve'
+        );
+
+    }
 
 
-return back()->with(
-'success',
-'LPK berhasil di reject'
-);
 
-}
+    public function reject($id)
+    {
+
+        $tenant = Tenant::findOrFail($id);
+
+        $tenant->status_verification = 'rejected';
+
+        $tenant->save();
+
+        return back()->with(
+            'success',
+            'LPK berhasil di reject'
+        );
+
+    }
 
 }

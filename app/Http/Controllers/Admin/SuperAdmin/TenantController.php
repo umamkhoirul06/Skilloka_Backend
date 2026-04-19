@@ -3,24 +3,23 @@
 namespace App\Http\Controllers\Admin\SuperAdmin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Lpk;
+use App\Models\Tenant;
 
 class TenantController extends Controller
 {
 
-public function index()
-{
+    public function index()
+    {
 
-$tenants = Lpk::latest()->get();
+        $tenants = Tenant::with('users')
+            ->latest()
+            ->get();
 
-return view(
+        return view(
+            'super_admin.tenants.index',
+            compact('tenants')
+        );
 
-'super_admin.tenants.index',
-
-compact('tenants')
-
-);
-
-}
+    }
 
 }

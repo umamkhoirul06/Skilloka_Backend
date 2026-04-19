@@ -49,6 +49,8 @@ padding:6px 12px;
 border-radius:8px;
 font-size:13px;
 font-weight:500;
+border:none;
+cursor:pointer;
 }
 
 .btn-approve{
@@ -103,25 +105,32 @@ Aksi
 
 <tbody>
 
-@forelse($lpks as $lpk)
+@forelse($tenants as $tenant)
 
 <tr>
 
 <td class="p-2">
-{{ $lpk->nama }}
+{{ $tenant->lpk_name ?? '-' }}
 </td>
 
 
 <td class="p-2">
-{{ $lpk->email }}
+{{ $tenant->users->first()->email ?? '-' }}
 </td>
 
 
 <td class="p-2">
 
-<span class="badge {{ $lpk->status_verifikasi }}">
+<span class="badge
 
-{{ ucfirst($lpk->status_verifikasi) }}
+@if($tenant->status_verification == 'approved') approved
+@elseif($tenant->status_verification == 'rejected') rejected
+@else pending
+@endif
+
+">
+
+{{ ucfirst($tenant->status_verification ?? 'pending') }}
 
 </span>
 
@@ -131,14 +140,12 @@ Aksi
 <td class="p-2 flex gap-2">
 
 <form method="POST"
-action="{{ route('super.verifications.approve',$lpk->id) }}">
+action="{{ route('super.verifications.approve',$tenant->id) }}">
 
 @csrf
 
 <button class="btn btn-approve">
-
 Approve
-
 </button>
 
 </form>
@@ -146,14 +153,12 @@ Approve
 
 
 <form method="POST"
-action="{{ route('super.verifications.reject',$lpk->id) }}">
+action="{{ route('super.verifications.reject',$tenant->id) }}">
 
 @csrf
 
 <button class="btn btn-reject">
-
 Reject
-
 </button>
 
 </form>
