@@ -55,11 +55,10 @@ Route::get('/admin/login',
 
 
 Route::post('/admin/login',
-
-[AdminAuthController::class,'login']
-
-)->name('admin.login.submit');
-
+    [AdminAuthController::class,'login']
+)
+->middleware('throttle:5,1')
+->name('admin.login.submit');
 
 
 Route::post('/logout',

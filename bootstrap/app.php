@@ -15,12 +15,20 @@ return Application::configure(basePath: dirname(__DIR__))
 
 ->withMiddleware(function (Middleware $middleware) {
 
+    $middleware->use([
+        \Illuminate\Http\Middleware\HandleCors::class,
+        \Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance::class,
+        \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
+        \Illuminate\Foundation\Http\Middleware\TrimStrings::class,
+        \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+
+        \App\Http\Middleware\SecureHeaders::class, // tambahkan ini
+    ]);
+
+
     $middleware->alias([
-
         'super-admin' => \App\Http\Middleware\EnsureSuperAdmin::class,
-
         'admin-lpk' => \App\Http\Middleware\EnsureAdminLpk::class,
-
     ]);
 
 })
