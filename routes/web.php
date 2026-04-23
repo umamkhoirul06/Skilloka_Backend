@@ -42,23 +42,27 @@ Route::get('/', function () {
 
 /*
 |--------------------------------------------------------------------------
-| LOGIN ADMIN
+| LOGIN & REGISTER ADMIN
 |--------------------------------------------------------------------------
 */
 
 Route::get('/admin/login',
-
-[AdminAuthController::class,'showLogin']
-
+    [AdminAuthController::class,'showLogin']
 )->name('admin.login');
-
-
 
 Route::post('/admin/login',
     [AdminAuthController::class,'login']
 )
 ->middleware('throttle:5,1')
 ->name('admin.login.submit');
+
+Route::get('/admin/register',
+    [AdminAuthController::class,'showRegister']
+)->name('admin.register');
+
+Route::post('/admin/register',
+    [AdminAuthController::class,'register']
+)->name('admin.register.submit');
 
 
 Route::post('/logout',
