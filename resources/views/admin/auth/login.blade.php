@@ -359,7 +359,9 @@
                         </p>
                     </div>
                 </div>
-
+            </div>
+        </div>
+    </div>
 
     <!-- Footer -->
     <div class="absolute bottom-4 left-0 right-0 text-center">
