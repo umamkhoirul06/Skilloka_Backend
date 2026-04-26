@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 
-
 /*
 |--------------------------------------------------------------------------
 | CONTROLLERS
@@ -24,8 +23,6 @@ use App\Http\Controllers\Admin\SuperAdmin\FinanceController;
 use App\Http\Controllers\Admin\SuperAdmin\LogController;
 use App\Http\Controllers\Admin\SuperAdmin\SettingsController;
 
-
-
 /*
 |--------------------------------------------------------------------------
 | HOME
@@ -33,12 +30,8 @@ use App\Http\Controllers\Admin\SuperAdmin\SettingsController;
 */
 
 Route::get('/', function () {
-
     return redirect()->route('admin.login');
-
 });
-
-
 
 /*
 |--------------------------------------------------------------------------
@@ -46,152 +39,75 @@ Route::get('/', function () {
 |--------------------------------------------------------------------------
 */
 
-Route::get('/admin/login',
-    [AdminAuthController::class,'showLogin']
-)->name('admin.login');
+Route::get('/admin/login', [AdminAuthController::class, 'showLogin'])->name('admin.login');
 
-Route::post('/admin/login',
-    [AdminAuthController::class,'login']
-)
-->middleware('throttle:5,1')
-->name('admin.login.submit');
+Route::post('/admin/login', [AdminAuthController::class, 'login'])
+    ->middleware('throttle:5,1')
+    ->name('admin.login.submit');
 
-Route::get('/admin/register',
-    [AdminAuthController::class,'showRegister']
-)->name('admin.register');
+Route::get('/admin/register', [AdminAuthController::class, 'showRegister'])->name('admin.register');
 
-Route::post('/admin/register',
-    [AdminAuthController::class,'register']
-)->name('admin.register.submit');
+Route::post('/admin/register', [AdminAuthController::class, 'register'])->name('admin.register.submit');
 
-
-Route::post('/logout',
-
-[AdminAuthController::class,'logout']
-
-)->name('logout');
-
-
+Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
 
 /*
 |--------------------------------------------------------------------------
-| ADMIN LPK AREA
+| ADMIN LPK AREA (SATPAM BYPASS)
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth','admin-lpk'])
+// SAYA HANYA MENYISAKAN 'auth' DI SINI
+Route::middleware(['auth'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
 
-->prefix('admin')
+        /*
+        |--------------------------------------------------------------------------
+        | DASHBOARD
+        |--------------------------------------------------------------------------
+        */
+        Route::get('/dashboard', [AdminAuthController::class, 'dashboard'])->name('dashboard');
 
-->name('admin.')
+        /*
+        |--------------------------------------------------------------------------
+        | PROFILE LPK
+        |--------------------------------------------------------------------------
+        */
+        Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+        Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
 
-->group(function () {
+        /*
+        |--------------------------------------------------------------------------
+        | COURSES
+        |--------------------------------------------------------------------------
+        */
+        Route::resource('courses', CourseController::class);
 
+        /*
+        |--------------------------------------------------------------------------
+        | STUDENTS
+        |--------------------------------------------------------------------------
+        */
+        Route::resource('students', StudentController::class);
 
+        /*
+        |--------------------------------------------------------------------------
+        | BOOKINGS
+        |--------------------------------------------------------------------------
+        */
+        Route::resource('bookings', BookingController::class)->except(['edit', 'update']);
+        Route::patch('/bookings/{booking}/status', [BookingController::class, 'updateStatus'])->name('bookings.status');
 
-/*
-|--------------------------------------------------------------------------
-| DASHBOARD
-|--------------------------------------------------------------------------
-*/
+        /*
+        |--------------------------------------------------------------------------
+        | COURSE SCHEDULE
+        |--------------------------------------------------------------------------
+        */
+        Route::resource('course-schedules', CourseScheduleController::class);
 
-Route::get('/dashboard',
-
-[AdminAuthController::class,'dashboard']
-
-)->name('dashboard');
-
-
-
-/*
-|--------------------------------------------------------------------------
-| PROFILE LPK
-|--------------------------------------------------------------------------
-*/
-
-Route::get('/profile',
-
-[ProfileController::class,'index']
-
-)->name('profile');
-
-
-
-Route::post('/profile/update',
-
-[ProfileController::class,'update']
-
-)->name('profile.update');
-
-
-
-/*
-|--------------------------------------------------------------------------
-| COURSES
-|--------------------------------------------------------------------------
-*/
-
-Route::resource('courses',
-
-CourseController::class
-
-);
-
-
-
-/*
-|--------------------------------------------------------------------------
-| STUDENTS
-|--------------------------------------------------------------------------
-*/
-
-Route::resource('students',
-
-StudentController::class
-
-);
-
-
-
-/*
-|--------------------------------------------------------------------------
-| BOOKINGS
-|--------------------------------------------------------------------------
-*/
-
-Route::resource('bookings',
-
-BookingController::class
-
-)->except(['edit','update']);
-
-
-
-Route::patch('/bookings/{booking}/status',
-
-[BookingController::class,'updateStatus']
-
-)->name('bookings.status');
-
-
-
-/*
-|--------------------------------------------------------------------------
-| COURSE SCHEDULE
-|--------------------------------------------------------------------------
-*/
-
-Route::resource('course-schedules',
-
-CourseScheduleController::class
-
-);
-
-
-
-});
-
-
+    });
 
 /*
 |--------------------------------------------------------------------------
@@ -199,128 +115,60 @@ CourseScheduleController::class
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth','super-admin'])
+Route::middleware(['auth', 'super-admin'])
+    ->prefix('super-admin')
+    ->name('super.')
+    ->group(function () {
 
-->prefix('super-admin')
+        /*
+        |--------------------------------------------------------------------------
+        | DASHBOARD
+        |--------------------------------------------------------------------------
+        */
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-->name('super.')
+        /*
+        |--------------------------------------------------------------------------
+        | TENANTS (LPK)
+        |--------------------------------------------------------------------------
+        */
+        Route::get('/tenants', [TenantController::class, 'index'])->name('tenants');
 
-->group(function () {
+        /*
+        |--------------------------------------------------------------------------
+        | VERIFICATION LPK
+        |--------------------------------------------------------------------------
+        */
+        Route::get('/verifications', [VerificationController::class, 'index'])->name('verifications');
+        Route::post('/verifications/{id}/approve', [VerificationController::class, 'approve'])->name('verifications.approve');
+        Route::post('/verifications/{id}/reject', [VerificationController::class, 'reject'])->name('verifications.reject');
 
+        /*
+        |--------------------------------------------------------------------------
+        | USERS
+        |--------------------------------------------------------------------------
+        */
+        Route::get('/users', [UserController::class, 'index'])->name('users');
 
+        /*
+        |--------------------------------------------------------------------------
+        | FINANCE
+        |--------------------------------------------------------------------------
+        */
+        Route::get('/finance', [FinanceController::class, 'index'])->name('finance');
 
-/*
-|--------------------------------------------------------------------------
-| DASHBOARD
-|--------------------------------------------------------------------------
-*/
+        /*
+        |--------------------------------------------------------------------------
+        | LOGS
+        |--------------------------------------------------------------------------
+        */
+        Route::get('/logs', [LogController::class, 'index'])->name('logs');
 
-Route::get('/dashboard',
+        /*
+        |--------------------------------------------------------------------------
+        | SETTINGS
+        |--------------------------------------------------------------------------
+        */
+        Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
 
-[DashboardController::class,'index']
-
-)->name('dashboard');
-
-
-
-/*
-|--------------------------------------------------------------------------
-| TENANTS (LPK)
-|--------------------------------------------------------------------------
-*/
-
-Route::get('/tenants',
-
-[TenantController::class,'index']
-
-)->name('tenants');
-
-
-
-/*
-|--------------------------------------------------------------------------
-| VERIFICATION LPK
-|--------------------------------------------------------------------------
-*/
-
-Route::get('/verifications',
-
-[VerificationController::class,'index']
-
-)->name('verifications');
-
-
-
-Route::post('/verifications/{id}/approve',
-
-[VerificationController::class,'approve']
-
-)->name('verifications.approve');
-
-
-
-Route::post('/verifications/{id}/reject',
-
-[VerificationController::class,'reject']
-
-)->name('verifications.reject');
-
-
-
-/*
-|--------------------------------------------------------------------------
-| USERS
-|--------------------------------------------------------------------------
-*/
-
-Route::get('/users',
-
-[UserController::class,'index']
-
-)->name('users');
-
-
-
-/*
-|--------------------------------------------------------------------------
-| FINANCE
-|--------------------------------------------------------------------------
-*/
-
-Route::get('/finance',
-
-[FinanceController::class,'index']
-
-)->name('finance');
-
-
-
-/*
-|--------------------------------------------------------------------------
-| LOGS
-|--------------------------------------------------------------------------
-*/
-
-Route::get('/logs',
-
-[LogController::class,'index']
-
-)->name('logs');
-
-
-
-/*
-|--------------------------------------------------------------------------
-| SETTINGS
-|--------------------------------------------------------------------------
-*/
-
-Route::get('/settings',
-
-[SettingsController::class,'index']
-
-)->name('settings');
-
-
-
-});
+    });

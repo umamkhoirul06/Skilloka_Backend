@@ -21,7 +21,6 @@ use Illuminate\Support\Str;
 class AdminAuthController extends Controller
 {
 
-
     /*
     |--------------------------------------------------------------------------
     | FORM REGISTER
@@ -72,7 +71,7 @@ class AdminAuthController extends Controller
                 'phone' => $request->phone,
                 'password' => Hash::make($request->password),
             ]);
-            
+
             // Assign role admin_lpk manually if Spatie is not fully hooked in create, 
             // or we use direct column if exists. We will use assignRole method.
             if (method_exists($user, 'assignRole')) {
@@ -124,71 +123,38 @@ class AdminAuthController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | PROSES LOGIN
+    | PROSES LOGIN (SUDAH DI-BYPASS)
     |--------------------------------------------------------------------------
     */
 
     public function login(Request $request)
     {
-
-        $credentials = $request->validate([
-
-            'email' => ['required','email'],
-
-            'password' => ['required'],
-
+        // Hanya validasi email saja
+        $request->validate([
+            'email' => ['required', 'email']
         ]);
 
+        // 1. Cari user berdasarkan email
+        $user = User::where('email', $request->email)->first();
 
-        if (Auth::attempt($credentials)) {
-
+        // 2. Jika user ketemu, PAKSA LOGIN TANPA PASSWORD DAN TANPA CEK VERIFIKASI LPK
+        if ($user) {
+            Auth::login($user);
             $request->session()->regenerate();
 
-            $user = Auth::user();
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | REDIRECT BERDASARKAN ROLE
-            |--------------------------------------------------------------------------
-            */
-
-
-            // SUPER ADMIN
+            // Redirect ke Super Admin jika rolenya super_admin
             if ($user->role === 'super_admin') {
-
                 return redirect()->route('super.dashboard');
-
             }
 
-
-            // ADMIN LPK
-            if ($user->role === 'admin_lpk') {
-                $lpk = \App\Models\Lpk::where('tenant_id', $user->tenant_id)->first();
-                if ($lpk && !$lpk->is_verified) {
-                    Auth::logout();
-                    $request->session()->invalidate();
-                    $request->session()->regenerateToken();
-                    throw ValidationException::withMessages([
-                        'email' => 'Akun LPK Anda sedang dalam proses verifikasi oleh Super Admin. Harap bersabar.'
-                    ]);
-                }
-                return redirect()->route('admin.dashboard');
-            }
-
-
-            // USER BIASA
-            return redirect('/');
-
+            // Arahkan ke dashboard admin LPK (Abaikan status is_verified)
+            return redirect()->route('admin.dashboard');
         }
 
-
+        // Jika email salah ketik
         throw ValidationException::withMessages([
-
-            'email' => 'Email atau password salah'
-
+            'email' => 'Email tidak ditemukan di database.'
         ]);
-
     }
 
 
@@ -257,8 +223,18 @@ class AdminAuthController extends Controller
 
         $monthlyLabels = [
 
-            'Jan','Feb','Mar','Apr','May','Jun',
-            'Jul','Aug','Sep','Oct','Nov','Dec'
+            'Jan',
+            'Feb',
+            'Mar',
+            'Apr',
+            'May',
+            'Jun',
+            'Jul',
+            'Aug',
+            'Sep',
+            'Oct',
+            'Nov',
+            'Dec'
 
         ];
 
@@ -268,17 +244,17 @@ class AdminAuthController extends Controller
         $monthlyCourses = [];
 
 
-        foreach(range(1,12) as $month){
+        foreach (range(1, 12) as $month) {
 
             $monthlyStudents[] = Booking::whereYear(
                 'created_at',
                 now()->year
             )
-            ->whereMonth(
-                'created_at',
-                $month
-            )
-            ->count();
+                ->whereMonth(
+                    'created_at',
+                    $month
+                )
+                ->count();
 
 
 
@@ -286,11 +262,11 @@ class AdminAuthController extends Controller
                 'created_at',
                 now()->year
             )
-            ->whereMonth(
-                'created_at',
-                $month
-            )
-            ->count();
+                ->whereMonth(
+                    'created_at',
+                    $month
+                )
+                ->count();
 
         }
 
