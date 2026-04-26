@@ -6,7 +6,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  # UBAH 1: Nama dipaksa huruf kecil semua
   IMAGE_NAME: umamkhoirul06/skilloka_backend
 
 jobs:
@@ -75,7 +74,6 @@ jobs:
             
             cd /home/${{ secrets.SERVER_USER }}/skilloka_backend
             
-            # UBAH 2: Tarik image menggunakan huruf kecil semua
             docker pull ghcr.io/umamkhoirul06/skilloka_backend:latest
             
             docker compose down
@@ -84,5 +82,6 @@ jobs:
             echo "⏳ Menunggu Postgres ready..."
             sleep 15
             
+            docker compose exec -T app php artisan optimize:clear
             docker compose exec -T app php artisan migrate --force --no-interaction
             echo "✅ Deployment selesai!"
