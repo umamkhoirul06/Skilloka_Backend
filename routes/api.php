@@ -12,6 +12,8 @@ Route::prefix('v1')->group(function () {
     // ─── Auth Public ─────────────────────────────────────────
     Route::post('/auth/register', [AuthController::class, 'register']);
     Route::post('/auth/login',    [AuthController::class, 'login']);
+    Route::post('/auth/request-otp', [AuthController::class, 'requestOtp']);
+    Route::post('/auth/verify-otp',  [AuthController::class, 'verifyOtp']);
 
     // ─── Public Discovery (tanpa login) ───────────────────────
     Route::get('/courses',         [CourseController::class,  'index']);
