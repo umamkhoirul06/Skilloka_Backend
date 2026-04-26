@@ -6,96 +6,85 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: skilloka_backend
-
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-
-# ================= TEST =================
   test:
     name: Run Tests
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.2
-          extensions: pdo_pgsql
+          php-version: '8.2'
+          extensions: pdo, pdo_pgsql, pgsql, bcmath
+      - run: composer install --no-progress --prefer-dist
+      - run: cp .env.example .env
+      - run: php artisan key:generate
+      - run: php artisan test
 
-      - name: Install dependencies
-        run: composer install --no-progress --prefer-dist
-
-      - name: Prepare env
-        run: |
-          cp .env.example .env
-          php artisan key:generate
-
-      - name: Run test
-        run: php artisan test || true
-
-
-
-# ================= BUILD IMAGE =================
-  build:
+  build-and-push:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
     needs: test
-
     permissions:
       contents: read
       packages: write
-
+    outputs:
+      image: ${{ steps.meta.outputs.tags }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Login ke GHCR
-        uses: docker/login-action@v3
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
         with:
-          registry: ghcr.io
-          username: umamkhoirul06
-          password: ${{ secrets.GHCR_TOKEN }}
-
-      - name: Build & Push Image
-        uses: docker/build-push-action@v5
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=sha-
+            type=raw,value=latest
+      - uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ghcr.io/umamkhoirul06/skilloka_backend:latest
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-
-
-# ================= DEPLOY VPS =================
-deploy:
-  name: Deploy ke VPS
-  runs-on: ubuntu-latest
-  needs: build
-
-  steps:
-    - name: Deploy via SSH
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.SERVER_HOST }}
-        username: ${{ secrets.SERVER_USER }}
-        key: ${{ secrets.SERVER_SSH_KEY }}
-        port: 8022
-
-        script: |
-
-          echo "START DEPLOY"
-
-          cd /home/${{ secrets.SERVER_USER }}/RPL2B-kelompok-4
-
-          docker pull ghcr.io/umamkhoirul06/skilloka_backend:latest
-
-          docker compose down
-
-          docker compose up -d
-
-          docker compose ps
-
-          echo "DEPLOY SUCCESS"
+  deploy:
+    name: Deploy ke VPS
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    steps:
+      - uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          script: |
+            set -e
+            echo "🚀 Mulai deployment..."
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            
+            # Masuk ke folder di VPS
+            cd /home/${{ secrets.SERVER_USER }}/skilloka_backend
+            
+            # Tarik image terbaru
+            docker pull ghcr.io/${{ github.repository }}:latest
+            
+            # Restart container
+            docker compose down
+            docker compose up -d --remove-orphans
+            
+            echo "⏳ Menunggu Postgres ready..."
+            sleep 15
+            
+            # Eksekusi migrasi database otomatis
+            docker compose exec -T app php artisan migrate --force --no-interaction
+            echo "✅ Deployment selesai!"
