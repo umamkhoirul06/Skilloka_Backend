@@ -6,7 +6,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  # UBAH 1: Nama dipaksa huruf kecil semua
+  IMAGE_NAME: umamkhoirul06/skilloka_backend
 
 jobs:
   test:
@@ -72,19 +73,16 @@ jobs:
             echo "🚀 Mulai deployment..."
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             
-            # Masuk ke folder di VPS
             cd /home/${{ secrets.SERVER_USER }}/skilloka_backend
             
-            # Tarik image terbaru
-            docker pull ghcr.io/${{ github.repository }}:latest
+            # UBAH 2: Tarik image menggunakan huruf kecil semua
+            docker pull ghcr.io/umamkhoirul06/skilloka_backend:latest
             
-            # Restart container
             docker compose down
             docker compose up -d --remove-orphans
             
             echo "⏳ Menunggu Postgres ready..."
             sleep 15
             
-            # Eksekusi migrasi database otomatis
             docker compose exec -T app php artisan migrate --force --no-interaction
             echo "✅ Deployment selesai!"
