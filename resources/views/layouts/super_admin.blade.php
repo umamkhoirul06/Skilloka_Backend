@@ -155,11 +155,14 @@
         </div>
 
         @php
+            $user = auth()->user();
+            $isSuperAdmin = $user && $user->hasRole('super_admin');
             $currentRoute = request()->route() ? request()->route()->getName() : '';
         @endphp
 
         <nav class="mt-6 flex-1 overflow-y-auto pb-4">
             <div class="px-6 mb-2 text-xs font-semibold text-emerald-500 uppercase tracking-wider">Super Admin</div>
+            @if($isSuperAdmin)
 
             <a href="{{ route('super.dashboard') }}" class="menu-item {{ str_contains($currentRoute, 'dashboard') ? 'active' : '' }}">
                 <span class="menu-icon"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg></span>
@@ -196,6 +199,8 @@
                 Settings
             </a>
 
+            @endif
+
             <div class="mt-8 px-6 mb-2 text-xs font-semibold text-emerald-500 uppercase tracking-wider">Account</div>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
@@ -226,7 +231,9 @@
                 <div class="flex items-center gap-3 pl-4 border-l border-gray-200">
                     <div class="text-right hidden md:block">
                         <div class="text-sm font-semibold text-gray-800">{{ auth()->check() ? auth()->user()->name : 'Super Admin' }}</div>
-                        <div class="text-xs text-gray-500 capitalize">System Admin</div>
+                        <div class="text-xs text-gray-500 capitalize">
+                            {{ $user && $user->getRoleNames()->first() ? str_replace('_', ' ', $user->getRoleNames()->first()) : 'System Admin' }}
+                        </div>
                     </div>
                     <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 border-2 border-white shadow-md flex items-center justify-center text-white font-bold text-sm">
                         {{ auth()->check() ? substr(auth()->user()->name, 0, 1) : 'S' }}
