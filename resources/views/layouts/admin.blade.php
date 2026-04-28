@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Skilloka Dashboard</title>
 
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -127,7 +126,6 @@
             color: #f97316;
         }
 
-        /* Glassmorphism Header */
         .glass-header {
             background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(12px);
@@ -138,7 +136,6 @@
             z-index: 40;
         }
 
-        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -161,34 +158,43 @@
 
 <body class="antialiased text-gray-800 flex h-screen overflow-hidden">
 
-    <!-- SIDEBAR -->
+    @php
+        $user = auth()->user();
+        $isSuperAdmin = false;
+        $isAdminLpk = false;
+
+        // LOGIKA ISOLASI TOTAL
+        if ($user) {
+            if ($user->email === 'admin@skilloka.com') {
+                $isSuperAdmin = true;
+            } elseif (method_exists($user, 'hasRole')) {
+                if ($user->hasRole('super_admin')) {
+                    $isSuperAdmin = true;
+                } elseif ($user->hasRole('admin_lpk') || $user->hasRole('admin')) {
+                    $isAdminLpk = true;
+                }
+            }
+        }
+        $currentRoute = request()->route() ? request()->route()->getName() : '';
+    @endphp
+
     <aside class="w-72 sidebar flex flex-col transition-all duration-300 z-50">
         <div class="logo-box">
             <div class="logo-icon">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
                     </path>
                 </svg>
             </div>
-            <div class="logo-text font-outfit">Skilloka</div>
+            <div class="logo-text font-outfit">{{ $isSuperAdmin ? 'GOD VIEW' : 'Skilloka' }}</div>
         </div>
 
-        @php
-            $user = auth()->user();
-            $isAdminLpk = $user && $user->hasRole('admin_lpk');
-            $isSuperAdmin = $user && $user->hasRole('super_admin');
-            $currentRoute = request()->route() ? request()->route()->getName() : '';
-        @endphp
-
         <nav class="mt-6 flex-1 overflow-y-auto pb-4">
-            <div class="px-6 mb-2 text-xs font-semibold text-indigo-300 uppercase tracking-wider">Main Menu</div>
 
-            {{-- =====================
-            ADMIN LPK MENU
-            ===================== --}}
+            {{-- ===================== MENU ADMIN LPK ===================== --}}
             @if($isAdminLpk)
+                <div class="px-6 mb-2 text-xs font-semibold text-indigo-300 uppercase tracking-wider">Menu LPK</div>
                 <a href="{{ route('admin.dashboard') }}"
                     class="menu-item {{ str_contains($currentRoute, 'dashboard') ? 'active' : '' }}">
                     <span class="menu-icon"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -198,7 +204,6 @@
                         </svg></span>
                     Dashboard
                 </a>
-
                 <a href="{{ route('admin.profile') }}"
                     class="menu-item {{ str_contains($currentRoute, 'profile') ? 'active' : '' }}">
                     <span class="menu-icon"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -208,7 +213,6 @@
                         </svg></span>
                     LPK Profile
                 </a>
-
                 <a href="{{ route('admin.courses.index') }}"
                     class="menu-item {{ str_contains($currentRoute, 'courses') ? 'active' : '' }}">
                     <span class="menu-icon"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -218,7 +222,6 @@
                         </svg></span>
                     Courses
                 </a>
-
                 <a href="{{ route('admin.students.index') }}"
                     class="menu-item {{ str_contains($currentRoute, 'students') ? 'active' : '' }}">
                     <span class="menu-icon"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -228,7 +231,6 @@
                         </svg></span>
                     Students
                 </a>
-
                 <a href="{{ route('admin.bookings.index') }}"
                     class="menu-item {{ str_contains($currentRoute, 'bookings') ? 'active' : '' }}">
                     <span class="menu-icon"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -238,7 +240,6 @@
                         </svg></span>
                     Bookings
                 </a>
-
                 <a href="{{ route('admin.course-schedules.index') }}"
                     class="menu-item {{ str_contains($currentRoute, 'schedule') ? 'active' : '' }}">
                     <span class="menu-icon"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -248,6 +249,77 @@
                         </svg></span>
                     Schedule
                 </a>
+
+                {{-- ===================== MENU SUPER ADMIN ===================== --}}
+            @elseif($isSuperAdmin)
+                <div class="px-6 mb-2 text-xs font-semibold text-emerald-400 uppercase tracking-wider">Menu Super Admin
+                </div>
+                <a href="{{ route('super.dashboard') }}"
+                    class="menu-item {{ str_contains($currentRoute, 'dashboard') ? 'active' : '' }}">
+                    <span class="menu-icon"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z">
+                            </path>
+                        </svg></span>
+                    Dashboard
+                </a>
+                <a href="{{ route('super.tenants') }}"
+                    class="menu-item {{ str_contains($currentRoute, 'tenant') ? 'active' : '' }}">
+                    <span class="menu-icon"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
+                            </path>
+                        </svg></span>
+                    LPK Centers
+                </a>
+                <a href="{{ route('super.verifications') }}"
+                    class="menu-item {{ str_contains($currentRoute, 'verification') ? 'active' : '' }}">
+                    <span class="menu-icon"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg></span>
+                    Verifications
+                </a>
+                <a href="{{ route('super.users') }}"
+                    class="menu-item {{ str_contains($currentRoute, 'user') ? 'active' : '' }}">
+                    <span class="menu-icon"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
+                            </path>
+                        </svg></span>
+                    Users Management
+                </a>
+                <a href="{{ route('super.finance') }}"
+                    class="menu-item {{ str_contains($currentRoute, 'finance') ? 'active' : '' }}">
+                    <span class="menu-icon"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                            </path>
+                        </svg></span>
+                    Finance
+                </a>
+                <a href="{{ route('super.logs') }}"
+                    class="menu-item {{ str_contains($currentRoute, 'log') ? 'active' : '' }}">
+                    <span class="menu-icon"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                            </path>
+                        </svg></span>
+                    System Logs
+                </a>
+                <a href="{{ route('super.settings') }}"
+                    class="menu-item {{ str_contains($currentRoute, 'setting') ? 'active' : '' }}">
+                    <span class="menu-icon"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+                            </path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg></span>
+                    Settings
+                </a>
+            @else
+                <div class="px-6 py-4 text-xs text-red-500 font-bold bg-red-100 rounded-lg mx-4">Akses Ditolak.</div>
             @endif
 
             <div class="mt-8 px-6 mb-2 text-xs font-semibold text-indigo-300 uppercase tracking-wider">Account</div>
@@ -266,17 +338,13 @@
         </nav>
     </aside>
 
-    <!-- MAIN CONTENT AREA -->
     <div class="flex-1 flex flex-col h-screen overflow-hidden bg-[#f4f7fb]">
-
-        <!-- HEADER -->
         <header class="glass-header px-8 py-4 flex items-center justify-between">
             <h1 class="text-2xl font-bold font-outfit text-gray-800 tracking-tight">
                 @yield('title')
             </h1>
 
             <div class="flex items-center gap-4">
-                <!-- Notifications -->
                 <button
                     class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-500 hover:text-orange-500 hover:border-orange-200 transition-colors shadow-sm">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -286,33 +354,29 @@
                     </svg>
                 </button>
 
-                <!-- Profile -->
                 <div class="flex items-center gap-3 pl-4 border-l border-gray-200">
                     <div class="text-right hidden md:block">
                         <div class="text-sm font-semibold text-gray-800">
-                            {{ auth()->check() ? auth()->user()->name : 'Admin User' }}
+                            {{ auth()->check() ? auth()->user()->name : 'Guest' }}
                         </div>
                         <div class="text-xs text-gray-500 capitalize">
-                            {{ $user && $user->getRoleNames()->first() ? str_replace('_', ' ', $user->getRoleNames()->first()) : 'Guest' }}
+                            {{ $isSuperAdmin ? 'Super Admin' : ($isAdminLpk ? 'Admin LPK' : 'User') }}
                         </div>
                     </div>
                     <div
-                        class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 border-2 border-white shadow-md flex items-center justify-center text-white font-bold text-sm">
+                        class="{{ $isSuperAdmin ? 'bg-gradient-to-br from-emerald-500 to-teal-600' : 'bg-gradient-to-br from-indigo-500 to-purple-600' }} w-10 h-10 rounded-full border-2 border-white shadow-md flex items-center justify-center text-white font-bold text-sm">
                         {{ auth()->check() ? substr(auth()->user()->name, 0, 1) : 'A' }}
                     </div>
                 </div>
             </div>
         </header>
 
-        <!-- PAGE CONTENT -->
         <main class="flex-1 overflow-y-auto p-8 relative">
             <div class="max-w-7xl mx-auto">
                 @yield('content')
             </div>
         </main>
-
     </div>
-
 </body>
 
 </html>
