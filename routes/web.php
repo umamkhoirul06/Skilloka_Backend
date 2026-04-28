@@ -58,7 +58,7 @@ Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
 */
 
 // SAYA HANYA MENYISAKAN 'auth' DI SINI
-Route::middleware(['auth'])
+Route::middleware(['auth', 'admin-lpk'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {

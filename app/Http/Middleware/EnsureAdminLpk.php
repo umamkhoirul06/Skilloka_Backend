@@ -21,7 +21,7 @@ class EnsureAdminLpk
 
 
         // jika bukan admin lpk
-        if (Auth::user()->role !== 'admin_lpk') {
+        if (!Auth::user()->hasRole('admin_lpk')) {
 
             abort(403,'Akses khusus Admin LPK');
 

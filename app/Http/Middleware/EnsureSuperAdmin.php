@@ -19,7 +19,7 @@ class EnsureSuperAdmin
         }
 
 
-        if (Auth::user()->role !== 'super_admin') {
+        if (!Auth::user()->hasRole('super_admin')) {
 
             abort(403,'Akses khusus Super Admin');
 

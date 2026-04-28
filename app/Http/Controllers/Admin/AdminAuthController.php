@@ -72,14 +72,7 @@ class AdminAuthController extends Controller
                 'password' => Hash::make($request->password),
             ]);
 
-            // Assign role admin_lpk manually if Spatie is not fully hooked in create, 
-            // or we use direct column if exists. We will use assignRole method.
-            if (method_exists($user, 'assignRole')) {
-                $user->assignRole('admin_lpk');
-            } else {
-                $user->role = 'admin_lpk';
-                $user->save();
-            }
+            $user->assignRole('admin_lpk');
 
             // 3. Create LPK profile
             $lpk = Lpk::create([
@@ -129,31 +122,31 @@ class AdminAuthController extends Controller
 
     public function login(Request $request)
     {
-        // Hanya validasi email saja
-        $request->validate([
-            'email' => ['required', 'email']
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required']
         ]);
 
-        // 1. Cari user berdasarkan email
-        $user = User::where('email', $request->email)->first();
-
-        // 2. Jika user ketemu, PAKSA LOGIN TANPA PASSWORD DAN TANPA CEK VERIFIKASI LPK
-        if ($user) {
-            Auth::login($user);
+        if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
+            $user = Auth::user();
 
-            // Redirect ke Super Admin jika rolenya super_admin
-            if ($user->role === 'super_admin') {
+            if ($user->hasRole('super_admin')) {
                 return redirect()->route('super.dashboard');
             }
 
-            // Arahkan ke dashboard admin LPK (Abaikan status is_verified)
-            return redirect()->route('admin.dashboard');
+            if ($user->hasRole('admin_lpk')) {
+                return redirect()->route('admin.dashboard');
+            }
+
+            Auth::logout();
+            throw ValidationException::withMessages([
+                'email' => 'Anda tidak memiliki akses ke area ini.'
+            ]);
         }
 
-        // Jika email salah ketik
         throw ValidationException::withMessages([
-            'email' => 'Email tidak ditemukan di database.'
+            'email' => 'Email atau password salah.'
         ]);
     }
 
@@ -239,35 +232,27 @@ class AdminAuthController extends Controller
         ];
 
 
-        $monthlyStudents = [];
+        $user = Auth::user();
 
-        $monthlyCourses = [];
+        // OPTIMASI: 1 Query untuk seluruh Booking tahun ini
+        $bookingsPerMonth = Booking::selectRaw('MONTH(created_at) as month, count(*) as total')
+            ->where('tenant_id', $user->tenant_id)
+            ->whereYear('created_at', now()->year)
+            ->groupBy('month')
+            ->pluck('total', 'month')
+            ->toArray();
 
+        // OPTIMASI: 1 Query untuk seluruh Course tahun ini
+        $coursesPerMonth = Course::selectRaw('MONTH(created_at) as month, count(*) as total')
+            ->where('tenant_id', $user->tenant_id)
+            ->whereYear('created_at', now()->year)
+            ->groupBy('month')
+            ->pluck('total', 'month')
+            ->toArray();
 
         foreach (range(1, 12) as $month) {
-
-            $monthlyStudents[] = Booking::whereYear(
-                'created_at',
-                now()->year
-            )
-                ->whereMonth(
-                    'created_at',
-                    $month
-                )
-                ->count();
-
-
-
-            $monthlyCourses[] = Course::whereYear(
-                'created_at',
-                now()->year
-            )
-                ->whereMonth(
-                    'created_at',
-                    $month
-                )
-                ->count();
-
+            $monthlyStudents[] = $bookingsPerMonth[$month] ?? 0;
+            $monthlyCourses[] = $coursesPerMonth[$month] ?? 0;
         }
 
 

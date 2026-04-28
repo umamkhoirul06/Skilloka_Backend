@@ -10,7 +10,7 @@ return new class extends Migration {
         Schema::create('bookings', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('tenant_id')->constrained('tenants')->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignUuid('schedule_id')->constrained('course_schedules')->cascadeOnDelete();
             $table->string('code')->unique();
             $table->enum('status', ['pending', 'paid', 'cancelled', 'completed'])->default('pending');
