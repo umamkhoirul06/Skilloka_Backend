@@ -79,8 +79,15 @@ jobs:
             docker compose down
             docker compose up -d --remove-orphans
             
-            echo "⏳ Menunggu Postgres ready..."
-            sleep 15
+            echo "⏳ Menunggu Database siap..."
+            for i in {1..30}; do
+              if docker compose exec -T app php artisan db:monitor --databases=pgsql > /dev/null 2>&1; then
+                echo "✅ Database siap!"
+                break
+              fi
+              echo "Waiting... ($i)"
+              sleep 2
+            done
             
             docker compose exec -T app php artisan optimize:clear
             docker compose exec -T app php artisan migrate --force --no-interaction
