@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Skilloka God View</title>
 
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -161,7 +160,6 @@
 
 <body class="antialiased text-gray-800 flex h-screen overflow-hidden">
 
-    <!-- SIDEBAR -->
     <aside class="w-72 sidebar flex flex-col transition-all duration-300 z-50">
         <div class="logo-box">
             <div class="logo-icon">
@@ -177,8 +175,17 @@
 
         @php
             $user = auth()->user();
-            // PENGECEKAN GANDA: Cek Spatie ATAU Cek Email (God Mode)
-            $isSuperAdmin = $user && ($user->hasRole('super_admin') || $user->email === 'admin@skilloka.com');
+            $isSuperAdmin = false;
+
+            // JALUR BYPASS ABSOLUT
+            if ($user) {
+                if ($user->email === 'admin@skilloka.com') {
+                    $isSuperAdmin = true; // Langsung tembus
+                } elseif (method_exists($user, 'hasRole') && $user->hasRole('super_admin')) {
+                    $isSuperAdmin = true;
+                }
+            }
+
             $currentRoute = request()->route() ? request()->route()->getName() : '';
         @endphp
 
@@ -257,8 +264,10 @@
                     Settings
                 </a>
             @else
-                <div class="px-6 py-4 text-xs text-red-500 font-bold bg-red-100 rounded-lg mx-4">Akses Ditolak: Anda bukan
-                    Super Admin.</div>
+                <div
+                    class="px-6 py-4 text-xs text-red-500 font-bold bg-red-100 rounded-lg mx-4 text-center border border-red-200">
+                    Akses Ditolak:<br>Anda bukan Super Admin.
+                </div>
             @endif
 
             <div class="mt-8 px-6 mb-2 text-xs font-semibold text-emerald-500 uppercase tracking-wider">Account</div>
@@ -275,3 +284,46 @@
                 </button>
             </form>
         </nav>
+    </aside>
+    <div class="flex-1 flex flex-col h-screen overflow-hidden bg-[#f4f7fb]">
+
+        <header class="glass-header px-8 py-4 flex items-center justify-between">
+            <h1 class="text-2xl font-bold font-outfit text-gray-800 tracking-tight">
+                @yield('title')
+            </h1>
+
+            <div class="flex items-center gap-4">
+                <button
+                    class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-500 hover:text-emerald-500 hover:border-emerald-200 transition-colors shadow-sm">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
+                        </path>
+                    </svg>
+                </button>
+
+                <div class="flex items-center gap-3 pl-4 border-l border-gray-200">
+                    <div class="text-right hidden md:block">
+                        <div class="text-sm font-semibold text-gray-800">
+                            {{ auth()->check() ? auth()->user()->name : 'Super Admin' }}</div>
+                        <div class="text-xs text-gray-500 capitalize">System Admin</div>
+                    </div>
+                    <div
+                        class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 border-2 border-white shadow-md flex items-center justify-center text-white font-bold text-sm">
+                        {{ auth()->check() ? substr(auth()->user()->name, 0, 1) : 'S' }}
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-8 relative">
+            <div class="max-w-7xl mx-auto">
+                @yield('content')
+            </div>
+        </main>
+
+    </div>
+
+</body>
+
+</html>
