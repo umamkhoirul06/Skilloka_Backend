@@ -176,7 +176,9 @@
         </div>
 
         @php
-            $role = auth()->check() ? auth()->user()->role : 'guest';
+            $user = auth()->user();
+            $isAdminLpk = $user && $user->hasRole('admin_lpk');
+            $isSuperAdmin = $user && $user->hasRole('super_admin');
             $currentRoute = request()->route() ? request()->route()->getName() : '';
         @endphp
 
@@ -186,7 +188,7 @@
             {{-- =====================
             ADMIN LPK MENU
             ===================== --}}
-            @if($role == 'admin' || $role == 'admin_lpk')
+            @if($isAdminLpk || $isSuperAdmin)
                 <a href="{{ route('admin.dashboard') }}"
                     class="menu-item {{ str_contains($currentRoute, 'dashboard') ? 'active' : '' }}">
                     <span class="menu-icon"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -251,7 +253,7 @@
             {{-- =====================
             SUPER ADMIN MENU
             ===================== --}}
-            @if($role == 'super_admin')
+            @if($isSuperAdmin)
                 <a href="{{ route('super.dashboard') }}"
                     class="menu-item {{ str_contains($currentRoute, 'dashboard') ? 'active' : '' }}">
                     <span class="menu-icon"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -366,7 +368,7 @@
                         <div class="text-sm font-semibold text-gray-800">
                             {{ auth()->check() ? auth()->user()->name : 'Admin User' }}
                         </div>
-                        <div class="text-xs text-gray-500 capitalize">{{ str_replace('_', ' ', $role) }}</div>
+                        <div class="text-xs text-gray-500 capitalize">{{ $user && $user->getRoleNames()->first() ? str_replace('_', ' ', $user->getRoleNames()->first()) : 'Guest' }}</div>
                     </div>
                     <div
                         class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 border-2 border-white shadow-md flex items-center justify-center text-white font-bold text-sm">
