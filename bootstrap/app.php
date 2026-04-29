@@ -34,8 +34,15 @@ return Application::configure(basePath: dirname(__DIR__))
 })
 
 ->withExceptions(function (Exceptions $exceptions) {
+    $exceptions->renderable(function (\Spatie\Permission\Exceptions\UnauthorizedException $e, $request) {
+        return response()->view('errors.403', [], 403);
+    });
 
-    //
+    $exceptions->renderable(function (\Throwable $e, $request) {
+        if ($e->getCode() == 500) {
+            return response()->view('errors.500', [], 500);
+        }
+    });
 })
 
 ->create();
