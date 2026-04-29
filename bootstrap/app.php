@@ -31,20 +31,19 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
 
+        // HANYA tangkap error 403 (Akses Ditolak)
         $exceptions->render(function (HttpException $e, Request $request) {
             if ($e->getStatusCode() == 403) {
                 return response()->view('errors.403', [], 403);
             }
         });
 
+        // Tangkap error 403 khusus Spatie
         $exceptions->render(function (UnauthorizedException $e, Request $request) {
             return response()->view('errors.403', [], 403);
         });
 
-        $exceptions->render(function (\Throwable $e, Request $request) {
-            if ($e->getCode() == 500 || $e->getCode() == 0) {
-                return response()->view('errors.500', [], 500);
-            }
-        });
-
+        // Biarkan error lainnya dihandle Laravel secara default 
+        // agar pesan merah login muncul kembali.
+    
     })->create();
