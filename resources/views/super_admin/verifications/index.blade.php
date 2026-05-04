@@ -1,193 +1,201 @@
 @extends('layouts.admin')
 
-@section('title','Verifikasi LPK')
+@section('title', 'Verifikasi LPK')
 
 @section('content')
 
-<style>
+    <style>
+        .card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            padding: 20px;
+        }
+
+        .table th {
+            font-size: 13px;
+            color: #6b7280;
+            font-weight: 500;
+        }
 
-.card{
-background:white;
-border-radius:12px;
-border:1px solid #e5e7eb;
-padding:20px;
-}
+        .table tr {
+            border-bottom: 1px solid #f1f5f9;
+        }
 
-.table th{
-font-size:13px;
-color:#6b7280;
-font-weight:500;
-}
+        .badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+        }
 
-.table tr{
-border-bottom:1px solid #f1f5f9;
-}
+        .pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
 
-.badge{
-padding:4px 10px;
-border-radius:6px;
-font-size:12px;
-}
+        .approved {
+            background: #dcfce7;
+            color: #166534;
+        }
 
-.pending{
-background:#fef3c7;
-color:#92400e;
-}
+        .rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
 
-.approved{
-background:#dcfce7;
-color:#166534;
-}
+        .btn {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+        }
 
-.rejected{
-background:#fee2e2;
-color:#991b1b;
-}
+        .btn-approve {
+            background: #22c55e;
+            color: white;
+        }
 
-.btn{
-padding:6px 12px;
-border-radius:8px;
-font-size:13px;
-font-weight:500;
-border:none;
-cursor:pointer;
-}
+        .btn-reject {
+            background: #ef4444;
+            color: white;
+        }
+    </style>
 
-.btn-approve{
-background:#22c55e;
-color:white;
-}
 
-.btn-reject{
-background:#ef4444;
-color:white;
-}
 
-</style>
+    <div class="card">
 
+        <h2 class="text-lg font-semibold mb-4">
+            Verifikasi LPK
+        </h2>
 
+        @if(session('success'))
+            <div
+                style="background-color: #dcfce7; color: #166534; padding: 12px; border-radius: 8px; margin-bottom: 16px; border: 1px solid #bbf7d0;">
+                {{ session('success') }}
+            </div>
+        @endif
 
-<div class="card">
+        @if(session('error'))
+            <div
+                style="background-color: #fee2e2; color: #991b1b; padding: 12px; border-radius: 8px; margin-bottom: 16px; border: 1px solid #fecaca;">
+                {{ session('error') }}
+            </div>
+        @endif
 
-<h2 class="text-lg font-semibold mb-4">
-Verifikasi LPK
-</h2>
 
+        <table class="table w-full">
 
+            <thead>
 
-<table class="table w-full">
+                <tr>
 
-<thead>
+                    <th class="p-2 text-left">
+                        Nama LPK
+                    </th>
 
-<tr>
+                    <th class="p-2 text-left">
+                        Email
+                    </th>
 
-<th class="p-2 text-left">
-Nama LPK
-</th>
+                    <th class="p-2 text-left">
+                        Status
+                    </th>
 
-<th class="p-2 text-left">
-Email
-</th>
+                    <th class="p-2 text-left">
+                        Aksi
+                    </th>
 
-<th class="p-2 text-left">
-Status
-</th>
+                </tr>
 
-<th class="p-2 text-left">
-Aksi
-</th>
+            </thead>
 
-</tr>
 
-</thead>
 
+            <tbody>
 
+                @forelse($tenants as $tenant)
 
-<tbody>
+                                <tr>
 
-@forelse($tenants as $tenant)
+                                    <td class="p-2">
+                                        {{ $tenant->lpk_name ?? '-' }}
+                                    </td>
 
-<tr>
 
-<td class="p-2">
-{{ $tenant->lpk_name ?? '-' }}
-</td>
+                                    <td class="p-2">
+                                        {{ $tenant->users->first()->email ?? '-' }}
+                                    </td>
 
 
-<td class="p-2">
-{{ $tenant->users->first()->email ?? '-' }}
-</td>
+                                    <td class="p-2">
 
+                                        <span class="badge
 
-<td class="p-2">
+                    @if($tenant->status_verification == 'approved') approved
+                    @elseif($tenant->status_verification == 'rejected') rejected
+                    @else pending
+                    @endif
 
-<span class="badge
+                    ">
 
-@if($tenant->status_verification == 'approved') approved
-@elseif($tenant->status_verification == 'rejected') rejected
-@else pending
-@endif
+                                            {{ ucfirst($tenant->status_verification ?? 'pending') }}
 
-">
+                                        </span>
 
-{{ ucfirst($tenant->status_verification ?? 'pending') }}
+                                    </td>
 
-</span>
 
-</td>
+                                    <td class="p-2 flex gap-2">
 
+                                        <form method="POST" action="{{ route('super.verifications.approve', $tenant->id) }}">
 
-<td class="p-2 flex gap-2">
+                                            @csrf
 
-<form method="POST"
-action="{{ route('super.verifications.approve',$tenant->id) }}">
+                                            <button class="btn btn-approve">
+                                                Approve
+                                            </button>
 
-@csrf
+                                        </form>
 
-<button class="btn btn-approve">
-Approve
-</button>
 
-</form>
 
+                                        <form method="POST" action="{{ route('super.verifications.reject', $tenant->id) }}">
 
+                                            @csrf
 
-<form method="POST"
-action="{{ route('super.verifications.reject',$tenant->id) }}">
+                                            <button class="btn btn-reject">
+                                                Reject
+                                            </button>
 
-@csrf
+                                        </form>
 
-<button class="btn btn-reject">
-Reject
-</button>
+                                    </td>
 
-</form>
+                                </tr>
 
-</td>
+                @empty
 
-</tr>
+                    <tr>
 
-@empty
+                        <td colspan="4" class="text-center p-4 text-gray-400">
 
-<tr>
+                            Belum ada data verifikasi
 
-<td colspan="4"
-class="text-center p-4 text-gray-400">
+                        </td>
 
-Belum ada data verifikasi
+                    </tr>
 
-</td>
+                @endforelse
 
-</tr>
 
-@endforelse
+            </tbody>
 
+        </table>
 
-</tbody>
-
-</table>
-
-</div>
+    </div>
 
 
 @endsection
