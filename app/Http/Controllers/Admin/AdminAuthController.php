@@ -20,23 +20,10 @@ use Illuminate\Support\Str;
 
 class AdminAuthController extends Controller
 {
-
-    /*
-    |--------------------------------------------------------------------------
-    | FORM REGISTER
-    |--------------------------------------------------------------------------
-    */
-
     public function showRegister()
     {
         return view('admin.auth.register');
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | PROSES REGISTER
-    |--------------------------------------------------------------------------
-    */
 
     public function register(Request $request)
     {
@@ -52,7 +39,6 @@ class AdminAuthController extends Controller
         try {
             DB::beginTransaction();
 
-            // 1. Create Tenant
             $tenant = Tenant::create([
                 'name' => $request->lpk_name,
                 'domain' => Str::slug($request->lpk_name) . '-' . Str::random(5),
@@ -63,7 +49,6 @@ class AdminAuthController extends Controller
                 'is_active' => true,
             ]);
 
-            // 2. Create User
             $user = User::create([
                 'tenant_id' => $tenant->id,
                 'name' => $request->name,
@@ -74,7 +59,6 @@ class AdminAuthController extends Controller
 
             $user->assignRole('admin_lpk');
 
-            // 3. Create LPK profile
             $lpk = Lpk::create([
                 'tenant_id' => $tenant->id,
                 'name' => $request->lpk_name,
@@ -84,7 +68,6 @@ class AdminAuthController extends Controller
                 'status' => 'pending',
             ]);
 
-            // 4. Create Lpk Verification for Super Admin
             LpkVerification::create([
                 'lpk_id' => $lpk->id,
                 'status' => 'pending',
@@ -100,25 +83,10 @@ class AdminAuthController extends Controller
         }
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | FORM LOGIN
-    |--------------------------------------------------------------------------
-    */
-
     public function showLogin()
     {
         return view('admin.auth.login');
     }
-
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | PROSES LOGIN (SUDAH DI-BYPASS)
-    |--------------------------------------------------------------------------
-    */
 
     public function login(Request $request)
     {
@@ -150,91 +118,25 @@ class AdminAuthController extends Controller
         ]);
     }
 
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | LOGOUT
-    |--------------------------------------------------------------------------
-    */
-
     public function logout(Request $request)
     {
-
         Auth::logout();
-
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
-
         return redirect()->route('admin.login');
-
     }
-
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | DASHBOARD ADMIN LPK
-    |--------------------------------------------------------------------------
-    */
 
     public function dashboard()
     {
-
-        // =====================
-        // STATISTIK
-        // =====================
-
         $totalCourses = Course::count();
-
-        // student dihitung dari booking
         $totalStudents = Booking::count();
-
         $upcomingClasses = CourseSchedule::count();
+        $pendingBookings = Booking::where('status', 'pending')->count();
+        $recentBookings = Booking::latest()->take(5)->get();
 
-        $pendingBookings = Booking::where(
-            'status',
-            'pending'
-        )->count();
-
-
-
-        // =====================
-        // BOOKING TERBARU
-        // =====================
-
-        $recentBookings = Booking::latest()
-            ->take(5)
-            ->get();
-
-
-
-        // =====================
-        // DATA CHART BULANAN
-        // =====================
-
-        $monthlyLabels = [
-
-            'Jan',
-            'Feb',
-            'Mar',
-            'Apr',
-            'May',
-            'Jun',
-            'Jul',
-            'Aug',
-            'Sep',
-            'Oct',
-            'Nov',
-            'Dec'
-
-        ];
-
-
+        $monthlyLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         $user = Auth::user();
 
-        // OPTIMASI: 1 Query untuk seluruh Booking tahun ini
         $bookingsPerMonth = Booking::selectRaw('MONTH(created_at) as month, count(*) as total')
             ->where('tenant_id', $user->tenant_id)
             ->whereYear('created_at', now()->year)
@@ -242,7 +144,6 @@ class AdminAuthController extends Controller
             ->pluck('total', 'month')
             ->toArray();
 
-        // OPTIMASI: 1 Query untuk seluruh Course tahun ini
         $coursesPerMonth = Course::selectRaw('MONTH(created_at) as month, count(*) as total')
             ->where('tenant_id', $user->tenant_id)
             ->whereYear('created_at', now()->year)
@@ -250,43 +151,23 @@ class AdminAuthController extends Controller
             ->pluck('total', 'month')
             ->toArray();
 
+        $monthlyStudents = [];
+        $monthlyCourses = [];
+
         foreach (range(1, 12) as $month) {
             $monthlyStudents[] = $bookingsPerMonth[$month] ?? 0;
             $monthlyCourses[] = $coursesPerMonth[$month] ?? 0;
         }
 
-
-
-        // =====================
-        // RETURN VIEW
-        // =====================
-
-        return view(
-
-            'admin.dashboard',
-
-            compact(
-
-                'totalCourses',
-
-                'totalStudents',
-
-                'upcomingClasses',
-
-                'pendingBookings',
-
-                'recentBookings',
-
-                'monthlyLabels',
-
-                'monthlyStudents',
-
-                'monthlyCourses'
-
-            )
-
-        );
-
+        return view('admin.dashboard', compact(
+            'totalCourses',
+            'totalStudents',
+            'upcomingClasses',
+            'pendingBookings',
+            'recentBookings',
+            'monthlyLabels',
+            'monthlyStudents',
+            'monthlyCourses'
+        ));
     }
-
 }
