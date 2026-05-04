@@ -11,14 +11,8 @@ class VerificationController extends Controller
 {
     public function index()
     {
-        $tenants = Tenant::with('users')
-            ->latest()
-            ->get();
-
-        return view(
-            'super_admin.verifications.index',
-            compact('tenants')
-        );
+        $tenants = Tenant::with('users')->latest()->get();
+        return view('super_admin.verifications.index', compact('tenants'));
     }
 
     public function approve($id)
@@ -26,15 +20,11 @@ class VerificationController extends Controller
         try {
             DB::beginTransaction();
 
-            // 1. Ambil data Tenant
             $tenant = Tenant::findOrFail($id);
-
-            // 2. KUNCI UTAMA: UPDATE STATUS TENANT AGAR BLADE BERUBAH HIJAU!
-            $tenant->status_verification = 'approved';
-            $tenant->is_active = true; // Mengaktifkan akses login Admin LPK
+            $tenant->is_active = true; // Cukup aktifkan aksesnya, jangan panggil status_verification
             $tenant->save();
 
-            // 3. Update juga status di tabel LPK
+            // Status Asli ada di tabel Lpk
             $lpk = Lpk::where('tenant_id', $tenant->id)->first();
             if ($lpk) {
                 $lpk->is_verified = true;
@@ -43,7 +33,7 @@ class VerificationController extends Controller
             }
 
             DB::commit();
-            return back()->with('success', 'MANTAP! LPK berhasil di Approve dan status telah aktif!');
+            return back()->with('success', 'MANTAP! LPK berhasil di Approve dan diaktifkan!');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -56,15 +46,11 @@ class VerificationController extends Controller
         try {
             DB::beginTransaction();
 
-            // 1. Ambil data Tenant
             $tenant = Tenant::findOrFail($id);
-
-            // 2. KUNCI UTAMA: UPDATE STATUS TENANT JADI REJECTED
-            $tenant->status_verification = 'rejected';
             $tenant->is_active = false;
             $tenant->save();
 
-            // 3. Update juga status di tabel LPK
+            // Status Asli ada di tabel Lpk
             $lpk = Lpk::where('tenant_id', $tenant->id)->first();
             if ($lpk) {
                 $lpk->is_verified = false;

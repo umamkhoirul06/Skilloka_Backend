@@ -63,10 +63,7 @@
         }
     </style>
 
-
-
     <div class="card">
-
         <h2 class="text-lg font-semibold mb-4">
             Verifikasi LPK
         </h2>
@@ -85,117 +82,60 @@
             </div>
         @endif
 
-
         <table class="table w-full">
-
             <thead>
-
                 <tr>
-
-                    <th class="p-2 text-left">
-                        Nama LPK
-                    </th>
-
-                    <th class="p-2 text-left">
-                        Email
-                    </th>
-
-                    <th class="p-2 text-left">
-                        Status
-                    </th>
-
-                    <th class="p-2 text-left">
-                        Aksi
-                    </th>
-
+                    <th class="p-2 text-left">Nama LPK</th>
+                    <th class="p-2 text-left">Email</th>
+                    <th class="p-2 text-left">Status</th>
+                    <th class="p-2 text-left">Aksi</th>
                 </tr>
-
             </thead>
-
-
-
             <tbody>
-
                 @forelse($tenants as $tenant)
-
-                                <tr>
-
-                                    <td class="p-2">
-                                        {{ $tenant->lpk_name ?? '-' }}
-                                    </td>
-
-
-                                    <td class="p-2">
-                                        {{ $tenant->users->first()->email ?? '-' }}
-                                    </td>
-
-
-                                    <td class="p-2">
-
-                                        <span class="badge
-
-                    @if($tenant->status_verification == 'approved') approved
-                    @elseif($tenant->status_verification == 'rejected') rejected
-                    @else pending
-                    @endif
-
-                    ">
-
-                                            {{ ucfirst($tenant->status_verification ?? 'pending') }}
-
-                                        </span>
-
-                                    </td>
-
-
-                                    <td class="p-2 flex gap-2">
-
-                                        <form method="POST" action="{{ route('super.verifications.approve', $tenant->id) }}">
-
-                                            @csrf
-
-                                            <button class="btn btn-approve">
-                                                Approve
-                                            </button>
-
-                                        </form>
-
-
-
-                                        <form method="POST" action="{{ route('super.verifications.reject', $tenant->id) }}">
-
-                                            @csrf
-
-                                            <button class="btn btn-reject">
-                                                Reject
-                                            </button>
-
-                                        </form>
-
-                                    </td>
-
-                                </tr>
-
-                @empty
-
+                    @php
+                        // 🔥 INI KUNCINYA: Kita cari status dari tabel LPK yang benar!
+                        $lpk = \App\Models\Lpk::where('tenant_id', $tenant->id)->first();
+                        $status = $lpk ? $lpk->status : 'pending';
+                    @endphp
                     <tr>
-
-                        <td colspan="4" class="text-center p-4 text-gray-400">
-
-                            Belum ada data verifikasi
-
+                        <td class="p-2">
+                            {{ $tenant->lpk_name ?? '-' }}
                         </td>
+                        <td class="p-2">
+                            {{ $tenant->users->first()->email ?? '-' }}
+                        </td>
+                        <td class="p-2">
+                            <span
+                                class="badge @if($status == 'approved') approved @elseif($status == 'rejected') rejected @else pending @endif">
+                                {{ ucfirst($status) }}
+                            </span>
+                        </td>
+                        <td class="p-2 flex gap-2">
+                            <form method="POST" action="{{ route('super.verifications.approve', $tenant->id) }}">
+                                @csrf
+                                <button class="btn btn-approve">
+                                    Approve
+                                </button>
+                            </form>
 
+                            <form method="POST" action="{{ route('super.verifications.reject', $tenant->id) }}">
+                                @csrf
+                                <button class="btn btn-reject">
+                                    Reject
+                                </button>
+                            </form>
+                        </td>
                     </tr>
-
+                @empty
+                    <tr>
+                        <td colspan="4" class="text-center p-4 text-gray-400">
+                            Belum ada data verifikasi
+                        </td>
+                    </tr>
                 @endforelse
-
-
             </tbody>
-
         </table>
-
     </div>
-
 
 @endsection
