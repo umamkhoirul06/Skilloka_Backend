@@ -11,8 +11,14 @@ class VerificationController extends Controller
 {
     public function index()
     {
-        $tenants = Tenant::with('users')->latest()->get();
-        return view('super_admin.verifications.index', compact('tenants'));
+        $tenants = Tenant::with('users')
+            ->latest()
+            ->get();
+
+        return view(
+            'super_admin.verifications.index',
+            compact('tenants')
+        );
     }
 
     public function approve($id)
@@ -21,19 +27,22 @@ class VerificationController extends Controller
             DB::beginTransaction();
 
             $tenant = Tenant::findOrFail($id);
-            $tenant->is_active = true; // Cukup aktifkan aksesnya, jangan panggil status_verification
+
+            // Tenant pakai approved (karena dia string biasa)
+            $tenant->status_verification = 'approved';
+            $tenant->is_active = true;
             $tenant->save();
 
-            // Status Asli ada di tabel Lpk
+            // LPK pakai 'active' agar lolos dari Satpam PostgreSQL
             $lpk = Lpk::where('tenant_id', $tenant->id)->first();
             if ($lpk) {
                 $lpk->is_verified = true;
-                $lpk->status = 'approved';
+                $lpk->status = 'active'; // KATA KUNCI: active
                 $lpk->save();
             }
 
             DB::commit();
-            return back()->with('success', 'MANTAP! LPK berhasil di Approve dan diaktifkan!');
+            return back()->with('success', 'MANTAP! LPK berhasil di Approve dan status telah aktif!');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -47,14 +56,17 @@ class VerificationController extends Controller
             DB::beginTransaction();
 
             $tenant = Tenant::findOrFail($id);
+
+            // Tenant pakai rejected
+            $tenant->status_verification = 'rejected';
             $tenant->is_active = false;
             $tenant->save();
 
-            // Status Asli ada di tabel Lpk
+            // LPK pakai 'inactive' agar lolos dari Satpam PostgreSQL
             $lpk = Lpk::where('tenant_id', $tenant->id)->first();
             if ($lpk) {
                 $lpk->is_verified = false;
-                $lpk->status = 'rejected';
+                $lpk->status = 'inactive'; // KATA KUNCI: inactive
                 $lpk->save();
             }
 
