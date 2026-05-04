@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Tenant;
 use App\Models\Lpk;
 use App\Models\LpkVerification;
+use Illuminate\Support\Facades\DB;
 
 class VerificationController extends Controller
 {
@@ -22,60 +23,75 @@ class VerificationController extends Controller
         );
     }
 
-
     public function approve($id)
     {
-        $tenant = Tenant::findOrFail($id);
+        try {
+            DB::beginTransaction();
 
-        // Cari data LPK yang terhubung dengan Tenant ini
-        $lpk = Lpk::where('tenant_id', $tenant->id)->first();
+            $tenant = Tenant::findOrFail($id);
 
-        if ($lpk) {
-            // Ubah status LPK menjadi terverifikasi
-            $lpk->is_verified = true;
-            $lpk->status = 'approved';
-            $lpk->save();
+            // Cari data LPK yang terhubung dengan Tenant ini
+            $lpk = Lpk::where('tenant_id', $tenant->id)->first();
 
-            // Ubah juga data di tabel riwayat verifikasi
-            $verification = LpkVerification::where('lpk_id', $lpk->id)->first();
-            if ($verification) {
-                $verification->status = 'approved';
-                $verification->save();
+            if ($lpk) {
+                // Ubah status LPK menjadi terverifikasi
+                $lpk->is_verified = true;
+
+                // Dihapus karena tabel lpks tidak memiliki kolom status di database-mu
+                // $lpk->status = 'approved'; 
+
+                $lpk->save();
+
+                // Ubah data di tabel riwayat verifikasi
+                $verification = LpkVerification::where('lpk_id', $lpk->id)->first();
+                if ($verification) {
+                    $verification->status = 'approved';
+                    $verification->save();
+                }
             }
+
+            DB::commit();
+            return back()->with('success', 'LPK berhasil di approve dan diaktifkan!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal memverifikasi LPK: ' . $e->getMessage());
         }
-
-        return back()->with(
-            'success',
-            'LPK berhasil di approve dan diaktifkan!'
-        );
     }
-
 
     public function reject($id)
     {
-        $tenant = Tenant::findOrFail($id);
+        try {
+            DB::beginTransaction();
 
-        // Cari data LPK yang terhubung dengan Tenant ini
-        $lpk = Lpk::where('tenant_id', $tenant->id)->first();
+            $tenant = Tenant::findOrFail($id);
 
-        if ($lpk) {
-            // Ubah status LPK menjadi tidak terverifikasi
-            $lpk->is_verified = false;
-            $lpk->status = 'rejected';
-            $lpk->save();
+            // Cari data LPK yang terhubung dengan Tenant ini
+            $lpk = Lpk::where('tenant_id', $tenant->id)->first();
 
-            // Ubah juga data di tabel riwayat verifikasi
-            $verification = LpkVerification::where('lpk_id', $lpk->id)->first();
-            if ($verification) {
-                $verification->status = 'rejected';
-                $verification->save();
+            if ($lpk) {
+                // Ubah status LPK menjadi tidak terverifikasi
+                $lpk->is_verified = false;
+
+                // Dihapus karena tabel lpks tidak memiliki kolom status di database-mu
+                // $lpk->status = 'rejected'; 
+
+                $lpk->save();
+
+                // Ubah data di tabel riwayat verifikasi
+                $verification = LpkVerification::where('lpk_id', $lpk->id)->first();
+                if ($verification) {
+                    $verification->status = 'rejected';
+                    $verification->save();
+                }
             }
+
+            DB::commit();
+            return back()->with('success', 'Pendaftaran LPK berhasil ditolak.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal menolak LPK: ' . $e->getMessage());
         }
-
-        return back()->with(
-            'success',
-            'Pendaftaran LPK berhasil ditolak.'
-        );
     }
-
 }

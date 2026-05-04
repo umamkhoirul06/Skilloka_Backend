@@ -126,7 +126,6 @@
             color: #10b981;
         }
 
-        /* Glassmorphism Header */
         .glass-header {
             background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(12px);
@@ -137,7 +136,6 @@
             z-index: 40;
         }
 
-        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -170,17 +168,16 @@
                     </path>
                 </svg>
             </div>
-            <div class="logo-text font-outfit">GOD VIEW</div>
+            <div class="logo-text font-outfit">Super Admin Skilloka</div>
         </div>
 
         @php
             $user = auth()->user();
             $isSuperAdmin = false;
 
-            // JALUR BYPASS ABSOLUT
             if ($user) {
                 if ($user->email === 'admin@skilloka.com') {
-                    $isSuperAdmin = true; // Langsung tembus
+                    $isSuperAdmin = true;
                 } elseif (method_exists($user, 'hasRole') && $user->hasRole('super_admin')) {
                     $isSuperAdmin = true;
                 }
@@ -202,7 +199,6 @@
                         </svg></span>
                     Dashboard
                 </a>
-
                 <a href="{{ route('super.tenants') }}"
                     class="menu-item {{ str_contains($currentRoute, 'tenant') ? 'active' : '' }}">
                     <span class="menu-icon"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -212,7 +208,6 @@
                         </svg></span>
                     LPK Centers
                 </a>
-
                 <a href="{{ route('super.verifications') }}"
                     class="menu-item {{ str_contains($currentRoute, 'verification') ? 'active' : '' }}">
                     <span class="menu-icon"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -221,7 +216,6 @@
                         </svg></span>
                     Verifications
                 </a>
-
                 <a href="{{ route('super.users') }}"
                     class="menu-item {{ str_contains($currentRoute, 'user') ? 'active' : '' }}">
                     <span class="menu-icon"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -231,7 +225,6 @@
                         </svg></span>
                     Users Management
                 </a>
-
                 <a href="{{ route('super.finance') }}"
                     class="menu-item {{ str_contains($currentRoute, 'finance') ? 'active' : '' }}">
                     <span class="menu-icon"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -241,7 +234,6 @@
                         </svg></span>
                     Finance
                 </a>
-
                 <a href="{{ route('super.logs') }}"
                     class="menu-item {{ str_contains($currentRoute, 'log') ? 'active' : '' }}">
                     <span class="menu-icon"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -251,7 +243,6 @@
                         </svg></span>
                     System Logs
                 </a>
-
                 <a href="{{ route('super.settings') }}"
                     class="menu-item {{ str_contains($currentRoute, 'setting') ? 'active' : '' }}">
                     <span class="menu-icon"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -285,8 +276,8 @@
             </form>
         </nav>
     </aside>
-    <div class="flex-1 flex flex-col h-screen overflow-hidden bg-[#f4f7fb]">
 
+    <div class="flex-1 flex flex-col h-screen overflow-hidden bg-[#f4f7fb]">
         <header class="glass-header px-8 py-4 flex items-center justify-between">
             <h1 class="text-2xl font-bold font-outfit text-gray-800 tracking-tight">
                 @yield('title')
@@ -305,8 +296,11 @@
                 <div class="flex items-center gap-3 pl-4 border-l border-gray-200">
                     <div class="text-right hidden md:block">
                         <div class="text-sm font-semibold text-gray-800">
-                            {{ auth()->check() ? auth()->user()->name : 'Super Admin' }}</div>
-                        <div class="text-xs text-gray-500 capitalize">System Admin</div>
+                            {{ auth()->check() ? auth()->user()->name : 'Super Admin' }}
+                        </div>
+                        <div class="text-xs text-gray-500 capitalize">
+                            {{ auth()->check() && auth()->user()->roles->count() > 0 ? (auth()->user()->roles->pluck('name')->first() == 'admin_lpk' ? 'Admin LPK' : 'Super Admin') : 'System Admin' }}
+                        </div>
                     </div>
                     <div
                         class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 border-2 border-white shadow-md flex items-center justify-center text-white font-bold text-sm">
@@ -321,9 +315,7 @@
                 @yield('content')
             </div>
         </main>
-
     </div>
-
 </body>
 
 </html>
