@@ -26,21 +26,24 @@ class VerificationController extends Controller
         try {
             DB::beginTransaction();
 
+            // 1. Ambil data Tenant
             $tenant = Tenant::findOrFail($id);
 
-            // Cari data LPK yang terhubung dengan Tenant ini
-            $lpk = Lpk::where('tenant_id', $tenant->id)->first();
+            // 2. KUNCI UTAMA: UPDATE STATUS TENANT AGAR BLADE BERUBAH HIJAU!
+            $tenant->status_verification = 'approved';
+            $tenant->is_active = true; // Mengaktifkan akses login Admin LPK
+            $tenant->save();
 
+            // 3. Update juga status di tabel LPK
+            $lpk = Lpk::where('tenant_id', $tenant->id)->first();
             if ($lpk) {
-                // Ubah status LPK menjadi terverifikasi
                 $lpk->is_verified = true;
+                $lpk->status = 'approved';
                 $lpk->save();
             }
 
-            // Kodingan LpkVerification KITA HAPUS TOTAL agar tidak Error 500
-
             DB::commit();
-            return back()->with('success', 'MANTAP! LPK berhasil di Approve dan diaktifkan!');
+            return back()->with('success', 'MANTAP! LPK berhasil di Approve dan status telah aktif!');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -53,18 +56,21 @@ class VerificationController extends Controller
         try {
             DB::beginTransaction();
 
+            // 1. Ambil data Tenant
             $tenant = Tenant::findOrFail($id);
 
-            // Cari data LPK yang terhubung dengan Tenant ini
-            $lpk = Lpk::where('tenant_id', $tenant->id)->first();
+            // 2. KUNCI UTAMA: UPDATE STATUS TENANT JADI REJECTED
+            $tenant->status_verification = 'rejected';
+            $tenant->is_active = false;
+            $tenant->save();
 
+            // 3. Update juga status di tabel LPK
+            $lpk = Lpk::where('tenant_id', $tenant->id)->first();
             if ($lpk) {
-                // Ubah status LPK menjadi tidak terverifikasi
                 $lpk->is_verified = false;
+                $lpk->status = 'rejected';
                 $lpk->save();
             }
-
-            // Kodingan LpkVerification KITA HAPUS TOTAL agar tidak Error 500
 
             DB::commit();
             return back()->with('success', 'SIPP! Pendaftaran LPK berhasil ditolak.');
