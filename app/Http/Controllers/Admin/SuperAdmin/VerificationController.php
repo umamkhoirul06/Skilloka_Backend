@@ -91,6 +91,7 @@ class VerificationController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            dd('BIANG KEROK ERRORNYA ADALAH: ' . $e->getMessage());
             return back()->with('error', 'Gagal menolak LPK: ' . $e->getMessage());
         }
     }
