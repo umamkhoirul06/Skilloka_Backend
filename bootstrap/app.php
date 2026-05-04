@@ -28,6 +28,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'super-admin' => \App\Http\Middleware\EnsureSuperAdmin::class,
             'admin-lpk' => \App\Http\Middleware\EnsureAdminLpk::class,
         ]);
+
+        // 🔥 INI KODINGAN AJAIB PENUNJUK JALAN LOGIN-NYA
+        $middleware->redirectGuestsTo(fn() => route('admin.login'));
     })
     ->withExceptions(function (Exceptions $exceptions) {
 
