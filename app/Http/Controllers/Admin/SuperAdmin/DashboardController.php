@@ -11,33 +11,22 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        // Menghitung total semua data
         $totalLpk = Lpk::count();
         $totalCourses = Course::count();
         $totalUsers = User::count();
 
-        // PERBAIKAN: Kolom di tabel Lpk biasanya bernama 'status', bukan 'status_verifikasi'
-        $pendingVerifications = Lpk::where('status', 'pending')->count();
+        // 🔥 PASTIKAN INI: Menghitung yang benar-benar masih PENDING saja
+        $pendingVerifications = Lpk::where('status_verifikasi', 'pending')->count();
 
-        $pendingLpks = Lpk::where('status', 'pending')
+        // Mengambil 5 LPK terbaru yang statusnya masih PENDING
+        $pendingLpks = Lpk::where('status_verifikasi', 'pending')
             ->latest()
             ->take(5)
             ->get();
 
-        $monthlyLabels = [
-            'Jan',
-            'Feb',
-            'Mar',
-            'Apr',
-            'May',
-            'Jun',
-            'Jul',
-            'Aug',
-            'Sep',
-            'Oct',
-            'Nov',
-            'Dec'
-        ];
-
+        // Logika Grafik (Tetap sama)
+        $monthlyLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         $monthlyLpk = [];
         $monthlyUsers = [];
         $monthlyCourses = [];

@@ -26,6 +26,7 @@
             padding: 4px 10px;
             border-radius: 6px;
             font-size: 12px;
+            font-weight: 600;
         }
 
         .pending {
@@ -64,9 +65,7 @@
     </style>
 
     <div class="card">
-        <h2 class="text-lg font-semibold mb-4">
-            Verifikasi LPK
-        </h2>
+        <h2 class="text-lg font-semibold mb-4">Verifikasi LPK</h2>
 
         @if(session('success'))
             <div
@@ -94,44 +93,33 @@
             <tbody>
                 @forelse($tenants as $tenant)
                     @php
-                        // 🔥 INI KUNCINYA: Kita cari status dari tabel LPK yang benar!
+                        // 🔥 BACA LANGSUNG DARI KOLOM status_verifikasi
                         $lpk = \App\Models\Lpk::where('tenant_id', $tenant->id)->first();
-                        $status = $lpk ? $lpk->status : 'pending';
+                        $status = $lpk ? $lpk->status_verifikasi : 'pending';
                     @endphp
                     <tr>
-                        <td class="p-2">
-                            {{ $tenant->lpk_name ?? '-' }}
-                        </td>
-                        <td class="p-2">
-                            {{ $tenant->users->first()->email ?? '-' }}
-                        </td>
+                        <td class="p-2">{{ $tenant->lpk_name ?? '-' }}</td>
+                        <td class="p-2">{{ $tenant->users->first()->email ?? '-' }}</td>
                         <td class="p-2">
                             <span
                                 class="badge @if($status == 'approved') approved @elseif($status == 'rejected') rejected @else pending @endif">
-                                {{ ucfirst($status) }}
+                                {{ strtoupper($status) }}
                             </span>
                         </td>
                         <td class="p-2 flex gap-2">
                             <form method="POST" action="{{ route('super.verifications.approve', $tenant->id) }}">
                                 @csrf
-                                <button class="btn btn-approve">
-                                    Approve
-                                </button>
+                                <button class="btn btn-approve">Approve</button>
                             </form>
-
                             <form method="POST" action="{{ route('super.verifications.reject', $tenant->id) }}">
                                 @csrf
-                                <button class="btn btn-reject">
-                                    Reject
-                                </button>
+                                <button class="btn btn-reject">Reject</button>
                             </form>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4" class="text-center p-4 text-gray-400">
-                            Belum ada data verifikasi
-                        </td>
+                        <td colspan="4" class="text-center p-4 text-gray-400">Belum ada data verifikasi</td>
                     </tr>
                 @endforelse
             </tbody>
