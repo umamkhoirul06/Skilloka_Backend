@@ -27,17 +27,15 @@ class VerificationController extends Controller
             DB::beginTransaction();
 
             $tenant = Tenant::findOrFail($id);
-
-            // Tenant pakai approved (karena dia string biasa)
-            $tenant->status_verification = 'approved';
+            // 🔥 Kolom gaib sudah dihapus! Kita cukup aktifkan akunnya saja.
             $tenant->is_active = true;
             $tenant->save();
 
-            // LPK pakai 'active' agar lolos dari Satpam PostgreSQL
+            // Status aslinya kita simpan di tabel LPK pakai kata kunci 'active'
             $lpk = Lpk::where('tenant_id', $tenant->id)->first();
             if ($lpk) {
                 $lpk->is_verified = true;
-                $lpk->status = 'active'; // KATA KUNCI: active
+                $lpk->status = 'active'; 
                 $lpk->save();
             }
 
@@ -56,17 +54,15 @@ class VerificationController extends Controller
             DB::beginTransaction();
 
             $tenant = Tenant::findOrFail($id);
-
-            // Tenant pakai rejected
-            $tenant->status_verification = 'rejected';
+            // 🔥 Kolom gaib sudah dihapus!
             $tenant->is_active = false;
             $tenant->save();
 
-            // LPK pakai 'inactive' agar lolos dari Satpam PostgreSQL
+            // Status aslinya kita simpan di tabel LPK pakai kata kunci 'inactive'
             $lpk = Lpk::where('tenant_id', $tenant->id)->first();
             if ($lpk) {
                 $lpk->is_verified = false;
-                $lpk->status = 'inactive'; // KATA KUNCI: inactive
+                $lpk->status = 'inactive'; 
                 $lpk->save();
             }
 
