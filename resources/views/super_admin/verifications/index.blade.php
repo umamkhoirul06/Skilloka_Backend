@@ -3,7 +3,6 @@
 @section('title', 'Verifikasi LPK')
 
 @section('content')
-
     <style>
         .card {
             background: white;
@@ -16,17 +15,14 @@
             font-size: 13px;
             color: #6b7280;
             font-weight: 500;
-        }
-
-        .table tr {
             border-bottom: 1px solid #f1f5f9;
         }
 
         .badge {
-            padding: 4px 10px;
+            padding: 4px 12px;
             border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
+            font-size: 11px;
+            font-weight: 700;
         }
 
         .pending {
@@ -45,10 +41,10 @@
         }
 
         .btn {
-            padding: 6px 12px;
+            padding: 6px 16px;
             border-radius: 8px;
-            font-size: 13px;
-            font-weight: 500;
+            font-size: 12px;
+            font-weight: 600;
             border: none;
             cursor: pointer;
         }
@@ -65,65 +61,46 @@
     </style>
 
     <div class="card">
-        <h2 class="text-lg font-semibold mb-4">Verifikasi LPK</h2>
+        <h2 class="text-lg font-semibold mb-6">Verifikasi Pendaftaran LPK</h2>
 
         @if(session('success'))
-            <div
-                style="background-color: #dcfce7; color: #166534; padding: 12px; border-radius: 8px; margin-bottom: 16px; border: 1px solid #bbf7d0;">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div
-                style="background-color: #fee2e2; color: #991b1b; padding: 12px; border-radius: 8px; margin-bottom: 16px; border: 1px solid #fecaca;">
-                {{ session('error') }}
-            </div>
-        @endif
+            <div style="background: #dcfce7; color: #166534; padding: 12px; border-radius: 8px; margin-bottom: 20px;">
+        {{ session('success') }}</div> @endif
 
         <table class="table w-full">
             <thead>
                 <tr>
-                    <th class="p-2 text-left">Nama LPK</th>
-                    <th class="p-2 text-left">Email</th>
-                    <th class="p-2 text-left">Status</th>
-                    <th class="p-2 text-left">Aksi</th>
+                    <th class="p-3 text-left">Nama LPK</th>
+                    <th class="p-3 text-left">Email Admin</th>
+                    <th class="p-3 text-left">Status</th>
+                    <th class="p-3 text-left">Aksi</th>
                 </tr>
             </thead>
             <tbody>
-                @forelse($tenants as $tenant)
+                @foreach($tenants as $tenant)
                     @php
-                        // 🔥 BACA LANGSUNG DARI KOLOM status_verifikasi
                         $lpk = \App\Models\Lpk::where('tenant_id', $tenant->id)->first();
                         $status = $lpk ? $lpk->status_verifikasi : 'pending';
                     @endphp
-                    <tr>
-                        <td class="p-2">{{ $tenant->lpk_name ?? '-' }}</td>
-                        <td class="p-2">{{ $tenant->users->first()->email ?? '-' }}</td>
-                        <td class="p-2">
-                            <span
-                                class="badge @if($status == 'approved') approved @elseif($status == 'rejected') rejected @else pending @endif">
+                    <tr style="border-bottom: 1px solid #f8fafc;">
+                        <td class="p-3">{{ $tenant->lpk_name }}</td>
+                        <td class="p-3 text-gray-500">{{ $tenant->users->first()->email ?? '-' }}</td>
+                        <td class="p-3">
+                            <span class="badge {{ $status }}">
                                 {{ strtoupper($status) }}
                             </span>
                         </td>
-                        <td class="p-2 flex gap-2">
-                            <form method="POST" action="{{ route('super.verifications.approve', $tenant->id) }}">
-                                @csrf
-                                <button class="btn btn-approve">Approve</button>
+                        <td class="p-3 flex gap-2">
+                            <form method="POST" action="{{ route('super.verifications.approve', $tenant->id) }}"> @csrf
+                                <button class="btn btn-approve">Approve & Aktifkan</button>
                             </form>
-                            <form method="POST" action="{{ route('super.verifications.reject', $tenant->id) }}">
-                                @csrf
+                            <form method="POST" action="{{ route('super.verifications.reject', $tenant->id) }}"> @csrf
                                 <button class="btn btn-reject">Reject</button>
                             </form>
                         </td>
                     </tr>
-                @empty
-                    <tr>
-                        <td colspan="4" class="text-center p-4 text-gray-400">Belum ada data verifikasi</td>
-                    </tr>
-                @endforelse
+                @endforeach
             </tbody>
         </table>
     </div>
-
 @endsection

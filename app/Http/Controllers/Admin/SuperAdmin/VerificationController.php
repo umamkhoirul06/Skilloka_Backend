@@ -20,22 +20,21 @@ class VerificationController extends Controller
         try {
             DB::beginTransaction();
 
-            // Aktifkan akun Tenant agar bisa login
             $tenant = Tenant::findOrFail($id);
+            // 🔥 KUNCI LOGIN: Set is_active jadi true agar Admin LPK bisa masuk
             $tenant->is_active = true;
             $tenant->save();
 
-            // Update tabel Lpk dengan kolom yang BENAR
             $lpk = Lpk::where('tenant_id', $tenant->id)->first();
             if ($lpk) {
                 $lpk->is_verified = true;
-                $lpk->status = 'active'; // Lolos satpam database
-                $lpk->status_verifikasi = 'approved'; // INI KOLOM ASLINYA!
+                $lpk->status = 'active'; // Lolos check constraint Postgres
+                $lpk->status_verifikasi = 'approved'; // Kolom yang dibaca di dashboard
                 $lpk->save();
             }
 
             DB::commit();
-            return back()->with('success', 'MANTAP! LPK berhasil di Approve dan aktif!');
+            return back()->with('success', 'MANTAP! LPK berhasil di Approve. Sekarang Admin LPK tersebut sudah bisa LOGIN!');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -48,17 +47,15 @@ class VerificationController extends Controller
         try {
             DB::beginTransaction();
 
-            // Matikan akun Tenant
             $tenant = Tenant::findOrFail($id);
-            $tenant->is_active = false;
+            $tenant->is_active = false; // Blokir akses login
             $tenant->save();
 
-            // Update tabel Lpk dengan kolom yang BENAR
             $lpk = Lpk::where('tenant_id', $tenant->id)->first();
             if ($lpk) {
                 $lpk->is_verified = false;
-                $lpk->status = 'pending'; // Lolos satpam database
-                $lpk->status_verifikasi = 'rejected'; // INI KOLOM ASLINYA!
+                $lpk->status = 'pending';
+                $lpk->status_verifikasi = 'rejected';
                 $lpk->save();
             }
 
