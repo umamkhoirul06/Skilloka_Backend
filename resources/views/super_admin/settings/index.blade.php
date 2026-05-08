@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('layouts.super_admin')
 
 @section('title','Settings')
 
@@ -62,11 +62,33 @@ grid-template-columns:1fr 1fr;
 gap:16px;
 }
 
+.alert-success{
+background:#dcfce7;
+color:#166534;
+padding:12px;
+border-radius:8px;
+margin-bottom:20px;
+font-size:14px;
+}
+
 </style>
 
 
 
-<form method="POST">
+@if(session('success'))
+
+<div class="alert-success">
+
+{{ session('success') }}
+
+</div>
+
+@endif
+
+
+
+<form method="POST"
+action="{{ route('super.settings.update') }}">
 
 @csrf
 
@@ -89,9 +111,11 @@ Pengaturan Platform
 Nama Platform
 </label>
 
-<input type="text"
+<input
+type="text"
+name="platform_name"
 class="input"
-value="Skilloka">
+value="{{ $setting->platform_name }}">
 
 </div>
 
@@ -103,9 +127,11 @@ value="Skilloka">
 Email Support
 </label>
 
-<input type="text"
+<input
+type="text"
+name="support_email"
 class="input"
-placeholder="support@skilloka.com">
+value="{{ $setting->support_email }}">
 
 </div>
 
@@ -117,9 +143,12 @@ placeholder="support@skilloka.com">
 Timezone
 </label>
 
-<select class="input">
+<select
+name="timezone"
+class="input">
 
-<option>
+<option value="Asia/Jakarta"
+{{ $setting->timezone == 'Asia/Jakarta' ? 'selected' : '' }}>
 Asia/Jakarta
 </option>
 
@@ -135,13 +164,17 @@ Asia/Jakarta
 Bahasa
 </label>
 
-<select class="input">
+<select
+name="language"
+class="input">
 
-<option>
+<option value="Indonesia"
+{{ $setting->language == 'Indonesia' ? 'selected' : '' }}>
 Indonesia
 </option>
 
-<option>
+<option value="English"
+{{ $setting->language == 'English' ? 'selected' : '' }}>
 English
 </option>
 
@@ -176,9 +209,11 @@ Pengaturan Pembayaran
 Fee Platform (%)
 </label>
 
-<input type="number"
+<input
+type="number"
+name="platform_fee"
 class="input"
-placeholder="10">
+value="{{ $setting->platform_fee }}">
 
 </div>
 
@@ -190,13 +225,17 @@ placeholder="10">
 Metode Pembayaran
 </label>
 
-<select class="input">
+<select
+name="payment_method"
+class="input">
 
-<option>
+<option value="Transfer Bank"
+{{ $setting->payment_method == 'Transfer Bank' ? 'selected' : '' }}>
 Transfer Bank
 </option>
 
-<option>
+<option value="E-Wallet"
+{{ $setting->payment_method == 'E-Wallet' ? 'selected' : '' }}>
 E-Wallet
 </option>
 

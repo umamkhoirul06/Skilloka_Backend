@@ -1,169 +1,657 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="id">
+
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Skilloka - Register LPK</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Register Mitra LPK - Skilloka</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
     @vite(['resources/css/app.css','resources/js/app.js'])
+
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f4f7fb; }
-        .font-outfit { font-family: 'Outfit', sans-serif; }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
-            border-radius: 24px;
+        body{
+            font-family:'Inter',sans-serif;
+            background:
+                radial-gradient(circle at top left,#e0e7ff,#f8fafc 45%);
         }
-        .premium-input {
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 14px 16px;
-            width: 100%;
-            transition: all 0.3s;
-            background: #f8fafc;
+
+        .container{
+            max-width:1200px;
+            margin:auto;
         }
-        .premium-input:focus {
-            background: #ffffff;
-            border-color: #f97316;
-            box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
-            outline: none;
+
+        .card{
+            background:rgba(255,255,255,.95);
+            backdrop-filter:blur(14px);
+            border:1px solid #e5e7eb;
+            border-radius:24px;
+            box-shadow:0 20px 40px rgba(15,23,42,.08);
+            overflow:hidden;
         }
-        .btn-primary {
-            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
-            color: white;
-            font-weight: 600;
-            border-radius: 12px;
-            padding: 14px;
-            width: 100%;
-            transition: all 0.3s;
-            border: none;
-            cursor: pointer;
+
+        .left-side{
+            background:
+                linear-gradient(135deg,#4f46e5,#7c3aed);
+            color:white;
+            padding:50px 40px;
+            position:relative;
         }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(234, 88, 12, 0.3);
+
+        .left-side::before{
+            content:'';
+            position:absolute;
+            width:300px;
+            height:300px;
+            background:rgba(255,255,255,.08);
+            border-radius:999px;
+            top:-80px;
+            right:-80px;
         }
-        .bg-pattern {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
-            background-size: 32px 32px;
-            opacity: 0.5;
-            z-index: -1;
+
+        .input{
+            width:100%;
+            border:1px solid #e5e7eb;
+            background:#f9fafb;
+            border-radius:14px;
+            padding:13px 15px;
+            font-size:14px;
+            transition:.2s;
         }
-        .gradient-text {
-            background: linear-gradient(to right, #ea580c, #4f46e5);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+
+        .input:focus{
+            outline:none;
+            background:white;
+            border-color:#6366f1;
+            box-shadow:0 0 0 4px rgba(99,102,241,.08);
         }
+
+        .label{
+            font-size:13px;
+            font-weight:500;
+            color:#374151;
+            margin-bottom:6px;
+            display:block;
+        }
+
+        .section-title{
+            font-size:15px;
+            font-weight:700;
+            color:#111827;
+            margin-bottom:18px;
+        }
+
+        .btn{
+            width:100%;
+            padding:15px;
+            border-radius:14px;
+            background:linear-gradient(135deg,#6366f1,#4f46e5);
+            color:white;
+            font-weight:600;
+            font-size:15px;
+            transition:.2s;
+        }
+
+        .btn:hover{
+            transform:translateY(-1px);
+            box-shadow:0 10px 25px rgba(79,70,229,.2);
+        }
+
+        .badge{
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            background:rgba(255,255,255,.12);
+            border:1px solid rgba(255,255,255,.15);
+            padding:10px 14px;
+            border-radius:999px;
+            font-size:13px;
+            margin-bottom:24px;
+        }
+
+        .feature{
+            display:flex;
+            gap:12px;
+            margin-bottom:18px;
+        }
+
+        .feature-icon{
+            width:38px;
+            height:38px;
+            border-radius:12px;
+            background:rgba(255,255,255,.12);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            flex-shrink:0;
+        }
+
+        .feature-title{
+            font-size:14px;
+            font-weight:600;
+        }
+
+        .feature-desc{
+            font-size:13px;
+            opacity:.8;
+            margin-top:2px;
+        }
+
+        .info-box{
+            background:#f8fafc;
+            border:1px solid #e2e8f0;
+            border-radius:16px;
+            padding:18px;
+        }
+
+        input[type=file]{
+            background:white;
+            border:1px dashed #c7d2fe;
+        }
+
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center relative p-6">
-    <div class="bg-pattern"></div>
-    
-    <div class="glass-card w-full max-w-4xl flex overflow-hidden">
-        
-        <!-- Left Side: Branding -->
-        <div class="w-2/5 bg-gradient-to-br from-[#1e1b4b] to-[#312e81] p-10 flex flex-col justify-between text-white hidden md:flex relative overflow-hidden">
-            <div class="absolute inset-0 opacity-10" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M54.627 0l.83.83-54.628 54.628-.83-.83L54.627 0zM29.627 0l.83.83-29.628 29.628-.83-.83L29.627 0zM59.197 29.57l.83.83-29.628 29.628-.83-.83L59.197 29.57z\' fill=\'%23ffffff\' fill-opacity=\'1\' fill-rule=\'evenodd\'/%3E%3C/svg%3E');"></div>
-            
-            <div class="relative z-10">
-                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center mb-6 shadow-lg">
-                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-                </div>
-                <h1 class="font-outfit text-4xl font-bold mb-4">Bergabunglah Bersama Skilloka</h1>
-                <p class="text-indigo-200 text-lg leading-relaxed">Kelola lembaga pelatihan kerja Anda dengan mudah, jangkau lebih banyak siswa, dan tingkatkan kredibilitas melalui sistem terintegrasi kami.</p>
+
+<body>
+
+<div class="container min-h-screen flex items-center py-10 px-4">
+
+    <div class="card w-full grid lg:grid-cols-2">
+
+        <!-- LEFT -->
+        <div class="left-side hidden lg:block">
+
+            <div class="badge">
+                ✅ Verifikasi oleh Skilloka
             </div>
-            
-            <div class="relative z-10">
-                <div class="flex -space-x-3 mb-3">
-                    <div class="w-10 h-10 rounded-full border-2 border-indigo-900 bg-gray-300"></div>
-                    <div class="w-10 h-10 rounded-full border-2 border-indigo-900 bg-gray-400"></div>
-                    <div class="w-10 h-10 rounded-full border-2 border-indigo-900 bg-gray-500"></div>
-                    <div class="w-10 h-10 rounded-full border-2 border-indigo-900 bg-orange-500 flex items-center justify-center text-xs font-bold">+50</div>
+
+            <h1 class="text-4xl font-extrabold leading-tight mb-5">
+                Gabung Menjadi
+                Mitra LPK Skilloka
+            </h1>
+
+            <p class="text-indigo-100 leading-relaxed mb-10">
+                Bangun pelatihan terpercaya bersama platform
+                Skilloka untuk wilayah Indramayu dan sekitarnya.
+            </p>
+
+            <div class="space-y-5">
+
+                <div class="feature">
+
+                    <div class="feature-icon">
+                        🛡️
+                    </div>
+
+                    <div>
+                        <div class="feature-title">
+                            LPK Terverifikasi
+                        </div>
+
+                        <div class="feature-desc">
+                            Seluruh mitra diverifikasi untuk menjaga
+                            keamanan dan kepercayaan siswa.
+                        </div>
+                    </div>
+
                 </div>
-                <p class="text-sm text-indigo-300">Lebih dari 50+ LPK telah bergabung.</p>
+
+
+
+                <div class="feature">
+
+                    <div class="feature-icon">
+                        📚
+                    </div>
+
+                    <div>
+                        <div class="feature-title">
+                            Kelola Kursus Profesional
+                        </div>
+
+                        <div class="feature-desc">
+                            Buat jadwal, kelola siswa,
+                            dan monitoring booking dalam satu dashboard.
+                        </div>
+                    </div>
+
+                </div>
+
+
+
+                <div class="feature">
+
+                    <div class="feature-icon">
+                        💬
+                    </div>
+
+                    <div>
+                        <div class="feature-title">
+                            Terhubung Langsung dengan Siswa
+                        </div>
+
+                        <div class="feature-desc">
+                            Siswa dapat menghubungi admin LPK melalui WhatsApp
+                            untuk meningkatkan kepercayaan.
+                        </div>
+                    </div>
+
+                </div>
+
             </div>
+
         </div>
 
-        <!-- Right Side: Form -->
-        <div class="w-full md:w-3/5 p-10 lg:p-14">
-            <h2 class="font-outfit text-3xl font-bold text-gray-800 mb-2">Pendaftaran LPK</h2>
-            <p class="text-gray-500 mb-8">Daftarkan lembaga pelatihan kerja Anda sekarang.</p>
+
+
+        <!-- RIGHT -->
+        <div class="p-8 lg:p-10">
+
+            <div class="mb-8">
+
+                <h2 class="text-2xl font-bold text-gray-900">
+                    Pendaftaran Mitra LPK
+                </h2>
+
+                <p class="text-gray-500 mt-2 text-sm">
+                    Lengkapi data berikut untuk mengajukan verifikasi LPK di Skilloka.
+                </p>
+
+            </div>
+
+
 
             @if($errors->any())
-                <div class="bg-red-50 text-red-500 p-4 rounded-xl mb-6 border border-red-100 text-sm">
-                    <ul class="list-disc pl-5">
+
+                <div class="mb-6 bg-red-50 border border-red-200 text-red-600 rounded-xl p-4 text-sm">
+
+                    <ul class="space-y-1">
+
                         @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
+
+                            <li>
+                                • {{ $error }}
+                            </li>
+
                         @endforeach
+
                     </ul>
+
                 </div>
+
             @endif
 
-            <form method="POST" action="{{ route('admin.register.submit') }}" class="space-y-6">
+
+
+            <form method="POST"
+      action="{{ route('admin.register.submit') }}">
+
                 @csrf
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Informasi Akun -->
-                    <div class="space-y-5">
-                        <h3 class="font-semibold text-gray-700 text-sm uppercase tracking-wider mb-2 border-b pb-2">Informasi Akun</h3>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap Admin</label>
-                            <input type="text" name="name" class="premium-input" placeholder="Cth: Budi Santoso" value="{{ old('name') }}" required>
-                        </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                            <input type="email" name="email" class="premium-input" placeholder="admin@lpkanda.com" value="{{ old('email') }}" required>
-                        </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                            <input type="password" name="password" class="premium-input" placeholder="Minimal 8 karakter" required>
-                        </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Konfirmasi Password</label>
-                            <input type="password" name="password_confirmation" class="premium-input" placeholder="Ketik ulang password" required>
-                        </div>
+                <!-- ADMIN -->
+                <div class="mb-8">
+
+                    <div class="section-title">
+                        Informasi Admin
                     </div>
 
-                    <!-- Informasi LPK -->
                     <div class="space-y-5">
-                        <h3 class="font-semibold text-gray-700 text-sm uppercase tracking-wider mb-2 border-b pb-2">Informasi Lembaga</h3>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama LPK</label>
-                            <input type="text" name="lpk_name" class="premium-input" placeholder="Cth: LPK Maju Jaya" value="{{ old('lpk_name') }}" required>
-                        </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nomor Telepon LPK</label>
-                            <input type="text" name="phone" class="premium-input" placeholder="08123456789" value="{{ old('phone') }}" required>
+
+                            <label class="label">
+                                Nama Admin
+                            </label>
+
+                            <input
+                                type="text"
+                                name="name"
+                                value="{{ old('name') }}"
+                                class="input"
+                                placeholder="Nama lengkap admin"
+                                required>
+
                         </div>
 
+
+
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Alamat Lengkap</label>
-                            <textarea name="address" class="premium-input h-24 resize-none" placeholder="Masukkan alamat lengkap lembaga" required>{{ old('address') }}</textarea>
+
+                            <label class="label">
+                                Email Admin
+                            </label>
+
+                            <input
+                                type="email"
+                                name="email"
+                                value="{{ old('email') }}"
+                                class="input"
+                                placeholder="admin@lpk.com"
+                                required>
+
                         </div>
+
+
+
+                        <div>
+
+                            <label class="label">
+                                Nomor WhatsApp Admin
+                            </label>
+
+                            <input
+                                type="text"
+                                name="phone"
+                                value="{{ old('phone') }}"
+                                class="input"
+                                placeholder="08xxxxxxxxxx"
+                                required>
+
+                        </div>
+
+
+
+                        <div class="grid md:grid-cols-2 gap-5">
+
+                            <div>
+
+                                <label class="label">
+                                    Password
+                                </label>
+
+                                <input
+                                    type="password"
+                                    name="password"
+                                    class="input"
+                                    placeholder="Minimal 8 karakter"
+                                    required>
+
+                            </div>
+
+
+
+                            <div>
+
+                                <label class="label">
+                                    Konfirmasi Password
+                                </label>
+
+                                <input
+                                    type="password"
+                                    name="password_confirmation"
+                                    class="input"
+                                    placeholder="Ulangi password"
+                                    required>
+
+                            </div>
+
+                        </div>
+
                     </div>
+
                 </div>
 
-                <div class="pt-4">
-                    <button type="submit" class="btn-primary font-outfit text-lg">Daftar Sekarang</button>
+
+
+                <!-- LPK -->
+                <div class="mb-8">
+
+                    <div class="section-title">
+                        Informasi LPK
+                    </div>
+
+                    <div class="space-y-5">
+
+                        <div>
+
+                            <label class="label">
+                                Nama LPK
+                            </label>
+
+                            <input
+                                type="text"
+                                name="lpk_name"
+                                value="{{ old('lpk_name') }}"
+                                class="input"
+                                placeholder="Contoh: LPK Sakura Indonesia"
+                                required>
+
+                        </div>
+
+
+
+                        <div>
+
+                            <label class="label">
+                                Nama Legal / Yayasan
+                            </label>
+
+                            <input
+                                type="text"
+                                name="legal_name"
+                                value="{{ old('legal_name') }}"
+                                class="input"
+                                placeholder="Nama legal resmi"
+                                required>
+
+                        </div>
+
+
+
+                        <div class="grid md:grid-cols-2 gap-5">
+
+                            <div>
+
+                                <label class="label">
+                                    NIB
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="nib"
+                                    value="{{ old('nib') }}"
+                                    class="input"
+                                    placeholder="Nomor Induk Berusaha"
+                                    required>
+
+                            </div>
+
+
+
+                            <div>
+
+                                <label class="label">
+                                    Email LPK
+                                </label>
+
+                                <input
+                                    type="email"
+                                    name="lpk_email"
+                                    value="{{ old('lpk_email') }}"
+                                    class="input"
+                                    placeholder="info@lpk.com">
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div>
+
+                            <label class="label">
+                                Alamat Lengkap
+                            </label>
+
+                            <textarea
+                                name="address"
+                                class="input h-28 resize-none"
+                                placeholder="Alamat lengkap LPK"
+                                required>{{ old('address') }}</textarea>
+
+                        </div>
+
+
+
+                        <div class="grid md:grid-cols-2 gap-5">
+
+                            <div>
+
+                                <label class="label">
+                                    Kota / Kabupaten
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="city"
+                                    value="{{ old('city') }}"
+                                    class="input"
+                                    placeholder="Indramayu"
+                                    required>
+
+                            </div>
+
+
+
+                            <div>
+
+                                <label class="label">
+                                    Instagram
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="instagram"
+                                    value="{{ old('instagram') }}"
+                                    class="input"
+                                    placeholder="@lpkanda">
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div>
+
+                            <label class="label">
+                                Deskripsi LPK
+                            </label>
+
+                            <textarea
+                                name="description"
+                                class="input h-32 resize-none"
+                                placeholder="Ceritakan singkat tentang LPK Anda"
+                                required>{{ old('description') }}</textarea>
+
+                        </div>
+
+
+
+                        <div>
+
+                            <label class="label">
+                                Fasilitas LPK
+                            </label>
+
+                            <textarea
+                                name="facilities"
+                                class="input h-28 resize-none"
+                                placeholder="AC, Wifi, Sertifikat, Asrama, dll">{{ old('facilities') }}</textarea>
+
+                        </div>
+
+                    </div>
+
                 </div>
+
+
+
+                <!-- INFO -->
+                <div class="info-box mb-8">
+
+                    <div class="flex items-start gap-3">
+
+                        <div class="text-lg">
+                            ⏳
+                        </div>
+
+                        <div>
+
+                            <h4 class="font-semibold text-gray-800 mb-1">
+                                Menunggu Verifikasi Skilloka
+                            </h4>
+
+                            <p class="text-sm text-gray-600 leading-relaxed">
+
+                                Seluruh data LPK akan diperiksa terlebih dahulu
+                                oleh tim Skilloka sebelum akun dapat digunakan.
+
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- AGREEMENT -->
+                <div class="mb-8 flex items-start gap-3">
+
+                    <input
+                        type="checkbox"
+                        required
+                        class="mt-1 rounded border-gray-300">
+
+                    <p class="text-sm text-gray-600 leading-relaxed">
+
+                        Saya menyatakan bahwa seluruh data yang diberikan benar
+                        dan bersedia diverifikasi oleh tim Skilloka.
+
+                    </p>
+
+                </div>
+
+
+
+                <!-- BUTTON -->
+                <button class="btn">
+
+                    Kirim Pengajuan Verifikasi
+
+                </button>
+
             </form>
 
-            <div class="mt-8 text-center text-sm text-gray-500">
-                Sudah memiliki akun? <a href="{{ route('admin.login') }}" class="text-orange-600 font-semibold hover:underline">Masuk di sini</a>
+
+
+            <!-- LOGIN -->
+            <div class="text-center mt-8 text-sm text-gray-500">
+
+                Sudah terdaftar sebagai mitra LPK?
+
+                <a href="{{ route('admin.login') }}"
+                   class="text-indigo-600 font-semibold hover:underline">
+
+                    Login di sini
+
+                </a>
+
             </div>
+
         </div>
+
     </div>
+
+</div>
+
 </body>
 </html>

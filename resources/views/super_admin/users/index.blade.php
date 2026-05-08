@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('layouts.super_admin')
 
 @section('title','Users')
 
@@ -84,6 +84,7 @@ Users
 
 <input
 type="text"
+id="searchInput"
 placeholder="Cari user..."
 class="search">
 
@@ -139,36 +140,28 @@ Role
 
 <td class="p-2">
 
-@if($user->role == 'user')
+@if($user->hasRole('user'))
 
 <span class="badge role-user">
-
 User
-
 </span>
 
 @endif
 
 
-
-@if($user->role == 'admin_lpk')
+@if($user->hasRole('admin_lpk'))
 
 <span class="badge role-admin">
-
 Admin LPK
-
 </span>
 
 @endif
 
 
-
-@if($user->role == 'super_admin')
+@if($user->hasRole('super_admin'))
 
 <span class="badge role-super">
-
 Super Admin
-
 </span>
 
 @endif
@@ -202,6 +195,33 @@ Belum ada user
 
 </div>
 
+<script>
 
+document.getElementById('searchInput')
+.addEventListener('keyup', function () {
+
+    let value = this.value.toLowerCase();
+
+    let rows = document.querySelectorAll('tbody tr');
+
+    rows.forEach(row => {
+
+        let text = row.innerText.toLowerCase();
+
+        if(text.includes(value)){
+
+            row.style.display = '';
+
+        } else {
+
+            row.style.display = 'none';
+
+        }
+
+    });
+
+});
+
+</script>
 
 @endsection

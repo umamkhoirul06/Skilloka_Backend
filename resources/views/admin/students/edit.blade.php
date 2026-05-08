@@ -3,78 +3,212 @@
 @section('header', 'Edit Student')
 
 @section('content')
-    <div class="max-w-2xl">
-        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-100">
-                <h3 class="font-semibold text-gray-800">Edit Student Information</h3>
-                <p class="text-sm text-gray-500">Update student details</p>
+
+<div class="max-w-3xl">
+
+    <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
+
+        <!-- header -->
+        <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+
+            <div>
+
+                <h3 class="text-lg font-semibold text-gray-800">
+                    Edit Data Siswa
+                </h3>
+
+                <p class="text-sm text-gray-500 mt-1">
+                    Perbarui informasi student
+                </p>
+
             </div>
 
-            <form action="{{ route('admin.students.update', $student) }}" method="POST" class="p-6 space-y-6">
-                @csrf
-                @method('PUT')
+            <div class="text-right">
 
-                <div>
-                    <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
-                    <input type="text" name="name" id="name" value="{{ old('name', $student->name) }}" required
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors">
-                    @error('name')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
+                <p class="text-xs text-gray-400">
+                    Total Booking
+                </p>
 
-                <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
-                    <input type="email" name="email" id="email" value="{{ old('email', $student->email) }}" required
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors">
-                    @error('email')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
+                <p class="text-lg font-bold text-green-600">
+                    {{ $student->bookings()->count() }}
+                </p>
 
-                <div>
-                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
-                    <input type="text" name="phone" id="phone" value="{{ old('phone', $student->phone) }}"
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors">
-                    @error('phone')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
+            </div>
 
-                <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <p class="text-sm text-yellow-700 mb-4">Leave password fields empty to keep the current password</p>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">New Password</label>
-                            <input type="password" name="password" id="password"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                                placeholder="Min. 8 characters">
-                            @error('password')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">Confirm
-                                New Password</label>
-                            <input type="password" name="password_confirmation" id="password_confirmation"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                                placeholder="Repeat password">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex items-center justify-end space-x-4 pt-4 border-t border-gray-100">
-                    <a href="{{ route('admin.students.index') }}"
-                        class="px-6 py-2.5 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-                        Cancel
-                    </a>
-                    <button type="submit"
-                        class="px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors shadow-sm">
-                        Update Student
-                    </button>
-                </div>
-            </form>
         </div>
+
+
+
+        <!-- form -->
+        <form
+            action="{{ route('admin.students.update', $student) }}"
+            method="POST"
+            class="p-6 space-y-6">
+
+            @csrf
+            @method('PUT')
+
+
+
+            <!-- nama -->
+            <div>
+
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Nama Lengkap
+                </label>
+
+                <input
+                    type="text"
+                    name="name"
+                    value="{{ old('name', $student->name) }}"
+                    required
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+
+                @error('name')
+
+                    <p class="mt-1 text-sm text-red-500">
+                        {{ $message }}
+                    </p>
+
+                @enderror
+
+            </div>
+
+
+
+            <!-- email -->
+            <div>
+
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Email
+                </label>
+
+                <input
+                    type="email"
+                    name="email"
+                    value="{{ old('email', $student->email) }}"
+                    required
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+
+                @error('email')
+
+                    <p class="mt-1 text-sm text-red-500">
+                        {{ $message }}
+                    </p>
+
+                @enderror
+
+            </div>
+
+
+
+            <!-- phone -->
+            <div>
+
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Nomor HP
+                </label>
+
+                <input
+                    type="text"
+                    name="phone"
+                    value="{{ old('phone', $student->phone) }}"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+
+                @error('phone')
+
+                    <p class="mt-1 text-sm text-red-500">
+                        {{ $message }}
+                    </p>
+
+                @enderror
+
+            </div>
+
+
+
+            <!-- password -->
+            <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-5">
+
+                <p class="text-sm text-yellow-700 mb-4">
+                    Kosongkan password jika tidak ingin mengganti password student.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+                    <div>
+
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Password Baru
+                        </label>
+
+                        <input
+                            type="password"
+                            name="password"
+                            id="password"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                            placeholder="Minimal 8 karakter">
+
+                    </div>
+
+
+
+                    <div>
+
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Konfirmasi Password
+                        </label>
+
+                        <input
+                            type="password"
+                            name="password_confirmation"
+                            id="password_confirmation"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                            placeholder="Ulangi password">
+
+                    </div>
+
+                </div>
+
+                @error('password')
+
+                    <p class="mt-3 text-sm text-red-500">
+                        {{ $message }}
+                    </p>
+
+                @enderror
+
+            </div>
+
+
+
+            <!-- action -->
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+
+                <a
+                    href="{{ route('admin.students.show', $student) }}"
+                    class="px-5 py-2.5 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50">
+
+                    Kembali
+
+                </a>
+
+
+
+                <button
+                    type="submit"
+                    class="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl shadow-sm">
+
+                    Simpan Perubahan
+
+                </button>
+
+            </div>
+
+        </form>
+
     </div>
+
+</div>
+
 @endsection

@@ -1,163 +1,442 @@
+{{-- resources/views/admin/courses/create.blade.php --}}
+
 @extends('layouts.admin')
 
-@section('header', 'Add New Course')
+@section('title','Manage Courses')
 
 @section('content')
-    <div class="max-w-2xl">
-        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-100">
-                <h3 class="font-semibold text-gray-800">Course Information</h3>
-                <p class="text-sm text-gray-500">Fill in the details of your new training course</p>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+
+    {{-- FORM TAMBAH --}}
+    <div class="bg-white p-6 rounded shadow">
+
+        <h2 style="font-size:18px;font-weight:600;margin-bottom:20px">
+            Tambah Course
+        </h2>
+
+        {{-- ERROR VALIDATION --}}
+        @if ($errors->any())
+
+            <div style="
+                background:#fee2e2;
+                color:#991b1b;
+                padding:12px;
+                border-radius:8px;
+                margin-bottom:16px
+            ">
+
+                <ul style="margin:0;padding-left:18px">
+
+                    @foreach ($errors->all() as $error)
+
+                        <li>{{ $error }}</li>
+
+                    @endforeach
+
+                </ul>
+
             </div>
 
-            <form action="{{ route('admin.courses.store') }}" method="POST" class="p-6 space-y-6">
-                @csrf
-
-                <div>
-                    <label for="title" class="block text-sm font-medium text-gray-700 mb-2">Course Title *</label>
-                    <input type="text" name="title" id="title" value="{{ old('title') }}" required
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="e.g., Welding Certification Basic">
-
-                    @error('title')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
+        @endif
 
 
-                <div>
-                    <label for="category_id" class="block text-sm font-medium text-gray-700 mb-2">Category *</label>
+        {{-- SUCCESS --}}
+        @if(session('success'))
 
-                    <select name="category_id" id="category_id" required
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <div style="
+                background:#dcfce7;
+                color:#166534;
+                padding:12px;
+                border-radius:8px;
+                margin-bottom:16px
+            ">
 
-                        <option value="">-- Select Category --</option>
+                {{ session('success') }}
 
-                        @foreach($categories as $category)
-                            <option value="{{ $category->id }}"
-                                {{ old('category_id') == $category->id ? 'selected' : '' }}>
-                                {{ $category->name }}
-                            </option>
-                        @endforeach
+            </div>
 
-                    </select>
-
-                    @error('category_id')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
+        @endif
 
 
-                <div>
-                    <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+        {{-- FORM --}}
+        <form method="POST"
+              action="{{ route('admin.courses.store') }}">
 
-                    <textarea name="description" id="description" rows="4"
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Describe what students will learn in this course...">{{ old('description') }}</textarea>
-
-                    @error('description')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
+            @csrf
 
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {{-- TITLE --}}
+            <div style="margin-bottom:16px">
 
-                    <div>
-                        <label for="price" class="block text-sm font-medium text-gray-700 mb-2">Price (Rp) *</label>
+                <label>Title</label>
 
-                        <input type="number" name="price" id="price" value="{{ old('price') }}" required min="0"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="1500000">
+                <input type="text"
+                       name="title"
+                       value="{{ old('title') }}"
+                       style="
+                            width:100%;
+                            padding:10px;
+                            border:1px solid #ddd;
+                            border-radius:6px
+                       "
+                       required>
 
-                        @error('price')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-
-                    <div>
-                        <label for="duration_hours" class="block text-sm font-medium text-gray-700 mb-2">
-                            Duration (Hours) *
-                        </label>
-
-                        <input type="number" name="duration_hours" id="duration_hours"
-                            value="{{ old('duration_hours') }}" required min="1"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="40">
-
-                        @error('duration_hours')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                </div>
+            </div>
 
 
-                <div>
-                    <label for="level" class="block text-sm font-medium text-gray-700 mb-2">
-                        Course Level *
-                    </label>
+            {{-- DESCRIPTION --}}
+            <div style="margin-bottom:16px">
 
-                    <select name="level" id="level" required
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <label>Description</label>
 
-                        <option value="">-- Select Level --</option>
+                <textarea name="description"
+                          rows="4"
+                          style="
+                                width:100%;
+                                padding:10px;
+                                border:1px solid #ddd;
+                                border-radius:6px
+                          ">{{ old('description') }}</textarea>
 
-                        <option value="beginner"
-                            {{ old('level')=='beginner' ? 'selected' : '' }}>
-                            Beginner
+            </div>
+
+
+            {{-- SYLLABUS --}}
+            <div style="margin-bottom:16px">
+
+                <label>Syllabus</label>
+
+                <textarea name="syllabus"
+                          rows="4"
+                          style="
+                                width:100%;
+                                padding:10px;
+                                border:1px solid #ddd;
+                                border-radius:6px
+                          ">{{ old('syllabus') }}</textarea>
+
+            </div>
+
+
+            {{-- PRICE --}}
+            <div style="margin-bottom:16px">
+
+                <label>Price</label>
+
+                <input type="number"
+                       name="price"
+                       value="{{ old('price') }}"
+                       style="
+                            width:100%;
+                            padding:10px;
+                            border:1px solid #ddd;
+                            border-radius:6px
+                       "
+                       required>
+
+            </div>
+
+
+            {{-- DURATION --}}
+            <div style="margin-bottom:16px">
+
+                <label>Duration Hours</label>
+
+                <input type="number"
+                       name="duration_hours"
+                       value="{{ old('duration_hours') }}"
+                       style="
+                            width:100%;
+                            padding:10px;
+                            border:1px solid #ddd;
+                            border-radius:6px
+                       "
+                       required>
+
+            </div>
+
+
+            {{-- CATEGORY --}}
+            <div style="margin-bottom:16px">
+
+                <label>Category</label>
+
+                <select name="category_id"
+                        style="
+                            width:100%;
+                            padding:10px;
+                            border:1px solid #ddd;
+                            border-radius:6px
+                        "
+                        required>
+
+                    <option value="">
+                        -- Pilih Category --
+                    </option>
+
+                    @foreach($categories ?? [] as $category)
+
+                        <option value="{{ $category->id }}"
+                            {{ old('category_id') == $category->id ? 'selected' : '' }}>
+
+                            {{ $category->name }}
+
                         </option>
 
-                        <option value="intermediate"
-                            {{ old('level')=='intermediate' ? 'selected' : '' }}>
-                            Intermediate
-                        </option>
+                    @endforeach
 
-                        <option value="advanced"
-                            {{ old('level')=='advanced' ? 'selected' : '' }}>
-                            Advanced
-                        </option>
+                </select>
 
-                    </select>
-
-                    @error('level')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
+            </div>
 
 
-                <div>
-                    <label for="max_participants" class="block text-sm font-medium text-gray-700 mb-2">
-                        Maximum Participants *
-                    </label>
+            {{-- LEVEL --}}
+            <div style="margin-bottom:16px">
 
-                    <input type="number" name="max_participants" id="max_participants"
-                        value="{{ old('max_participants', 20) }}" required min="1"
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="20">
+                <label>Level</label>
 
-                    @error('max_participants')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
+                <select name="level"
+                        style="
+                            width:100%;
+                            padding:10px;
+                            border:1px solid #ddd;
+                            border-radius:6px
+                        ">
+
+                    <option value="beginner">Beginner</option>
+
+                    <option value="intermediate">Intermediate</option>
+
+                    <option value="advanced">Advanced</option>
+
+                </select>
+
+            </div>
 
 
-                <div class="flex items-center justify-end space-x-4 pt-4 border-t border-gray-100">
+            {{-- CERT TYPE --}}
+            <div style="margin-bottom:16px">
 
-                    <a href="{{ route('admin.courses.index') }}"
-                        class="px-6 py-2.5 text-gray-700 hover:bg-gray-100 rounded-lg">
-                        Cancel
-                    </a>
+                <label>Certificate Type</label>
 
-                    <button type="submit"
-                        class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg">
-                        Create Course
-                    </button>
+                <input type="text"
+                       name="cert_type"
+                       value="{{ old('cert_type') }}"
+                       style="
+                            width:100%;
+                            padding:10px;
+                            border:1px solid #ddd;
+                            border-radius:6px
+                       ">
 
-                </div>
+            </div>
 
-            </form>
-        </div>
+
+            {{-- MAX PARTICIPANTS --}}
+            <div style="margin-bottom:20px">
+
+                <label>Max Participants</label>
+
+                <input type="number"
+                       name="max_participants"
+                       value="{{ old('max_participants') }}"
+                       style="
+                            width:100%;
+                            padding:10px;
+                            border:1px solid #ddd;
+                            border-radius:6px
+                       ">
+
+            </div>
+
+
+            {{-- BUTTON --}}
+            <button type="submit"
+                    style="
+                        background:#7c3aed;
+                        color:white;
+                        padding:10px 16px;
+                        border:none;
+                        border-radius:6px;
+                        cursor:pointer
+                    ">
+
+                Simpan
+
+            </button>
+
+        </form>
+
     </div>
+
+
+
+    {{-- LIST COURSE --}}
+    <div class="bg-white p-6 rounded shadow">
+
+        <h2 style="
+            font-size:18px;
+            font-weight:600;
+            margin-bottom:20px
+        ">
+            Daftar Course
+        </h2>
+
+
+        <table style="
+            width:100%;
+            border-collapse:collapse
+        ">
+
+            <thead style="background:#f3f4f6">
+
+                <tr>
+
+                    <th style="
+                        padding:10px;
+                        border:1px solid #e5e7eb
+                    ">
+                        Title
+                    </th>
+
+                    <th style="
+                        padding:10px;
+                        border:1px solid #e5e7eb
+                    ">
+                        Category
+                    </th>
+
+                    <th style="
+                        padding:10px;
+                        border:1px solid #e5e7eb
+                    ">
+                        Price
+                    </th>
+
+                    <th style="
+                        padding:10px;
+                        border:1px solid #e5e7eb
+                    ">
+                        Action
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+            {{-- FIX ERROR UNDEFINED VARIABLE --}}
+            @forelse($courses ?? [] as $course)
+
+                <tr>
+
+                    <td style="
+                        padding:10px;
+                        border:1px solid #e5e7eb
+                    ">
+                        {{ $course->title }}
+                    </td>
+
+
+                    <td style="
+                        padding:10px;
+                        border:1px solid #e5e7eb
+                    ">
+                        {{ $course->category->name ?? '-' }}
+                    </td>
+
+
+                    <td style="
+                        padding:10px;
+                        border:1px solid #e5e7eb
+                    ">
+                        Rp {{ number_format($course->price,0,',','.') }}
+                    </td>
+
+
+                    <td style="
+                        padding:10px;
+                        border:1px solid #e5e7eb
+                    ">
+
+                        <div style="
+                            display:flex;
+                            gap:8px
+                        ">
+
+                            {{-- EDIT --}}
+                            <a href="{{ route('admin.courses.edit',$course->id) }}"
+                               style="
+                                    background:#f59e0b;
+                                    color:white;
+                                    padding:6px 10px;
+                                    border-radius:6px;
+                                    text-decoration:none;
+                                    font-size:13px
+                               ">
+
+                                Edit
+
+                            </a>
+
+
+                            {{-- DELETE --}}
+                            <form action="{{ route('admin.courses.destroy',$course->id) }}"
+                                  method="POST"
+                                  onsubmit="return confirm('Hapus course ini?')">
+
+                                @csrf
+                                @method('DELETE')
+
+                                <button type="submit"
+                                        style="
+                                            background:#dc2626;
+                                            color:white;
+                                            padding:6px 10px;
+                                            border:none;
+                                            border-radius:6px;
+                                            cursor:pointer
+                                        ">
+
+                                    Hapus
+
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+            @empty
+
+                <tr>
+
+                    <td colspan="4"
+                        style="
+                            padding:20px;
+                            text-align:center
+                        ">
+
+                        Belum ada course
+
+                    </td>
+
+                </tr>
+
+            @endforelse
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
 @endsection

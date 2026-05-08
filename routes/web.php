@@ -12,8 +12,10 @@ use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\BookingController;
+use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\CourseScheduleController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\AdminDashboardController; // 🔥 WAJIB INI
 
 use App\Http\Controllers\Admin\SuperAdmin\DashboardController;
 use App\Http\Controllers\Admin\SuperAdmin\TenantController;
@@ -22,6 +24,7 @@ use App\Http\Controllers\Admin\SuperAdmin\UserController;
 use App\Http\Controllers\Admin\SuperAdmin\FinanceController;
 use App\Http\Controllers\Admin\SuperAdmin\LogController;
 use App\Http\Controllers\Admin\SuperAdmin\SettingsController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -53,60 +56,51 @@ Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
 
 /*
 |--------------------------------------------------------------------------
-| ADMIN LPK AREA (SATPAM BYPASS)
+| ADMIN LPK AREA
 |--------------------------------------------------------------------------
 */
 
-// SAYA HANYA MENYISAKAN 'auth' DI SINI
-Route::middleware(['auth', 'admin-lpk'])
+Route::middleware(['auth', 'role:admin_lpk'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
 
-        /*
-        |--------------------------------------------------------------------------
-        | DASHBOARD
-        |--------------------------------------------------------------------------
-        */
-        Route::get('/dashboard', [AdminAuthController::class, 'dashboard'])->name('dashboard');
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])
+            ->name('dashboard');
 
-        /*
-        |--------------------------------------------------------------------------
-        | PROFILE LPK
-        |--------------------------------------------------------------------------
-        */
         Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
         Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
 
-        /*
-        |--------------------------------------------------------------------------
-        | COURSES
-        |--------------------------------------------------------------------------
-        */
         Route::resource('courses', CourseController::class);
+        Route::resource('students', StudentController::class)
+    ->only([
+        'index',
+        'show',
+        'edit',
+        'update',
+        'destroy'
+    ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | STUDENTS
-        |--------------------------------------------------------------------------
-        */
-        Route::resource('students', StudentController::class);
-
-        /*
-        |--------------------------------------------------------------------------
-        | BOOKINGS
-        |--------------------------------------------------------------------------
-        */
         Route::resource('bookings', BookingController::class)->except(['edit', 'update']);
         Route::patch('/bookings/{booking}/status', [BookingController::class, 'updateStatus'])->name('bookings.status');
-
         /*
-        |--------------------------------------------------------------------------
-        | COURSE SCHEDULE
-        |--------------------------------------------------------------------------
-        */
-        Route::resource('course-schedules', CourseScheduleController::class);
+|--------------------------------------------------------------------------
+| PAYMENTS
+|--------------------------------------------------------------------------
+*/
 
+Route::resource('payments', PaymentController::class)
+    ->only([
+        'index',
+        'show'
+    ]);
+
+Route::patch(
+    '/payments/{payment}/status',
+    [PaymentController::class, 'updateStatus']
+)->name('payments.status');
+
+        Route::resource('course-schedules', CourseScheduleController::class);
     });
 
 /*
@@ -115,60 +109,55 @@ Route::middleware(['auth', 'admin-lpk'])
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'super-admin'])
+Route::middleware(['auth', 'role:super_admin'])
     ->prefix('super-admin')
     ->name('super.')
     ->group(function () {
 
-        /*
-        |--------------------------------------------------------------------------
-        | DASHBOARD
-        |--------------------------------------------------------------------------
-        */
-        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard', [DashboardController::class, 'index'])
+            ->name('dashboard');
 
-        /*
-        |--------------------------------------------------------------------------
-        | TENANTS (LPK)
-        |--------------------------------------------------------------------------
-        */
-        Route::get('/tenants', [TenantController::class, 'index'])->name('tenants');
+        Route::get('/tenants', [TenantController::class, 'index'])
+    ->name('tenants');
 
-        /*
-        |--------------------------------------------------------------------------
-        | VERIFICATION LPK
-        |--------------------------------------------------------------------------
-        */
-        Route::get('/verifications', [VerificationController::class, 'index'])->name('verifications');
-        Route::post('/verifications/{id}/approve', [VerificationController::class, 'approve'])->name('verifications.approve');
-        Route::post('/verifications/{id}/reject', [VerificationController::class, 'reject'])->name('verifications.reject');
 
-        /*
-        |--------------------------------------------------------------------------
-        | USERS
-        |--------------------------------------------------------------------------
-        */
+
+Route::get('/tenants/{id}', [TenantController::class, 'show'])
+    ->name('tenants.show');
+
+
+
+Route::delete('/tenants/{id}', [TenantController::class, 'destroy'])
+    ->name('tenants.delete');
+        Route::get(
+            '/verifications',
+            [VerificationController::class, 'index']
+        )->name('verifications');
+
+        Route::get(
+            '/verifications/{id}',
+            [VerificationController::class, 'show']
+        )->name('verifications.show');
+
+        Route::post(
+            '/verifications/{id}/approve',
+            [VerificationController::class, 'approve']
+        )->name('verifications.approve');
+
+        Route::post(
+            '/verifications/{id}/reject',
+            [VerificationController::class, 'reject']
+        )->name('verifications.reject');
+
         Route::get('/users', [UserController::class, 'index'])->name('users');
 
-        /*
-        |--------------------------------------------------------------------------
-        | FINANCE
-        |--------------------------------------------------------------------------
-        */
-        Route::get('/finance', [FinanceController::class, 'index'])->name('finance');
+Route::get('/finance', [FinanceController::class, 'index'])->name('finance');
 
-        /*
-        |--------------------------------------------------------------------------
-        | LOGS
-        |--------------------------------------------------------------------------
-        */
-        Route::get('/logs', [LogController::class, 'index'])->name('logs');
+Route::get('/logs', [LogController::class, 'index'])->name('logs');
 
-        /*
-        |--------------------------------------------------------------------------
-        | SETTINGS
-        |--------------------------------------------------------------------------
-        */
-        Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
+Route::get('/settings', [SettingsController::class, 'index'])
+    ->name('settings');
 
+Route::post('/settings', [SettingsController::class, 'update'])
+    ->name('settings.update');
     });

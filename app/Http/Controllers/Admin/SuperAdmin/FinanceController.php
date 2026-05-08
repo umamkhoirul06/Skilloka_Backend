@@ -7,27 +7,27 @@ use App\Models\Payment;
 
 class FinanceController extends Controller
 {
+    public function index()
+    {
+        // total pembayaran
+        $totalPayments = Payment::count();
 
-public function index()
-{
+        // total revenue (status success)
+        $totalRevenue = Payment::where('status', 'success')
+            ->sum('amount');
 
-$totalPayments = Payment::count();
+        // pembayaran terbaru
+        $recentPayments = Payment::latest()
+            ->take(10)
+            ->get();
 
-$totalRevenue = Payment::sum('amount');
-
-$recentPayments = Payment::latest()
-->take(10)
-->get();
-
-return view(
-'super_admin.finance.index',
-compact(
-'totalPayments',
-'totalRevenue',
-'recentPayments'
-)
-);
-
-}
-
+        return view(
+            'super_admin.finance.index',
+            compact(
+                'totalPayments',
+                'totalRevenue',
+                'recentPayments'
+            )
+        );
+    }
 }

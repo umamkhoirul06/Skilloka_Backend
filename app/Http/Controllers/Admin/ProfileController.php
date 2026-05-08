@@ -3,113 +3,278 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+
 use Illuminate\Http\Request;
-use App\Models\Tenant;
+use Illuminate\Support\Facades\Auth;
+
+use App\Models\Lpk;
 
 class ProfileController extends Controller
 {
 
+    /*
+    |--------------------------------------------------------------------------
+    | PROFILE PAGE
+    |--------------------------------------------------------------------------
+    */
+
     public function index()
     {
 
-        // ambil tenant pertama (LPK)
-        $tenant = Tenant::orderBy('created_at','asc')->first();
+        /*
+        |--------------------------------------------------------------------------
+        | USER LOGIN
+        |--------------------------------------------------------------------------
+        */
 
-        return view('admin.profile', compact('tenant'));
+        $user = Auth::user();
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SAFETY LOGIN
+        |--------------------------------------------------------------------------
+        */
+
+        if (!$user) {
+
+            abort(403);
+
+        }
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | GET LPK BY TENANT
+        |--------------------------------------------------------------------------
+        */
+
+        $lpk = Lpk::where(
+
+                'tenant_id',
+                $user->tenant_id
+
+            )
+
+            ->firstOrFail();
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | VIEW
+        |--------------------------------------------------------------------------
+        */
+
+        return view(
+
+            'admin.profile',
+
+            compact('lpk')
+
+        );
 
     }
 
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | UPDATE PROFILE
+    |--------------------------------------------------------------------------
+    */
+
     public function update(Request $request)
     {
 
-        $tenant = Tenant::orderBy('created_at','asc')->first();
-
-        if(!$tenant){
-
-            return back()->with('error','Tenant tidak ditemukan');
-
-        }
-
-
         /*
-        BASIC INFO
+        |--------------------------------------------------------------------------
+        | USER LOGIN
+        |--------------------------------------------------------------------------
         */
 
-        $tenant->lpk_name = $request->lpk_name;
-        $tenant->legal_name = $request->legal_name;
-        $tenant->nib = $request->nib;
-        $tenant->description = $request->description;
+        $user = Auth::user();
 
 
 
         /*
-        CONTACT
+        |--------------------------------------------------------------------------
+        | SAFETY LOGIN
+        |--------------------------------------------------------------------------
         */
 
-        $tenant->phone = $request->phone;
-        $tenant->email = $request->email;
-        $tenant->website = $request->website;
+        if (!$user) {
 
-        $tenant->instagram = $request->instagram;
-        $tenant->facebook = $request->facebook;
-        $tenant->tiktok = $request->tiktok;
-
-
-
-        /*
-        LOCATION
-        */
-
-        $tenant->province = $request->province;
-        $tenant->city = $request->city;
-        $tenant->district = $request->district;
-
-        $tenant->address = $request->address;
-
-        $tenant->latitude = $request->latitude;
-        $tenant->longitude = $request->longitude;
-
-
-
-        /*
-        MEDIA
-        */
-
-        if($request->hasFile('logo')){
-
-            $logoPath = $request->file('logo')
-                ->store('logo','public');
-
-            $tenant->logo = $logoPath;
-
-        }
-
-
-        if($request->hasFile('banner')){
-
-            $bannerPath = $request->file('banner')
-                ->store('banner','public');
-
-            $tenant->banner = $bannerPath;
+            abort(403);
 
         }
 
 
 
         /*
-        FACILITIES
+        |--------------------------------------------------------------------------
+        | GET LPK
+        |--------------------------------------------------------------------------
         */
 
-        $tenant->facilities = $request->facilities;
+        $lpk = Lpk::where(
+
+                'tenant_id',
+                $user->tenant_id
+
+            )
+
+            ->firstOrFail();
 
 
 
-        $tenant->save();
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDATION
+        |--------------------------------------------------------------------------
+        */
+
+        $request->validate([
+
+            'name' => 'required|max:255',
+
+            'legal_name' => 'nullable|max:255',
+
+            'nib' => 'nullable|max:255',
+
+            'address' => 'nullable',
+
+            'description' => 'nullable',
+
+            'facilities' => 'nullable',
+
+            'contact_info' => 'nullable',
+
+            'lat' => 'nullable',
+
+            'long' => 'nullable',
+
+            'logo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+
+            'images.*' => 'nullable|image|mimes:jpg,jpeg,png|max:4096',
+
+        ]);
 
 
-        return back()->with('success','Profile berhasil disimpan');
+
+        /*
+        |--------------------------------------------------------------------------
+        | UPDATE DATA
+        |--------------------------------------------------------------------------
+        */
+
+        $lpk->update([
+
+            'name' => $request->name,
+
+            'legal_name' => $request->legal_name,
+
+            'nib' => $request->nib,
+
+            'address' => $request->address,
+
+            'description' => $request->description,
+
+            'facilities' => $request->facilities,
+
+            'contact_info' => $request->contact_info,
+
+            'lat' => $request->lat,
+
+            'long' => $request->long,
+
+        ]);
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | UPLOAD LOGO
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->hasFile('logo')) {
+
+            $logo = $request
+
+                ->file('logo')
+
+                ->store(
+
+                    'lpk/logo',
+
+                    'public'
+
+                );
+
+
+
+            $lpk->update([
+
+                'logo' => $logo
+
+            ]);
+
+        }
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | UPLOAD GALLERY
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->hasFile('images')) {
+
+            $images = [];
+
+
+
+            foreach ($request->file('images') as $image) {
+
+                $images[] = $image->store(
+
+                    'lpk/gallery',
+
+                    'public'
+
+                );
+
+            }
+
+
+
+            $lpk->update([
+
+                'images' => json_encode($images)
+
+            ]);
+
+        }
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SUCCESS
+        |--------------------------------------------------------------------------
+        */
+
+        return back()->with(
+
+            'success',
+
+            'Profil LPK berhasil diperbarui'
+
+        );
 
     }
 

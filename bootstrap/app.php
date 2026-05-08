@@ -25,9 +25,17 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->alias([
-            'super-admin' => \App\Http\Middleware\EnsureSuperAdmin::class,
-            'admin-lpk' => \App\Http\Middleware\EnsureAdminLpk::class,
-        ]);
+    'super-admin' => \App\Http\Middleware\EnsureSuperAdmin::class,
+    'admin-lpk' => \App\Http\Middleware\EnsureAdminLpk::class,
+
+    // 🔥 TAMBAHAN
+    'approved' => \App\Http\Middleware\CheckUserApproved::class,
+
+    // Spatie
+    'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
+    'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+    'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
 

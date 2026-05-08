@@ -266,7 +266,9 @@
 
                     <div class="text-center mb-8">
                         <h2 class="text-2xl font-bold text-white mb-2">Selamat Datang! 👋</h2>
-                        <p class="text-gray-400">Masuk ke dashboard admin Anda</p>
+                        <p class="text-gray-400">
+    Login untuk Super Admin & Admin LPK
+</p>
                     </div>
 
                     @if(session('success'))
@@ -343,9 +345,15 @@
                                     class="w-4 h-4 rounded border-gray-600 bg-gray-700 text-purple-600 focus:ring-purple-500 focus:ring-offset-0">
                                 <span class="ml-2 text-sm text-gray-400">Ingat saya</span>
                             </label>
-                            <a href="#" class="text-sm text-purple-400 hover:text-purple-300 transition-colors">
-                                Lupa password?
-                            </a>
+                            <a href="https://wa.me/62895405193300"
+   target="_blank"
+   class="text-sm text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-1">
+
+    <i class="fab fa-whatsapp"></i>
+
+    Hubungi Super Admin
+
+</a>
                         </div>
 
                         <button type="submit"
@@ -355,14 +363,31 @@
                     </form>
 
                     <div class="mt-8 pt-6 border-t border-gray-700/50">
-                        <p class="text-center text-gray-500 text-sm">
-                            Belum punya akun LPK?
-                            <a href="{{ route('admin.register') }}"
-                                class="text-purple-400 hover:text-purple-300 font-medium">Daftar Sekarang</a>
-                        </p>
-                    </div>
-                </div>
-            </div>
+
+    <p class="text-center text-gray-500 text-sm mb-2">
+
+        Registrasi hanya untuk Admin LPK
+
+    </p>
+
+    <div class="text-center">
+
+        <a href="{{ route('admin.register') }}"
+            class="text-purple-400 hover:text-purple-300 font-medium text-sm">
+
+            Daftar Sebagai Admin LPK
+
+        </a>
+
+    </div>
+
+    <p class="text-center text-gray-600 text-xs mt-4">
+
+        Super Admin dibuat langsung oleh sistem.
+
+    </p>
+
+</div>
         </div>
     </div>
 

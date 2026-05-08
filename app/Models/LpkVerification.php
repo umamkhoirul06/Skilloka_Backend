@@ -4,8 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+// 🔥 TAMBAH INI
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+
 class LpkVerification extends Model
 {
+    // 🔥 WAJIB
+    use HasUuids;
+
     protected $guarded = ['id'];
 
     protected $casts = [

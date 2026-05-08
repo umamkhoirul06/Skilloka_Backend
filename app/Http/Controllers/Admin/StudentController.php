@@ -5,104 +5,158 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class StudentController extends Controller
 {
     /**
-     * Display a listing of the students.
+     * LIST STUDENT
+     * (user yang pernah booking di tenant admin ini)
      */
     public function index()
     {
-        $user = auth('web')->user();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
 
-        // Get students (users with 'student' role) for the current tenant
-        $students = User::role('student')
-            ->when($user->tenant_id, function ($query) use ($user) {
-                return $query->where('tenant_id', $user->tenant_id);
+        $tenantId = $user->tenant_id;
+
+        $students = User::withCount('bookings')
+            ->whereHas('bookings', function ($q) use ($tenantId) {
+
+                $q->where('tenant_id', $tenantId);
+
             })
             ->latest()
             ->paginate(10);
 
-        return view('admin.students.index', compact('students'));
+        return view(
+            'admin.students.index',
+            compact('students')
+        );
     }
 
+
+
     /**
-     * Show the form for creating a new student.
+     * CREATE TIDAK DIPAKAI
      */
     public function create()
     {
-        return view('admin.students.create');
+        abort(404);
     }
 
+
+
     /**
-     * Store a newly created student in storage.
+     * STORE TIDAK DIPAKAI
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'phone' => 'nullable|string|max:20',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
-
-        $user = auth('web')->user();
-        $validated['password'] = bcrypt($validated['password']);
-        $validated['tenant_id'] = $user->tenant_id;
-
-        $student = User::create($validated);
-        $student->assignRole('student');
-
-        return redirect()->route('admin.students.index')
-            ->with('success', 'Student created successfully!');
+        abort(404);
     }
 
+
+
     /**
-     * Display the specified student.
+     * DETAIL STUDENT
      */
     public function show(User $student)
     {
-        return view('admin.students.show', compact('student'));
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        $tenantId = $user->tenant_id;
+
+        // hanya booking dari tenant admin ini
+        $student->load([
+
+            'bookings' => function ($q) use ($tenantId) {
+
+                $q->where('tenant_id', $tenantId)
+                    ->latest();
+
+            }
+
+        ]);
+
+        return view(
+            'admin.students.show',
+            compact('student')
+        );
     }
 
+
+
     /**
-     * Show the form for editing the specified student.
+     * FORM EDIT STUDENT
      */
     public function edit(User $student)
     {
-        return view('admin.students.edit', compact('student'));
+        return view(
+            'admin.students.edit',
+            compact('student')
+        );
     }
 
+
+
     /**
-     * Update the specified student in storage.
+     * UPDATE STUDENT
      */
     public function update(Request $request, User $student)
     {
         $validated = $request->validate([
+
             'name' => 'required|string|max:255',
+
             'email' => 'required|email|unique:users,email,' . $student->id,
+
             'phone' => 'nullable|string|max:20',
+
         ]);
 
+
+        // update password kalau diisi
         if ($request->filled('password')) {
-            $request->validate(['password' => 'string|min:8|confirmed']);
-            $validated['password'] = bcrypt($request->password);
+
+            $request->validate([
+
+                'password' => 'required|string|min:8|confirmed'
+
+            ]);
+
+            $validated['password'] = Hash::make(
+                $request->password
+            );
         }
+
 
         $student->update($validated);
 
-        return redirect()->route('admin.students.index')
-            ->with('success', 'Student updated successfully!');
+
+        return redirect()
+            ->route('admin.students.show', $student)
+            ->with(
+                'success',
+                'Data student berhasil diperbarui'
+            );
     }
 
+
+
     /**
-     * Remove the specified student from storage.
+     * DELETE STUDENT
      */
     public function destroy(User $student)
     {
         $student->delete();
 
-        return redirect()->route('admin.students.index')
-            ->with('success', 'Student deleted successfully!');
+        return redirect()
+            ->route('admin.students.index')
+            ->with(
+                'success',
+                'Student berhasil dihapus'
+            );
     }
 }

@@ -13,9 +13,10 @@
         "meilisearch/meilisearch-php": "^1.16",
         "predis/predis": "^3.4",
         "spatie/laravel-activitylog": "^4.11",
-        "spatie/laravel-permission": "^6.24"
+        "spatie/laravel-permission": "^6.25"
     },
     "require-dev": {
+        "barryvdh/laravel-ide-helper": "^3.7",
         "enlightn/enlightn": "^2.10",
         "fakerphp/faker": "^1.23",
         "laravel/pint": "^1.13",

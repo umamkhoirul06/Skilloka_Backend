@@ -4,18 +4,20 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use App\Models\Course;
 use App\Models\Category;
+use App\Models\Lpk;
 
 class CourseController extends Controller
 {
     /**
-     * Display a listing of the courses.
+     * Display list course
      */
     public function index()
     {
-        $user = auth('web')->user();
+        $user = Auth::user();
 
         $courses = Course::with('category')
             ->where('tenant_id', $user->tenant_id)
@@ -26,95 +28,150 @@ class CourseController extends Controller
     }
 
     /**
-     * Show the form for creating a new course.
+     * Show create form
      */
     public function create()
     {
-        $categories = Category::all();
-        return view('admin.courses.create', compact('categories'));
+        $user = Auth::user();
+
+        // category global
+        $categories = Category::latest()->get();
+
+        $courses = Course::with('category')
+            ->where('tenant_id', $user->tenant_id)
+            ->latest()
+            ->get();
+
+        return view('admin.courses.create', compact(
+            'categories',
+            'courses'
+        ));
     }
 
     /**
-     * Store a newly created course in storage.
+     * Store course
      */
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
-            'duration_hours' => 'required|integer|min:1',
-            'category_id' => 'required|exists:categories,id',
-            'level' => 'required|in:beginner,intermediate,advanced',
+            'title'            => 'required|string|max:255',
+            'description'      => 'nullable|string',
+            'syllabus'         => 'nullable|string',
+            'price'            => 'required|numeric|min:0',
+            'duration_hours'   => 'required|integer|min:1',
+            'category_id'      => 'required|exists:categories,id',
+            'level'            => 'required|in:beginner,intermediate,advanced',
+            'cert_type'        => 'nullable|string|max:255',
+            'max_participants' => 'nullable|integer|min:1',
         ]);
 
-        $user = auth('web')->user();
+        $user = Auth::user();
 
-        // pastikan user punya tenant & lpk
-        if (!$user->tenant_id || !$user->lpk_id) {
-            abort(500, 'User belum terhubung ke tenant / LPK');
+        // cari LPK berdasarkan tenant
+        $lpk = Lpk::where(
+            'tenant_id',
+            $user->tenant_id
+        )->first();
+
+        if (!$lpk) {
+            return back()->withErrors([
+                'error' => 'LPK tidak ditemukan'
+            ]);
         }
 
         $validated['tenant_id'] = $user->tenant_id;
-        $validated['lpk_id'] = $user->lpk_id;
-        $validated['slug'] = Str::slug($request->title);
+        $validated['lpk_id'] = $lpk->id;
+
+        // slug unik
+        $validated['slug'] =
+            Str::slug($validated['title']) . '-' . uniqid();
+
         $validated['is_active'] = true;
 
         Course::create($validated);
 
-        return redirect()->route('admin.courses.index')
-            ->with('success', 'Course created successfully!');
+        return redirect()
+            ->route('admin.courses.create')
+            ->with('success', 'Course berhasil dibuat');
     }
 
     /**
-     * Display the specified course.
+     * Show detail course
      */
     public function show(Course $course)
     {
+        if ($course->tenant_id !== Auth::user()->tenant_id) {
+            abort(403);
+        }
+
         $course->load('category', 'schedules');
+
         return view('admin.courses.show', compact('course'));
     }
 
     /**
-     * Show the form for editing the specified course.
+     * Show edit form
      */
     public function edit(Course $course)
     {
-        $categories = Category::all();
-        return view('admin.courses.edit', compact('course', 'categories'));
+        if ($course->tenant_id !== Auth::user()->tenant_id) {
+            abort(403);
+        }
+
+        // category global
+        $categories = Category::latest()->get();
+
+        return view('admin.courses.edit', compact(
+            'course',
+            'categories'
+        ));
     }
 
     /**
-     * Update the specified course in storage.
+     * Update course
      */
     public function update(Request $request, Course $course)
     {
+        if ($course->tenant_id !== Auth::user()->tenant_id) {
+            abort(403);
+        }
+
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
-            'duration_hours' => 'required|integer|min:1',
-            'category_id' => 'required|exists:categories,id',
-            'level' => 'required|in:beginner,intermediate,advanced',
-            'is_active' => 'boolean',
+            'title'            => 'required|string|max:255',
+            'description'      => 'nullable|string',
+            'syllabus'         => 'nullable|string',
+            'price'            => 'required|numeric|min:0',
+            'duration_hours'   => 'required|integer|min:1',
+            'category_id'      => 'required|exists:categories,id',
+            'level'            => 'required|in:beginner,intermediate,advanced',
+            'cert_type'        => 'nullable|string|max:255',
+            'max_participants' => 'nullable|integer|min:1',
+            'is_active'        => 'nullable|boolean',
         ]);
 
-        $validated['slug'] = Str::slug($request->title);
+        $validated['slug'] =
+            Str::slug($validated['title']) . '-' . uniqid();
 
         $course->update($validated);
 
-        return redirect()->route('admin.courses.index')
-            ->with('success', 'Course updated successfully!');
+        return redirect()
+            ->route('admin.courses.create')
+            ->with('success', 'Course berhasil diupdate');
     }
 
     /**
-     * Remove the specified course from storage.
+     * Delete course
      */
     public function destroy(Course $course)
     {
+        if ($course->tenant_id !== Auth::user()->tenant_id) {
+            abort(403);
+        }
+
         $course->delete();
 
-        return redirect()->route('admin.courses.index')
-            ->with('success', 'Course deleted successfully!');
+        return redirect()
+            ->route('admin.courses.create')
+            ->with('success', 'Course berhasil dihapus');
     }
 }

@@ -1,462 +1,354 @@
 @extends('layouts.admin')
 
-@section('header', 'LPK Profile Management')
-
-@section('breadcrumbs')
-<a href="{{ route('admin.dashboard') }}" class="hover:text-blue-600">Home</a>
-<span class="mx-2">/</span>
-<span class="text-gray-800">Profile</span>
-@endsection
-
+@section('title', 'LPK Profile')
 
 @section('content')
 
-<div class="bg-white rounded-lg shadow-lg overflow-hidden"
-x-data="{ activeTab: 'basic' }">
+<div
+    x-data="{ activeTab: 'basic' }"
+    class="max-w-6xl mx-auto p-6 space-y-6">
 
+    <!-- HEADER -->
+    <div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
 
-@if(session('success'))
-<div class="m-4 p-3 bg-green-100 text-green-700 rounded">
-{{ session('success') }}
-</div>
-@endif
+        <!-- COVER -->
+        <div class="h-36 bg-gradient-to-r from-slate-900 via-blue-800 to-indigo-700"></div>
 
+        <!-- PROFILE -->
+        <div class="px-6 pb-6 relative">
 
+            <div class="-mt-12 flex items-end gap-5 flex-wrap">
 
-<!-- TAB MENU -->
+                <!-- LOGO -->
+                <div class="w-24 h-24 rounded-2xl overflow-hidden border-4 border-white shadow-xl bg-white">
 
-<div class="flex border-b border-gray-200">
+                    @if($lpk->logo)
 
-<button
-@click="activeTab = 'basic'"
-:class="{ 'border-blue-500 text-blue-600': activeTab === 'basic' }"
-class="px-6 py-4 font-medium text-gray-600 hover:text-blue-500 border-b-2 border-transparent">
+                        <img
+                            src="{{ asset('storage/'.$lpk->logo) }}"
+                            class="w-full h-full object-cover">
 
-Basic Info
+                    @else
 
-</button>
+                        <div class="w-full h-full bg-slate-100 flex items-center justify-center text-4xl font-bold text-slate-500">
 
+                            {{ strtoupper(substr($lpk->name,0,1)) }}
 
-<button
-@click="activeTab = 'contact'"
-:class="{ 'border-blue-500 text-blue-600': activeTab === 'contact' }"
-class="px-6 py-4 font-medium text-gray-600 hover:text-blue-500 border-b-2 border-transparent">
+                        </div>
 
-Contact & Social
+                    @endif
 
-</button>
+                </div>
 
+                <!-- INFO -->
+                <div class="pb-1">
 
-<button
-@click="activeTab = 'location'"
-:class="{ 'border-blue-500 text-blue-600': activeTab === 'location' }"
-class="px-6 py-4 font-medium text-gray-600 hover:text-blue-500 border-b-2 border-transparent">
+                    <h1 class="text-3xl font-bold text-slate-800 leading-tight">
 
-Location
+                        {{ $lpk->name }}
 
-</button>
+                    </h1>
 
+                    <div class="flex items-center gap-3 mt-3 flex-wrap">
 
-<button
-@click="activeTab = 'media'"
-:class="{ 'border-blue-500 text-blue-600': activeTab === 'media' }"
-class="px-6 py-4 font-medium text-gray-600 hover:text-blue-500 border-b-2 border-transparent">
+                        @if($lpk->is_verified)
 
-Media & Facilities
+                            <span class="px-4 py-1 rounded-full bg-green-100 text-green-700 text-sm font-semibold">
+                                Verified
+                            </span>
 
-</button>
+                        @else
 
-</div>
+                            <span class="px-4 py-1 rounded-full bg-yellow-100 text-yellow-700 text-sm font-semibold">
+                                Pending Verification
+                            </span>
 
+                        @endif
 
+                        <span class="text-sm text-slate-500">
+                            NIB : {{ $lpk->nib ?? '-' }}
+                        </span>
 
-<!-- 1 FORM UNTUK SEMUA TAB -->
+                    </div>
 
-<form method="POST"
-action="{{ route('admin.profile.update') }}"
-enctype="multipart/form-data">
+                </div>
 
-@csrf
+            </div>
 
+        </div>
 
-<div class="p-8">
+    </div>
 
+    <!-- MAIN -->
+    <div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
 
-<!-- BASIC INFO -->
+        <!-- TAB -->
+        <div class="flex gap-3 p-4 border-b border-gray-100 bg-slate-50 overflow-auto">
 
-<div x-show="activeTab === 'basic'">
+            <!-- BASIC -->
+            <button
+                @click="activeTab='basic'"
+                :class="activeTab==='basic'
+                    ? 'bg-blue-600 text-white shadow'
+                    : 'text-slate-600 hover:bg-slate-100'"
+                class="px-5 py-2.5 rounded-xl text-sm font-semibold transition whitespace-nowrap">
 
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                Basic Info
 
-<div>
+            </button>
 
-<label class="block text-sm font-medium text-gray-700">
-LPK Name
-</label>
+            <!-- LOCATION -->
+            <button
+                @click="activeTab='location'"
+                :class="activeTab==='location'
+                    ? 'bg-blue-600 text-white shadow'
+                    : 'text-slate-600 hover:bg-slate-100'"
+                class="px-5 py-2.5 rounded-xl text-sm font-semibold transition whitespace-nowrap">
 
-<input
-type="text"
-name="lpk_name"
-value="{{ old('lpk_name', $tenant->lpk_name ?? '') }}"
-class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                Location
 
-</div>
+            </button>
 
+            <!-- MEDIA -->
+            <button
+                @click="activeTab='media'"
+                :class="activeTab==='media'
+                    ? 'bg-blue-600 text-white shadow'
+                    : 'text-slate-600 hover:bg-slate-100'"
+                class="px-5 py-2.5 rounded-xl text-sm font-semibold transition whitespace-nowrap">
 
+                Media & Facilities
 
-<div>
+            </button>
 
-<label class="block text-sm font-medium text-gray-700">
-Legal Name
-</label>
+        </div>
 
-<input
-type="text"
-name="legal_name"
-value="{{ old('legal_name', $tenant->legal_name ?? '') }}"
-class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+        <!-- FORM -->
+        <form
+            action="{{ route('admin.profile.update') }}"
+            method="POST"
+            enctype="multipart/form-data">
 
-</div>
+            @csrf
 
+            <div class="p-6">
 
+                <!-- BASIC -->
+                <div
+                    x-show="activeTab==='basic'"
+                    x-cloak
+                    class="space-y-6">
 
-<div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-<label class="block text-sm font-medium text-gray-700">
-NIB
-</label>
+                        <!-- LPK NAME -->
+                        <div>
 
-<input
-type="text"
-name="nib"
-value="{{ old('nib', $tenant->nib ?? '') }}"
-class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                            <label class="block text-sm font-medium text-slate-700 mb-1.5">
+                                LPK Name
+                            </label>
 
-</div>
+                            <input
+                                type="text"
+                                name="name"
+                                value="{{ old('name',$lpk->name) }}"
+                                class="w-full rounded-xl border-gray-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
 
+                        </div>
 
+                        <!-- LEGAL NAME -->
+                        <div>
 
-<div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-slate-700 mb-1.5">
+                                Legal Name
+                            </label>
 
-<label class="block text-sm font-medium text-gray-700">
-Description
-</label>
+                            <input
+                                type="text"
+                                name="legal_name"
+                                value="{{ old('legal_name',$lpk->legal_name) }}"
+                                class="w-full rounded-xl border-gray-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
 
-<textarea
-name="description"
-rows="4"
-class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                        </div>
 
-{{ old('description', $tenant->description ?? '') }}
+                        <!-- NIB -->
+                        <div>
 
-</textarea>
+                            <label class="block text-sm font-medium text-slate-700 mb-1.5">
+                                NIB
+                            </label>
 
-</div>
+                            <input
+                                type="text"
+                                name="nib"
+                                value="{{ old('nib',$lpk->nib) }}"
+                                class="w-full rounded-xl border-gray-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
 
-</div>
+                        </div>
 
-</div>
+                        <!-- CONTACT -->
+                        <div>
 
+                            <label class="block text-sm font-medium text-slate-700 mb-1.5">
+                                Contact Info
+                            </label>
 
+                            <input
+                                type="text"
+                                name="contact_info"
+                                value="{{ old('contact_info',$lpk->contact_info) }}"
+                                class="w-full rounded-xl border-gray-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
 
+                        </div>
 
-<!-- CONTACT -->
+                    </div>
 
-<div x-show="activeTab === 'contact'">
+                    <!-- DESCRIPTION -->
+                    <div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">
+                            Description
+                        </label>
 
-<div>
+                        <textarea
+                            name="description"
+                            rows="4"
+                            class="w-full rounded-xl border-gray-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ old('description',$lpk->description) }}</textarea>
 
-<label class="block text-sm font-medium text-gray-700">
-Phone
-</label>
+                    </div>
 
-<input
-type="text"
-name="phone"
-value="{{ old('phone', $tenant->phone ?? '') }}"
-class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                </div>
 
-</div>
+                <!-- LOCATION -->
+                <div
+                    x-show="activeTab==='location'"
+                    x-cloak
+                    class="space-y-6">
 
+                    <!-- ADDRESS -->
+                    <div>
 
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">
+                            Full Address
+                        </label>
 
-<div>
+                        <textarea
+                            name="address"
+                            rows="3"
+                            class="w-full rounded-xl border-gray-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ old('address',$lpk->address) }}</textarea>
 
-<label class="block text-sm font-medium text-gray-700">
-Email
-</label>
+                    </div>
 
-<input
-type="text"
-name="email"
-value="{{ old('email', $tenant->email ?? '') }}"
-class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                    <!-- LAT LONG -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-</div>
+                        <!-- LAT -->
+                        <div>
 
+                            <label class="block text-sm font-medium text-slate-700 mb-1.5">
+                                Latitude
+                            </label>
 
+                            <input
+                                type="text"
+                                name="lat"
+                                value="{{ old('lat',$lpk->lat) }}"
+                                class="w-full rounded-xl border-gray-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
 
-<div>
+                        </div>
 
-<label class="block text-sm font-medium text-gray-700">
-Website
-</label>
+                        <!-- LONG -->
+                        <div>
 
-<input
-type="text"
-name="website"
-value="{{ old('website', $tenant->website ?? '') }}"
-class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                            <label class="block text-sm font-medium text-slate-700 mb-1.5">
+                                Longitude
+                            </label>
 
-</div>
+                            <input
+                                type="text"
+                                name="long"
+                                value="{{ old('long',$lpk->long) }}"
+                                class="w-full rounded-xl border-gray-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
 
+                        </div>
 
+                    </div>
 
-<div>
+                </div>
 
-<label class="block text-sm font-medium text-gray-700">
-Instagram
-</label>
+                <!-- MEDIA -->
+                <div
+                    x-show="activeTab==='media'"
+                    x-cloak
+                    class="space-y-6">
 
-<input
-type="text"
-name="instagram"
-value="{{ old('instagram', $tenant->instagram ?? '') }}"
-class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-</div>
+                        <!-- LOGO -->
+                        <div>
 
+                            <label class="block text-sm font-medium text-slate-700 mb-2">
+                                Upload Logo
+                            </label>
 
+                            <input
+                                type="file"
+                                name="logo"
+                                class="w-full rounded-xl border border-gray-300 p-3 text-sm">
 
-<div>
+                        </div>
 
-<label class="block text-sm font-medium text-gray-700">
-Facebook
-</label>
+                        <!-- GALLERY -->
+                        <div>
 
-<input
-type="text"
-name="facebook"
-value="{{ old('facebook', $tenant->facebook ?? '') }}"
-class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                            <label class="block text-sm font-medium text-slate-700 mb-2">
+                                Upload Gallery
+                            </label>
 
-</div>
+                            <input
+                                type="file"
+                                name="images[]"
+                                multiple
+                                class="w-full rounded-xl border border-gray-300 p-3 text-sm">
 
+                        </div>
 
+                    </div>
 
-<div>
+                    <!-- FACILITIES -->
+                    <div>
 
-<label class="block text-sm font-medium text-gray-700">
-Tiktok
-</label>
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">
+                            Facilities
+                        </label>
 
-<input
-type="text"
-name="tiktok"
-value="{{ old('tiktok', $tenant->tiktok ?? '') }}"
-class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                        <textarea
+                            name="facilities"
+                            rows="4"
+                            class="w-full rounded-xl border-gray-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ old('facilities',$lpk->facilities) }}</textarea>
 
-</div>
+                    </div>
 
-</div>
+                </div>
 
-</div>
+            </div>
 
+            <!-- FOOTER -->
+            <div class="px-6 py-4 border-t border-gray-100 bg-slate-50 flex justify-end">
 
+                <button
+                    type="submit"
+                    class="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold shadow-md transition">
 
+                    Save Changes
 
-<!-- LOCATION -->
+                </button>
 
-<div x-show="activeTab === 'location'">
+            </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        </form>
 
-<div>
-
-<label class="block text-sm font-medium text-gray-700">
-Province
-</label>
-
-<input
-type="text"
-name="province"
-value="{{ old('province', $tenant->province ?? '') }}"
-class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-
-</div>
-
-
-
-<div>
-
-<label class="block text-sm font-medium text-gray-700">
-City
-</label>
-
-<input
-type="text"
-name="city"
-value="{{ old('city', $tenant->city ?? '') }}"
-class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-
-</div>
-
-
-
-<div>
-
-<label class="block text-sm font-medium text-gray-700">
-District
-</label>
-
-<input
-type="text"
-name="district"
-value="{{ old('district', $tenant->district ?? '') }}"
-class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-
-</div>
-
-
-
-<div class="md:col-span-2">
-
-<label class="block text-sm font-medium text-gray-700">
-Address
-</label>
-
-<textarea
-name="address"
-rows="3"
-class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-
-{{ old('address', $tenant->address ?? '') }}
-
-</textarea>
-
-</div>
-
-
-
-<div>
-
-<label class="block text-sm font-medium text-gray-700">
-Latitude
-</label>
-
-<input
-type="text"
-name="latitude"
-value="{{ old('latitude', $tenant->latitude ?? '') }}"
-class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-
-</div>
-
-
-
-<div>
-
-<label class="block text-sm font-medium text-gray-700">
-Longitude
-</label>
-
-<input
-type="text"
-name="longitude"
-value="{{ old('longitude', $tenant->longitude ?? '') }}"
-class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-
-</div>
-
-</div>
-
-</div>
-
-
-
-
-<!-- MEDIA -->
-
-<div x-show="activeTab === 'media'">
-
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-<div>
-
-<label class="block text-sm font-medium text-gray-700">
-Logo
-</label>
-
-<input
-type="file"
-name="logo"
-class="mt-1 block w-full">
-
-</div>
-
-
-
-<div>
-
-<label class="block text-sm font-medium text-gray-700">
-Banner
-</label>
-
-<input
-type="file"
-name="banner"
-class="mt-1 block w-full">
-
-</div>
-
-
-
-<div class="md:col-span-2">
-
-<label class="block text-sm font-medium text-gray-700">
-Facilities
-</label>
-
-<textarea
-name="facilities"
-rows="3"
-class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-
-{{ old('facilities', $tenant->facilities ?? '') }}
-
-</textarea>
-
-</div>
-
-</div>
-
-</div>
-
-
-
-
-<!-- SAVE BUTTON -->
-
-<div class="mt-8 flex justify-end">
-
-<button
-type="submit"
-class="bg-blue-600 text-white px-6 py-2 rounded-md">
-
-Save All Changes
-
-</button>
-
-</div>
-
-
-</div>
-
-</form>
-
-
+    </div>
 
 </div>
 

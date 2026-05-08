@@ -1,177 +1,412 @@
 @extends('layouts.admin')
 
-@section('title','Create Booking')
+@section('title', 'Create Booking')
 
 @section('content')
 
-<div class="max-w-2xl">
+<div class="max-w-6xl mx-auto space-y-6">
 
-<div class="bg-white rounded-xl shadow-sm overflow-hidden">
+    <!-- HEADER -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 
-<div class="px-6 py-4 border-b">
+        <div>
 
-<h3 class="font-semibold text-gray-800">
-Booking Information
-</h3>
+            <h1 class="text-3xl font-bold text-gray-800">
+                Create Booking
+            </h1>
 
-<p class="text-sm text-gray-500">
-Register student ke jadwal course
-</p>
+            <p class="text-sm text-gray-500 mt-1">
+                Registrasikan siswa ke jadwal kursus secara manual
+            </p>
 
-</div>
+        </div>
 
+        <a href="{{ route('admin.bookings.index') }}"
+           class="inline-flex items-center justify-center px-5 py-2.5 rounded-xl border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
 
-<form action="{{ route('admin.bookings.store') }}" method="POST" class="p-6 space-y-6">
+            ← Kembali
 
-@csrf
+        </a>
 
+    </div>
 
-{{-- STUDENT --}}
-<div>
 
-<label class="block text-sm font-medium mb-2">
 
-Select Student
+    <!-- ERROR -->
+    @if ($errors->any())
 
-</label>
+    <div class="rounded-2xl border border-red-200 bg-red-50 p-5">
 
-<select name="user_id" required class="w-full border rounded-lg px-3 py-2">
+        <div class="font-semibold text-red-700 mb-3">
+            Terjadi Kesalahan
+        </div>
 
-<option value="">-- pilih student --</option>
+        <ul class="space-y-1 text-sm text-red-600">
 
-@foreach($students as $student)
+            @foreach ($errors->all() as $error)
 
-<option value="{{ $student->id }}">
+                <li>
+                    • {{ $error }}
+                </li>
 
-{{ $student->name }}
+            @endforeach
 
-</option>
+        </ul>
 
-@endforeach
+    </div>
 
-</select>
+    @endif
 
 
-@if($students->isEmpty())
 
-<p class="text-sm text-red-500 mt-2">
+    <!-- WARNING -->
+    @if($students->isEmpty())
 
-belum ada student
+    <div class="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
 
-</p>
+        Belum ada student aktif di tenant ini.
 
-@endif
+    </div>
 
-</div>
+    @endif
 
 
 
-{{-- SCHEDULE --}}
-<div>
+    <!-- CONTENT -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-<label class="block text-sm font-medium mb-2">
+        <!-- LEFT -->
+        <div class="lg:col-span-2">
 
-Select Schedule
+            <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
 
-</label>
+                <!-- TOP -->
+                <div class="px-6 py-5 border-b border-gray-100 bg-gray-50">
 
-<select name="schedule_id" required class="w-full border rounded-lg px-3 py-2">
+                    <h3 class="text-lg font-semibold text-gray-800">
+                        Booking Information
+                    </h3>
 
-<option value="">-- pilih jadwal --</option>
+                    <p class="text-sm text-gray-500 mt-1">
+                        Isi data booking siswa dan pilih jadwal kursus
+                    </p>
 
-@foreach($schedules as $schedule)
+                </div>
 
-<option value="{{ $schedule->id }}">
 
-{{ $schedule->course->title }}
 
-|
+                <!-- FORM -->
+                <form
+                    action="{{ route('admin.bookings.store') }}"
+                    method="POST"
+                    class="p-6 space-y-6">
 
-{{ $schedule->start_date->format('d M Y') }}
+                    @csrf
 
--
 
-{{ $schedule->end_date->format('d M Y') }}
 
-|
+                    <!-- STUDENT -->
+                    <div>
 
-{{ substr($schedule->daily_start,0,5) }}
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Select Student
+                        </label>
 
--
+                        <select
+                            name="user_id"
+                            required
+                            class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
 
-{{ substr($schedule->daily_end,0,5) }}
+                            <option value="">
+                                -- pilih student --
+                            </option>
 
-|
+                            @foreach($students as $student)
 
-Rp {{ number_format($schedule->course->price,0,',','.') }}
+                            <option
+                                value="{{ $student->id }}"
+                                {{ old('user_id') == $student->id ? 'selected' : '' }}>
 
-</option>
+                                {{ $student->name }}
 
-@endforeach
+                                @if($student->email)
+                                    - {{ $student->email }}
+                                @endif
 
-</select>
+                            </option>
 
+                            @endforeach
 
-@if($schedules->isEmpty())
+                        </select>
 
-<p class="text-sm text-red-500 mt-2">
+                    </div>
 
-belum ada schedule
 
-</p>
 
-@endif
+                    <!-- SCHEDULE -->
+                    <div>
 
-</div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Select Schedule
+                        </label>
 
+                        <select
+                            name="schedule_id"
+                            required
+                            class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
 
+                            <option value="">
+                                -- pilih jadwal --
+                            </option>
 
-{{-- STATUS --}}
-<div>
+                            @foreach($schedules as $schedule)
 
-<label class="block text-sm font-medium mb-2">
+                            <option
+                                value="{{ $schedule->id }}"
+                                {{ old('schedule_id') == $schedule->id ? 'selected' : '' }}>
 
-Status
+                                {{ $schedule->course->title }}
+                                |
+                                {{ \Carbon\Carbon::parse($schedule->start_date)->format('d M Y') }}
+                                -
+                                {{ \Carbon\Carbon::parse($schedule->end_date)->format('d M Y') }}
+                                |
+                                {{ substr($schedule->daily_start,0,5) }}
+                                -
+                                {{ substr($schedule->daily_end,0,5) }}
+                                |
+                                Rp {{ number_format($schedule->course->price,0,',','.') }}
 
-</label>
+                            </option>
 
-<select name="status" class="w-full border rounded-lg px-3 py-2">
+                            @endforeach
 
-<option value="pending">
-Pending
-</option>
+                        </select>
 
-<option value="paid">
-Paid
-</option>
+                    </div>
 
-</select>
 
-</div>
 
+                    <!-- STATUS -->
+                    <div>
 
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Booking Status
+                        </label>
 
-<div class="flex justify-end gap-3 pt-4">
+                        <select
+                            name="status"
+                            class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
 
-<a href="{{ route('admin.bookings.index') }}"
-class="px-4 py-2 border rounded-lg">
+                            <option value="pending">
+                                Pending
+                            </option>
 
-Cancel
+                            <option value="paid">
+                                Paid
+                            </option>
 
-</a>
+                            <option value="cancelled">
+                                Cancelled
+                            </option>
 
-<button class="px-5 py-2 bg-purple-600 text-white rounded-lg">
+                            <option value="completed">
+                                Completed
+                            </option>
 
-Create Booking
+                        </select>
 
-</button>
+                    </div>
 
-</div>
 
 
-</form>
+                    <!-- NOTES -->
+                    <div>
 
-</div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Notes (Optional)
+                        </label>
+
+                        <textarea
+                            name="notes"
+                            rows="4"
+                            placeholder="Tambahkan catatan booking..."
+                            class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm resize-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">{{ old('notes') }}</textarea>
+
+                    </div>
+
+
+
+                    <!-- ACTION -->
+                    <div class="flex items-center justify-end gap-3 pt-5 border-t border-gray-100">
+
+                        <a href="{{ route('admin.bookings.index') }}"
+                           class="px-5 py-2.5 rounded-xl border border-gray-300 text-sm text-gray-700 hover:bg-gray-50 transition">
+
+                            Cancel
+
+                        </a>
+
+                        <button
+                            type="submit"
+                            class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition shadow-sm">
+
+                            Create Booking
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- RIGHT -->
+        <div class="space-y-6">
+
+            <!-- BOOKING FLOW -->
+            <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+
+                <h3 class="text-lg font-semibold text-gray-800 mb-6">
+                    Booking Flow
+                </h3>
+
+                <div class="space-y-6">
+
+                    <div class="flex items-start gap-4">
+
+                        <div class="w-9 h-9 rounded-full bg-gray-900 text-white flex items-center justify-center text-sm font-semibold">
+                            1
+                        </div>
+
+                        <div>
+
+                            <p class="font-semibold text-gray-800">
+                                Booking Dibuat
+                            </p>
+
+                            <p class="text-sm text-gray-500 mt-1">
+                                Admin membuat booking manual untuk siswa
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="flex items-start gap-4">
+
+                        <div class="w-9 h-9 rounded-full bg-yellow-500 text-white flex items-center justify-center text-sm font-semibold">
+                            2
+                        </div>
+
+                        <div>
+
+                            <p class="font-semibold text-gray-800">
+                                Payment Pending
+                            </p>
+
+                            <p class="text-sm text-gray-500 mt-1">
+                                Payment otomatis dibuat dengan status pending
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="flex items-start gap-4">
+
+                        <div class="w-9 h-9 rounded-full bg-green-600 text-white flex items-center justify-center text-sm font-semibold">
+                            3
+                        </div>
+
+                        <div>
+
+                            <p class="font-semibold text-gray-800">
+                                Verifikasi Payment
+                            </p>
+
+                            <p class="text-sm text-gray-500 mt-1">
+                                Admin dapat approve atau reject pembayaran
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- PAYMENT INFO -->
+            <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+
+                <h3 class="text-lg font-semibold text-gray-800 mb-5">
+                    Payment Information
+                </h3>
+
+                <div class="space-y-4 text-sm">
+
+                    <div class="flex items-center justify-between">
+
+                        <span class="text-gray-500">
+                            Source
+                        </span>
+
+                        <span class="font-medium text-gray-800">
+                            Admin Booking
+                        </span>
+
+                    </div>
+
+                    <div class="flex items-center justify-between">
+
+                        <span class="text-gray-500">
+                            Payment Status
+                        </span>
+
+                        <span class="px-3 py-1 rounded-full bg-red-100 text-red-700 text-xs font-semibold">
+                            Unpaid
+                        </span>
+
+                    </div>
+
+                    <div class="flex items-center justify-between">
+
+                        <span class="text-gray-500">
+                            Payment Method
+                        </span>
+
+                        <span class="font-medium text-gray-800">
+                            Manual
+                        </span>
+
+                    </div>
+
+                    <div class="flex items-center justify-between">
+
+                        <span class="text-gray-500">
+                            Expires
+                        </span>
+
+                        <span class="font-medium text-gray-800">
+                            24 Hours
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
 
 </div>
 
