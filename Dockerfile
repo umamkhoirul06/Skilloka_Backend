@@ -1,18 +1,20 @@
-FROM php:8.2-fpm
+FROM php:8.2-fpm-alpine
 
-RUN apt-get update && apt-get install -y \
-    libpq-dev \
-    unzip \
-    git \
-    curl \
-    && docker-php-ext-install pdo pdo_pgsql pgsql
+# Install dependencies sistem (TERMASUK postgresql-dev)
+RUN apk add --no-cache \
+    nginx nodejs npm curl zip unzip git supervisor libpng-dev libzip-dev oniguruma-dev libxml2-dev postgresql-dev
 
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+# Install ekstensi PHP (Ubah pdo_mysql jadi pdo_pgsql)
+RUN docker-php-ext-install pdo_pgsql pgsql mbstring exif pcntl bcmath gd opcache zip
 
-WORKDIR /var/www
-
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+WORKDIR /var/www/html
 COPY . .
+RUN composer install --optimize-autoloader --no-dev
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader
+COPY docker/nginx.conf /etc/nginx/nginx.conf
+COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-CMD ["php-fpm"]
+EXPOSE 80
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
