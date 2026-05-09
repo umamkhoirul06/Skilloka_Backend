@@ -21,7 +21,11 @@ jobs:
       - run: composer install --no-progress --prefer-dist
       - run: cp .env.example .env
       - run: php artisan key:generate
+      # 🔥 INI KUNCINYA: Tambahkan env di bawah ini
       - run: php artisan test
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ":memory:"
 
   build-and-push:
     name: Build & Push Docker Image
