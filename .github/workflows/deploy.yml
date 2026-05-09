@@ -12,34 +12,56 @@ jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
+    
+    # 🔥 INI KUNCINYA: Kita nyalakan server PostgreSQL asli di GitHub Actions
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: skilloka_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - uses: actions/checkout@v4
       
-      # 1. Setup PHP
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
           extensions: pdo, pdo_pgsql, pgsql, bcmath
 
-      # 2. Setup Node.js (WAJIB UNTUK VITE/TAILWIND)
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      # 3. Install PHP Dependencies
       - run: composer install --no-progress --prefer-dist
       
-      # 4. Install & Build Frontend Dependencies (WAJIB AGAR MANIFEST VITE TERBACA)
       - run: npm install
       - run: npm run build
 
-      # 5. Setup Environment & Jalankan Testing
       - run: cp .env.example .env
+      
+      # 🔥 UBAH SETTINGAN .ENV AGAR MENGGUNAKAN POSTGRESQL (Bukan SQLite)
+      - name: Setup Database Database Connection
+        run: |
+          sed -i 's/DB_CONNECTION=.*/DB_CONNECTION=pgsql/' .env
+          sed -i 's/DB_HOST=.*/DB_HOST=127.0.0.1/' .env
+          sed -i 's/DB_PORT=.*/DB_PORT=5432/' .env
+          sed -i 's/DB_DATABASE=.*/DB_DATABASE=skilloka_db/' .env
+          sed -i 's/DB_USERNAME=.*/DB_USERNAME=postgres/' .env
+          sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=password/' .env
+
       - run: php artisan key:generate
+      
+      # 🔥 Jalankan test dengan PostgreSQL Asli!
       - run: php artisan test
-        env:
-          DB_CONNECTION: sqlite
-          DB_DATABASE: ":memory:"
 
   build-and-push:
     name: Build & Push Docker Image

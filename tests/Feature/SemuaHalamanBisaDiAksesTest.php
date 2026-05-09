@@ -14,20 +14,20 @@ use Spatie\Permission\PermissionRegistrar;
 
 class SemuaHalamanBisaDiAksesTest extends TestCase
 {
-    // 🔥 Tambahkan WithoutVite agar tidak error "Manifest not found" saat CI/CD
+    // 🔥 Gunakan WithoutVite agar aman dari error "Manifest not found" saat CI/CD
     use RefreshDatabase, WithoutVite;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        // 🔥 Reset cache permission (WAJIB)
+        // 🔥 Reset cache permission bawaan Spatie (WAJIB)
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // 🔥 Jalankan migration (karena pakai RefreshDatabase)
+        // 🔥 Jalankan migration untuk database testing
         $this->artisan('migrate');
 
-        // 🔥 Pastikan role ada + guard sesuai
+        // 🔥 Pastikan role dasar sudah tersedia
         Role::firstOrCreate([
             'name' => 'admin-lpk',
             'guard_name' => 'web',
@@ -41,15 +41,15 @@ class SemuaHalamanBisaDiAksesTest extends TestCase
 
     private function admin()
     {
-        // 🔥 BUAT TENANT DUMMY (Status Aktif)
+        // 🔥 1. Buat Tenant Dummy (Syarat aktif)
         $tenantId = (string) Str::uuid();
         $tenant = Tenant::forceCreate([
             'id' => $tenantId,
             'name' => 'Tenant Testing',
-            'is_active' => true, // Syarat agar bisa login
+            'is_active' => true,
         ]);
 
-        // 🔥 BUAT LPK DUMMY (Status Approved)
+        // 🔥 2. Buat LPK Dummy (Syarat agar lolos filter verifikasi)
         $lpkId = (string) Str::uuid();
         $lpk = Lpk::forceCreate([
             'id' => $lpkId,
@@ -57,10 +57,10 @@ class SemuaHalamanBisaDiAksesTest extends TestCase
             'name' => 'LPK Testing',
             'is_verified' => true,
             'status' => 'active',
-            'status_verifikasi' => 'approved', // Syarat agar lolos 403 Forbidden
+            'status_verifikasi' => 'approved',
         ]);
 
-        // 🔥 Buat User & Hubungkan dengan LPK yang sudah di-Approve
+        // 🔥 3. Buat User & Hubungkan dengan LPK dan Tenant di atas
         $user = User::factory()->create([
             'email_verified_at' => now(),
             'tenant_id' => $tenantId,
@@ -86,14 +86,13 @@ class SemuaHalamanBisaDiAksesTest extends TestCase
     }
 
     /*
-    |--------------------------------
-    | PUBLIC
-    |--------------------------------
+    |--------------------------------------------------------------------------
+    | TEST HALAMAN PUBLIC
+    |--------------------------------------------------------------------------
     */
     public function test_home_redirect(): void
     {
-        $this->get('/')
-            ->assertRedirect(route('admin.login'));
+        $this->get('/')->assertRedirect(route('admin.login'));
     }
 
     public function test_login_page(): void
@@ -107,9 +106,9 @@ class SemuaHalamanBisaDiAksesTest extends TestCase
     }
 
     /*
-    |--------------------------------
-    | ADMIN LPK
-    |--------------------------------
+    |--------------------------------------------------------------------------
+    | TEST HALAMAN ADMIN LPK
+    |--------------------------------------------------------------------------
     */
     public function test_admin_dashboard(): void
     {
@@ -157,9 +156,9 @@ class SemuaHalamanBisaDiAksesTest extends TestCase
     }
 
     /*
-    |--------------------------------
-    | SUPER ADMIN
-    |--------------------------------
+    |--------------------------------------------------------------------------
+    | TEST HALAMAN SUPER ADMIN
+    |--------------------------------------------------------------------------
     */
     public function test_super_dashboard(): void
     {
