@@ -7,9 +7,15 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Course;
 use App\Models\Booking;
+<<<<<<< HEAD
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
+=======
+use App\Models\CourseSchedule;
+use Barryvdh\DomPDF\Facade\Pdf;
+
+>>>>>>> 1b253d1228e5419f6b7442a875d29e23e7027801
 class AdminDashboardController extends Controller
 {
     public function index()
@@ -39,6 +45,7 @@ class AdminDashboardController extends Controller
             'recentBookings'
         ));
     }
+<<<<<<< HEAD
    
 
 public function exportPdf(Request $request)
@@ -71,4 +78,36 @@ public function exportPdf(Request $request)
 
     return $pdf->download('report-' . $period . '-' . now()->format('Ymd') . '.pdf');
 }
+=======
+
+    /*
+    |--------------------------------------------------------------------------
+    | DOWNLOAD DASHBOARD PDF
+    |--------------------------------------------------------------------------
+    */
+
+    public function downloadPdf()
+    {
+        $user = Auth::user();
+        $tenantId = $user->tenant_id;
+
+        $totalStudents = User::where('tenant_id', $tenantId)->count();
+        $totalCourses = Course::where('tenant_id', $tenantId)->count();
+        $upcomingClasses = CourseSchedule::whereHas('course', fn($q) => $q->where('tenant_id', $tenantId))
+            ->where('start_date', '>=', now())
+            ->count();
+        $pendingBookings = Booking::where('tenant_id', $tenantId)->where('status', 'pending')->count();
+        $recentBookings = Booking::where('tenant_id', $tenantId)->latest()->take(10)->get();
+
+        $pdf = Pdf::loadView('admin.dashboard_pdf', compact(
+            'totalStudents',
+            'totalCourses',
+            'upcomingClasses',
+            'pendingBookings',
+            'recentBookings'
+        ))->setPaper('a4', 'portrait');
+
+        return $pdf->download('laporan-dashboard-' . now()->format('Y-m-d') . '.pdf');
+    }
+>>>>>>> 1b253d1228e5419f6b7442a875d29e23e7027801
 }

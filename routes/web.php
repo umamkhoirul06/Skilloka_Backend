@@ -113,6 +113,9 @@ Route::middleware(['auth', 'role:admin_lpk'])
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])
             ->name('dashboard');
 
+        Route::get('/dashboard/pdf', [AdminDashboardController::class, 'downloadPdf'])
+            ->name('dashboard.pdf');
+
         Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
         Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
 

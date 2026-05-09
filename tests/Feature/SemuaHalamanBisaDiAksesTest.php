@@ -4,6 +4,9 @@ namespace Tests\Feature;
 
 use Tests\TestCase;
 use App\Models\User;
+use App\Models\Tenant;
+use App\Models\Lpk;
+use Illuminate\Support\Str;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
@@ -16,28 +19,42 @@ class SemuaHalamanBisaDiAksesTest extends TestCase
     {
         parent::setUp();
 
-        // 🔥 Reset cache permission (WAJIB)
+        // Reset cache permission bawaan Spatie
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // 🔥 Jalankan migration (karena pakai RefreshDatabase)
+        // Jalankan migration untuk database testing
         $this->artisan('migrate');
 
-        // 🔥 Pastikan role ada + guard sesuai
-        Role::firstOrCreate([
-            'name' => 'admin-lpk',
-            'guard_name' => 'web',
-        ]);
-
-        Role::firstOrCreate([
-            'name' => 'super-admin',
-            'guard_name' => 'web',
-        ]);
+        // Pastikan role dasar sudah tersedia
+        Role::firstOrCreate(['name' => 'admin-lpk', 'guard_name' => 'web']);
+        Role::firstOrCreate(['name' => 'super-admin', 'guard_name' => 'web']);
     }
 
     private function admin()
     {
+        $tenantId = (string) Str::uuid();
+        $tenant = Tenant::forceCreate([
+            'id' => $tenantId,
+            'name' => 'Tenant Testing',
+            'is_active' => true,
+        ]);
+
+        $lpkId = (string) Str::uuid();
+        $lpk = Lpk::forceCreate([
+            'id' => $lpkId,
+            'tenant_id' => $tenantId,
+            'name' => 'LPK Testing',
+            'is_verified' => true,
+            'status' => 'active',
+            'status_verifikasi' => 'approved',
+        ]);
+
         $user = User::factory()->create([
             'email_verified_at' => now(),
+            'tenant_id' => $tenantId,
+            'lpk_id' => $lpkId,
+            'status' => 'active',
+            'role' => 'admin-lpk', // 🔥 KUNCI: Isi kolom role di database
         ]);
 
         $user->assignRole('admin-lpk');
@@ -48,7 +65,10 @@ class SemuaHalamanBisaDiAksesTest extends TestCase
     private function superAdmin()
     {
         $user = User::factory()->create([
+            'email' => 'god@skilloka.com', // 🔥 KUNCI: Pakai email dewa untuk Super Admin
             'email_verified_at' => now(),
+            'status' => 'active',
+            'role' => 'super-admin', // 🔥 KUNCI: Isi kolom role di database
         ]);
 
         $user->assignRole('super-admin');
@@ -57,14 +77,13 @@ class SemuaHalamanBisaDiAksesTest extends TestCase
     }
 
     /*
-    |--------------------------------
-    | PUBLIC
-    |--------------------------------
+    |--------------------------------------------------------------------------
+    | TEST HALAMAN PUBLIC
+    |--------------------------------------------------------------------------
     */
     public function test_home_redirect(): void
     {
-        $this->get('/')
-            ->assertRedirect(route('admin.login'));
+        $this->get('/')->assertRedirect(route('admin.login'));
     }
 
     public function test_login_page(): void
@@ -78,9 +97,9 @@ class SemuaHalamanBisaDiAksesTest extends TestCase
     }
 
     /*
-    |--------------------------------
-    | ADMIN LPK
-    |--------------------------------
+    |--------------------------------------------------------------------------
+    | TEST HALAMAN ADMIN LPK
+    |--------------------------------------------------------------------------
     */
     public function test_admin_dashboard(): void
     {
@@ -128,9 +147,9 @@ class SemuaHalamanBisaDiAksesTest extends TestCase
     }
 
     /*
-    |--------------------------------
-    | SUPER ADMIN
-    |--------------------------------
+    |--------------------------------------------------------------------------
+    | TEST HALAMAN SUPER ADMIN
+    |--------------------------------------------------------------------------
     */
     public function test_super_dashboard(): void
     {

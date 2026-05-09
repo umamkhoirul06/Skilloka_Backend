@@ -317,11 +317,13 @@ function downloadPdf() {
             <div class="card-header">
                 <span>Activity Overview</span>
                 <div class="flex items-center gap-2">
+                    @if($status == 'approved')
                     <select class="filter-select" id="filterLine" onchange="updateLineChart(this.value)">
                         <option value="year">Tahun Ini</option>
                         <option value="month">Bulan Ini</option>
                         <option value="week">7 Hari Terakhir</option>
                     </select>
+                    @endif
                 </div>
             </div>
             <div style="height: 300px; width: 100%;">
@@ -333,10 +335,12 @@ function downloadPdf() {
         <div class="content-card">
             <div class="card-header">
                 <span>Distribution</span>
+                @if($status == 'approved')
                 <select class="filter-select" id="filterPie" onchange="updatePieChart(this.value)">
                     <option value="year">Tahun Ini</option>
                     <option value="month">Bulan Ini</option>
                 </select>
+                @endif
             </div>
             <div style="height: 300px; width: 100%; display: flex; align-items: center; justify-content: center;">
                 <canvas id="chartPie"></canvas>
