@@ -204,6 +204,7 @@
         <div>
             <p class="page-topbar-title">Ringkasan Operasional LPK Anda</p>
         </div>
+        @if($status == 'approved')
         <a href="{{ route('admin.dashboard.pdf') }}" class="btn-pdf" target="_blank" id="btn-export-pdf">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -211,6 +212,7 @@
             </svg>
             Download Report (PDF)
         </a>
+        @endif
     </div>
 
     <div class="status-banner banner-{{ $status }}" style="margin-bottom:28px;">
@@ -304,11 +306,13 @@
             <div class="card-header">
                 <span>Activity Overview</span>
                 <div class="flex items-center gap-2">
+                    @if($status == 'approved')
                     <select class="filter-select" id="filterLine" onchange="updateLineChart(this.value)">
                         <option value="year">Tahun Ini</option>
                         <option value="month">Bulan Ini</option>
                         <option value="week">7 Hari Terakhir</option>
                     </select>
+                    @endif
                 </div>
             </div>
             <div style="height: 300px; width: 100%;">
@@ -320,10 +324,12 @@
         <div class="content-card">
             <div class="card-header">
                 <span>Distribution</span>
+                @if($status == 'approved')
                 <select class="filter-select" id="filterPie" onchange="updatePieChart(this.value)">
                     <option value="year">Tahun Ini</option>
                     <option value="month">Bulan Ini</option>
                 </select>
+                @endif
             </div>
             <div style="height: 300px; width: 100%; display: flex; align-items: center; justify-content: center;">
                 <canvas id="chartPie"></canvas>
