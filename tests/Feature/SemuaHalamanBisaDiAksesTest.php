@@ -8,14 +8,14 @@ use App\Models\Tenant;
 use App\Models\Lpk;
 use Illuminate\Support\Str;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithoutVite;
+// 🔥 Tanpa WithoutVite karena NPM Build sudah sukses di CI/CD
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
 class SemuaHalamanBisaDiAksesTest extends TestCase
 {
-    // 🔥 Gunakan WithoutVite agar aman dari error "Manifest not found" saat CI/CD
-    use RefreshDatabase, WithoutVite;
+    // 🔥 Cukup RefreshDatabase saja
+    use RefreshDatabase;
 
     protected function setUp(): void
     {
