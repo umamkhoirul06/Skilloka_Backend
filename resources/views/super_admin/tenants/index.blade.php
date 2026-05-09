@@ -233,7 +233,25 @@ border:1px solid #bbf7d0;
     </div>
 
 
+<div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+    <select id="lpkPeriod" style="padding:8px 14px; border:1px solid #e2e8f0; border-radius:10px; font-size:13px;">
+        <option value="month">Bulan Ini</option>
+        <option value="3months">3 Bulan</option>
+        <option value="6months">6 Bulan</option>
+        <option value="year">Tahun Ini</option>
+    </select>
+    <a href="#" onclick="downloadLpkPdf()"
+       style="background:linear-gradient(135deg,#4f46e5,#7c3aed); color:white; padding:10px 20px; border-radius:10px; font-size:13px; font-weight:600; text-decoration:none;">
+        📥 Download Daftar LPK (PDF)
+    </a>
+</div>
 
+<script>
+function downloadLpkPdf() {
+    const period = document.getElementById('lpkPeriod').value;
+    window.open(`/super-admin/tenants/report/pdf?period=${period}`, '_blank');
+}
+</script>
     <!-- TABLE -->
     <table class="table w-full">
 

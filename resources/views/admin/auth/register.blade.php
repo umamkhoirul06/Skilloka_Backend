@@ -603,31 +603,25 @@
 
 
 
-                <!-- AGREEMENT -->
-                <div class="mb-8 flex items-start gap-3">
+                {{-- AGREEMENT --}}
+<div class="mb-8 flex items-start gap-3">
+    <input
+        type="checkbox"
+        id="persetujuan"
+        required
+        class="mt-1 rounded border-gray-300"
+        onchange="toggleBtn(this)">
 
-                    <input
-                        type="checkbox"
-                        required
-                        class="mt-1 rounded border-gray-300">
+    <p class="text-sm text-gray-600 leading-relaxed">
+        Saya menyatakan bahwa seluruh data yang diberikan benar
+        dan bersedia diverifikasi oleh tim Skilloka.
+    </p>
+</div>
 
-                    <p class="text-sm text-gray-600 leading-relaxed">
-
-                        Saya menyatakan bahwa seluruh data yang diberikan benar
-                        dan bersedia diverifikasi oleh tim Skilloka.
-
-                    </p>
-
-                </div>
-
-
-
-                <!-- BUTTON -->
-                <button class="btn">
-
-                    Kirim Pengajuan Verifikasi
-
-                </button>
+{{-- BUTTON --}}
+<button id="btnKirim" class="btn opacity-50 cursor-not-allowed" disabled>
+    Kirim Pengajuan Verifikasi
+</button>
 
             </form>
 
@@ -652,6 +646,18 @@
     </div>
 
 </div>
+<script>
+function toggleBtn(checkbox) {
+    const btn = document.getElementById('btnKirim');
+    if (checkbox.checked) {
+        btn.disabled = false;
+        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+    } else {
+        btn.disabled = true;
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+}
+</script>
 
 </body>
 </html>

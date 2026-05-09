@@ -8,7 +8,10 @@ use App\Models\Lpk;
 use App\Models\LpkVerification;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
-
+// Tambah di bagian use
+use App\Mail\LpkVerified;
+use App\Mail\LpkRejected;
+use Illuminate\Support\Facades\Mail;
 class VerificationController extends Controller
 {
     /*
@@ -204,19 +207,21 @@ class VerificationController extends Controller
             DB::commit();
 
 
+// Kirim email ke semua user tenant
+foreach ($users as $user) {
+    Mail::to($user->email)->send(new LpkVerified(
+        $user->name,
+        $lpk->name
+    ));
+}
 
-            return redirect()
+return redirect()
+    ->route('super.tenants')
+    ->with('success', 'LPK berhasil diverifikasi');
 
-                ->route('super.tenants')
 
-                ->with(
 
-                    'success',
-
-                    'LPK berhasil diverifikasi'
-
-                );
-
+           
         } catch (\Exception $e) {
 
             DB::rollBack();
@@ -340,18 +345,19 @@ class VerificationController extends Controller
             DB::commit();
 
 
+// Kirim email ke semua user tenant
+$users = User::where('tenant_id', $tenant->id)->get();
+foreach ($users as $user) {
+    Mail::to($user->email)->send(new LpkRejected(
+        $user->name,
+        $lpk->name
+    ));
+}
 
-            return redirect()
-
-                ->route('super.verifications')
-
-                ->with(
-
-                    'success',
-
-                    'Pengajuan LPK berhasil ditolak'
-
-                );
+return redirect()
+    ->route('super.verifications')
+    ->with('success', 'Pengajuan LPK berhasil ditolak');
+            
 
         } catch (\Exception $e) {
 

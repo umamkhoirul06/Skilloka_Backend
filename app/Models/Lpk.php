@@ -11,22 +11,23 @@ class Lpk extends Model
     use HasUuids, BelongsToTenant;
 
     protected $fillable = [
-        'tenant_id',
-        'name',
-        'legal_name',
-        'nib',
-        'location_id',
-        'address',
-        'lat',
-        'long',
-        'description',
-        'facilities',
-        'is_verified',
-        'status',
-        'contact_info',
-        'logo',
-        'images',
-    ];
+    'tenant_id',
+    'name',
+    'legal_name',
+    'nib',
+    'location_id',
+    'address',
+    'lat',
+    'long',
+    'description',
+    'facilities',
+    'is_verified',
+    'status',
+    'status_verifikasi', // ← TAMBAH INI
+    'contact_info',
+    'logo',
+    'images',
+];
 
     protected $casts = [
         'facilities' => 'array',

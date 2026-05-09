@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Tenant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+ use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
+
 
 class TenantController extends Controller
 {
@@ -148,4 +151,30 @@ class TenantController extends Controller
             ]);
         }
     }
+   
+public function exportPdf(Request $request)
+{
+    $period = $request->get('period', 'month');
+
+    $startDate = match($period) {
+        'month'   => Carbon::now()->startOfMonth(),
+        '3months' => Carbon::now()->subMonths(3),
+        '6months' => Carbon::now()->subMonths(6),
+        default   => Carbon::now()->startOfYear(),
+    };
+
+    $tenants = Tenant::with(['users', 'lpk'])
+        ->whereHas('lpk', function ($q) {
+            $q->where('status', 'active');
+        })
+        ->where('created_at', '>=', $startDate)
+        ->latest()
+        ->get();
+
+    $pdf = Pdf::loadView('super_admin.tenants.pdf', compact(
+        'tenants', 'period', 'startDate'
+    ))->setPaper('a4', 'landscape');
+
+    return $pdf->download('daftar-lpk-' . $period . '-' . now()->format('Ymd') . '.pdf');
+}
 }

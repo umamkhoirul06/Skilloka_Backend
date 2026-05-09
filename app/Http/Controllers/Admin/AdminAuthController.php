@@ -413,7 +413,7 @@ class AdminAuthController extends Controller
 
                     'success',
 
-                    'Pendaftaran berhasil! Tim Skilloka akan memverifikasi LPK Anda terlebih dahulu.'
+                    'Pendaftaran berhasil! Tim Skilloka akan memverifikasi LPK Anda terlebih dahulu. Silahkan tunggu notifikasi di email anda.'
 
                 );
 

@@ -3,12 +3,15 @@
 @section('title', 'Admin LPK Dashboard')
 
 @section('content')
-
     @php
-        // 🔥 Pengecekan Status LPK otomatis
-        $myLpk = \App\Models\Lpk::where('tenant_id', auth()->user()->tenant_id)->first();
-        $status = $myLpk ? $myLpk->status_verifikasi : 'pending';
-    @endphp
+    $myLpk = \App\Models\Lpk::where('tenant_id', auth()->user()->tenant_id)->first();
+    $status = $myLpk ? $myLpk->status_verifikasi : 'pending';
+    
+    $monthlyStudentsJson = json_encode($monthlyStudents ?? [10,25,15,35,22,45,30,40,28,50,35,60]);
+    $monthlyCoursesJson  = json_encode($monthlyCourses  ?? [5,12,18,15,28,24,20,18,22,30,25,35]);
+@endphp
+
+   
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -200,18 +203,28 @@
     {{-- ═══════════════════════════════════════
          Status Banner (JANGAN DIUBAH LOGIKANYA)
     ═══════════════════════════════════════ --}}
-    <div class="page-topbar">
-        <div>
-            <p class="page-topbar-title">Ringkasan Operasional LPK Anda</p>
-        </div>
-        <a href="{{ route('admin.dashboard.pdf') }}" class="btn-pdf" target="_blank" id="btn-export-pdf">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-            </svg>
-            Download Report (PDF)
-        </a>
-    </div>
+    <div class="flex items-center gap-2">
+    <select id="periodSelect" class="filter-select">
+        <option value="year">Tahun Ini</option>
+        <option value="month">Bulan Ini</option>
+        <option value="3months">3 Bulan</option>
+        <option value="6months">6 Bulan</option>
+    </select>
+    <a href="#" onclick="downloadPdf()" class="btn-pdf" id="btn-export-pdf">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+        </svg>
+        Download Report (PDF)
+    </a>
+</div>
+
+<script>
+function downloadPdf() {
+    const period = document.getElementById('periodSelect').value;
+    window.open(`/admin/dashboard/report/pdf?period=${period}`, '_blank');
+}
+</script>
 
     <div class="status-banner banner-{{ $status }}" style="margin-bottom:28px;">
         <div>
@@ -409,8 +422,8 @@
         const lineDataSets = {
             year: {
                 labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
-                students: @json($monthlyStudents ?? [10,25,15,35,22,45,30,40,28,50,35,60]),
-                courses:  @json($monthlyCourses  ?? [5,12,18,15,28,24,20,18,22,30,25,35]),
+                students: {!! $monthlyStudentsJson !!},
+                courses:  {!! $monthlyCoursesJson !!},
             },
             month: {
                 labels: ['Minggu 1','Minggu 2','Minggu 3','Minggu 4'],

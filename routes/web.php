@@ -24,7 +24,52 @@ use App\Http\Controllers\Admin\SuperAdmin\UserController;
 use App\Http\Controllers\Admin\SuperAdmin\FinanceController;
 use App\Http\Controllers\Admin\SuperAdmin\LogController;
 use App\Http\Controllers\Admin\SuperAdmin\SettingsController;
+use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Http\Request;
 
+// Form lupa password
+Route::get('/admin/forgot-password', function () {
+    return view('admin.auth.forgot-password');
+})->name('password.request');
+
+// Kirim link reset
+Route::post('/admin/forgot-password', function (Request $request) {
+    $request->validate(['email' => 'required|email']);
+
+    $status = Password::sendResetLink(
+        $request->only('email')
+    );
+
+    return $status === Password::RESET_LINK_SENT
+        ? back()->with('success', 'Link reset password telah dikirim ke email Anda!')
+        : back()->withErrors(['email' => __($status)]);
+})->name('password.email');
+
+// Form reset password
+Route::get('/admin/reset-password/{token}', function (string $token) {
+    return view('admin.auth.reset-password', ['token' => $token]);
+})->name('password.reset');
+
+// Proses reset password
+Route::post('/admin/reset-password', function (Request $request) {
+    $request->validate([
+        'token'    => 'required',
+        'email'    => 'required|email',
+        'password' => 'required|confirmed|min:8',
+    ]);
+
+    $status = Password::reset(
+        $request->only('email', 'password', 'password_confirmation', 'token'),
+        function ($user, $password) {
+            $user->forceFill(['password' => bcrypt($password)])->save();
+        }
+    );
+
+    return $status === Password::PASSWORD_RESET
+        ? redirect()->route('admin.login')->with('success', 'Password berhasil direset!')
+        : back()->withErrors(['email' => __($status)]);
+})->name('password.update');
 
 /*
 |--------------------------------------------------------------------------
@@ -80,7 +125,8 @@ Route::middleware(['auth', 'role:admin_lpk'])
         'update',
         'destroy'
     ]);
-
+        Route::get('/dashboard/report/pdf', [AdminDashboardController::class, 'exportPdf'])
+    ->name('admin.dashboard.pdf');
         Route::resource('bookings', BookingController::class)->except(['edit', 'update']);
         Route::patch('/bookings/{booking}/status', [BookingController::class, 'updateStatus'])->name('bookings.status');
         /*
@@ -120,7 +166,8 @@ Route::middleware(['auth', 'role:super_admin'])
         Route::get('/tenants', [TenantController::class, 'index'])
     ->name('tenants');
 
-
+Route::get('/tenants/report/pdf', [TenantController::class, 'exportPdf'])
+    ->name('super.tenants.pdf');
 
 Route::get('/tenants/{id}', [TenantController::class, 'show'])
     ->name('tenants.show');
@@ -160,4 +207,6 @@ Route::get('/settings', [SettingsController::class, 'index'])
 
 Route::post('/settings', [SettingsController::class, 'update'])
     ->name('settings.update');
+    Route::get('/finance/report/pdf', [\App\Http\Controllers\Admin\SuperAdmin\FinanceController::class, 'exportPdf'])
+    ->name('super.finance.pdf');
     });

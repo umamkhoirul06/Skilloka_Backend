@@ -345,14 +345,9 @@
                                     class="w-4 h-4 rounded border-gray-600 bg-gray-700 text-purple-600 focus:ring-purple-500 focus:ring-offset-0">
                                 <span class="ml-2 text-sm text-gray-400">Ingat saya</span>
                             </label>
-                            <a href="https://wa.me/62895405193300"
-   target="_blank"
-   class="text-sm text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-1">
-
-    <i class="fab fa-whatsapp"></i>
-
-    Hubungi Super Admin
-
+                            <a href="{{ route('password.request') }}"
+   class="text-sm text-purple-400 hover:text-purple-300 transition-colors">
+    Lupa Password?
 </a>
                         </div>
 
@@ -362,6 +357,17 @@
                         </button>
                     </form>
 
+
+<a href="https://wa.me/62895405193300"
+   target="_blank"
+   class="text-sm text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-1">
+
+    <i class="fab fa-whatsapp"></i>
+
+    Hubungi Super Admin
+    
+
+</a>
                     <div class="mt-8 pt-6 border-t border-gray-700/50">
 
     <p class="text-center text-gray-500 text-sm mb-2">
