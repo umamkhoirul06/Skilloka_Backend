@@ -14,14 +14,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      
+      # 1. Setup PHP
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
           extensions: pdo, pdo_pgsql, pgsql, bcmath
+
+      # 2. Setup Node.js (WAJIB UNTUK VITE/TAILWIND)
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 3. Install PHP Dependencies
       - run: composer install --no-progress --prefer-dist
+      
+      # 4. Install & Build Frontend Dependencies (WAJIB AGAR MANIFEST VITE TERBACA)
+      - run: npm install
+      - run: npm run build
+
+      # 5. Setup Environment & Jalankan Testing
       - run: cp .env.example .env
       - run: php artisan key:generate
-      # 🔥 INI KUNCINYA: Tambahkan env di bawah ini
       - run: php artisan test
         env:
           DB_CONNECTION: sqlite

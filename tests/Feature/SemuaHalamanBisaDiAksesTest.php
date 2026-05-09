@@ -4,13 +4,18 @@ namespace Tests\Feature;
 
 use Tests\TestCase;
 use App\Models\User;
+use App\Models\Tenant;
+use App\Models\Lpk;
+use Illuminate\Support\Str;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\WithoutVite;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
 class SemuaHalamanBisaDiAksesTest extends TestCase
 {
-    use RefreshDatabase;
+    // 🔥 Tambahkan WithoutVite agar tidak error "Manifest not found" saat CI/CD
+    use RefreshDatabase, WithoutVite;
 
     protected function setUp(): void
     {
@@ -36,8 +41,31 @@ class SemuaHalamanBisaDiAksesTest extends TestCase
 
     private function admin()
     {
+        // 🔥 BUAT TENANT DUMMY (Status Aktif)
+        $tenantId = (string) Str::uuid();
+        $tenant = Tenant::forceCreate([
+            'id' => $tenantId,
+            'name' => 'Tenant Testing',
+            'is_active' => true, // Syarat agar bisa login
+        ]);
+
+        // 🔥 BUAT LPK DUMMY (Status Approved)
+        $lpkId = (string) Str::uuid();
+        $lpk = Lpk::forceCreate([
+            'id' => $lpkId,
+            'tenant_id' => $tenantId,
+            'name' => 'LPK Testing',
+            'is_verified' => true,
+            'status' => 'active',
+            'status_verifikasi' => 'approved', // Syarat agar lolos 403 Forbidden
+        ]);
+
+        // 🔥 Buat User & Hubungkan dengan LPK yang sudah di-Approve
         $user = User::factory()->create([
             'email_verified_at' => now(),
+            'tenant_id' => $tenantId,
+            'lpk_id' => $lpkId,
+            'status' => 'active',
         ]);
 
         $user->assignRole('admin-lpk');
@@ -49,6 +77,7 @@ class SemuaHalamanBisaDiAksesTest extends TestCase
     {
         $user = User::factory()->create([
             'email_verified_at' => now(),
+            'status' => 'active',
         ]);
 
         $user->assignRole('super-admin');
