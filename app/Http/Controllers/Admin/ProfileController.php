@@ -88,194 +88,61 @@ class ProfileController extends Controller
 
     public function update(Request $request)
     {
-
         /*
         |--------------------------------------------------------------------------
         | USER LOGIN
         |--------------------------------------------------------------------------
         */
-
         $user = Auth::user();
-
-
 
         /*
         |--------------------------------------------------------------------------
         | SAFETY LOGIN
         |--------------------------------------------------------------------------
         */
-
         if (!$user) {
-
             abort(403);
-
         }
-
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | GET LPK
-        |--------------------------------------------------------------------------
-        */
-
-        $lpk = Lpk::where(
-
-                'tenant_id',
-                $user->tenant_id
-
-            )
-
-            ->firstOrFail();
-
-
 
         /*
         |--------------------------------------------------------------------------
         | VALIDATION
         |--------------------------------------------------------------------------
         */
-
         $request->validate([
-
-            'name' => 'required|max:255',
-
-            'legal_name' => 'nullable|max:255',
-
-            'nib' => 'nullable|max:255',
-
-            'address' => 'nullable',
-
-            'description' => 'nullable',
-
-            'facilities' => 'nullable',
-
-            'contact_info' => 'nullable',
-
-            'lat' => 'nullable',
-
-            'long' => 'nullable',
-
-            'logo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-
-            'images.*' => 'nullable|image|mimes:jpg,jpeg,png|max:4096',
-
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,'.$user->id,
+            'phone' => 'nullable|string|max:25',
+            'avatar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-
+        /*
+        |--------------------------------------------------------------------------
+        | UPDATE DATA PENGGUNA
+        |--------------------------------------------------------------------------
+        */
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->phone = $request->phone;
 
         /*
         |--------------------------------------------------------------------------
-        | UPDATE DATA
+        | UPLOAD AVATAR
         |--------------------------------------------------------------------------
         */
-
-        $lpk->update([
-
-            'name' => $request->name,
-
-            'legal_name' => $request->legal_name,
-
-            'nib' => $request->nib,
-
-            'address' => $request->address,
-
-            'description' => $request->description,
-
-            'facilities' => $request->facilities,
-
-            'contact_info' => $request->contact_info,
-
-            'lat' => $request->lat,
-
-            'long' => $request->long,
-
-        ]);
-
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | UPLOAD LOGO
-        |--------------------------------------------------------------------------
-        */
-
-        if ($request->hasFile('logo')) {
-
-            $logo = $request
-
-                ->file('logo')
-
-                ->store(
-
-                    'lpk/logo',
-
-                    'public'
-
-                );
-
-
-
-            $lpk->update([
-
-                'logo' => $logo
-
-            ]);
-
+        if ($request->hasFile('avatar')) {
+            $avatar = $request->file('avatar')->store('user/avatars', 'public');
+            $user->avatar = $avatar;
         }
 
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | UPLOAD GALLERY
-        |--------------------------------------------------------------------------
-        */
-
-        if ($request->hasFile('images')) {
-
-            $images = [];
-
-
-
-            foreach ($request->file('images') as $image) {
-
-                $images[] = $image->store(
-
-                    'lpk/gallery',
-
-                    'public'
-
-                );
-
-            }
-
-
-
-            $lpk->update([
-
-                'images' => json_encode($images)
-
-            ]);
-
-        }
-
-
+        $user->save();
 
         /*
         |--------------------------------------------------------------------------
         | SUCCESS
         |--------------------------------------------------------------------------
         */
-
-        return back()->with(
-
-            'success',
-
-            'Profil LPK berhasil diperbarui'
-
-        );
-
+        return back()->with('success', 'Profil Pengguna berhasil diperbarui!');
     }
 
 }
