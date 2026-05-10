@@ -7,15 +7,11 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Course;
 use App\Models\Booking;
-<<<<<<< HEAD
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
-=======
 use App\Models\CourseSchedule;
-use Barryvdh\DomPDF\Facade\Pdf;
 
->>>>>>> 1b253d1228e5419f6b7442a875d29e23e7027801
 class AdminDashboardController extends Controller
 {
     public function index()
@@ -45,40 +41,37 @@ class AdminDashboardController extends Controller
             'recentBookings'
         ));
     }
-<<<<<<< HEAD
-   
 
-public function exportPdf(Request $request)
-{
-    $tenantId = auth()->user()->tenant_id;
-    
-    // Filter periode
-    $period = $request->get('period', 'year');
-    
-    $startDate = match($period) {
-        'month'    => Carbon::now()->startOfMonth(),
-        '3months'  => Carbon::now()->subMonths(3),
-        '6months'  => Carbon::now()->subMonths(6),
-        default    => Carbon::now()->startOfYear(),
-    };
+    public function exportPdf(Request $request)
+    {
+        $tenantId = auth()->user()->tenant_id;
+        
+        // Filter periode
+        $period = $request->get('period', 'year');
+        
+        $startDate = match($period) {
+            'month'    => Carbon::now()->startOfMonth(),
+            '3months'  => Carbon::now()->subMonths(3),
+            '6months'  => Carbon::now()->subMonths(6),
+            default    => Carbon::now()->startOfYear(),
+        };
 
-    $bookings = \App\Models\Booking::with([
-            'user',
-            'schedule.course'
-        ])
-        ->where('tenant_id', $tenantId)
-        ->where('created_at', '>=', $startDate)
-        ->orderBy('created_at', 'desc')
-        ->get();
+        $bookings = \App\Models\Booking::with([
+                'user',
+                'schedule.course'
+            ])
+            ->where('tenant_id', $tenantId)
+            ->where('created_at', '>=', $startDate)
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-    $lpk = \App\Models\Lpk::where('tenant_id', $tenantId)->first();
+        $lpk = \App\Models\Lpk::where('tenant_id', $tenantId)->first();
 
-    $pdf = Pdf::loadView('admin.reports.pdf', compact('bookings', 'lpk', 'period', 'startDate'))
-        ->setPaper('a4', 'landscape');
+        $pdf = Pdf::loadView('admin.reports.pdf', compact('bookings', 'lpk', 'period', 'startDate'))
+            ->setPaper('a4', 'landscape');
 
-    return $pdf->download('report-' . $period . '-' . now()->format('Ymd') . '.pdf');
-}
-=======
+        return $pdf->download('report-' . $period . '-' . now()->format('Ymd') . '.pdf');
+    }
 
     /*
     |--------------------------------------------------------------------------
@@ -109,5 +102,4 @@ public function exportPdf(Request $request)
 
         return $pdf->download('laporan-dashboard-' . now()->format('Y-m-d') . '.pdf');
     }
->>>>>>> 1b253d1228e5419f6b7442a875d29e23e7027801
 }
