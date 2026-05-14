@@ -9,42 +9,43 @@ use Illuminate\Http\Request;
 
 class CourseController extends BaseController
 {
+    /**
+     * Mengambil daftar Courses/Pelatihan yang berstatus aktif
+     */
     public function index(Request $request)
     {
-        // Public endpoint, so valid logic even without auth?
-        // TenantScope applies only if tenant is set. 
-        // For public discovery (all tenants), we might need to remove scope or handle differently.
-        // If "Course Discovery" is global, we need withoutGlobalScope(TenantScope::class).
+        $query = Course::query()->where('is_active', true);
 
-        $query = Course::query();
-
-        // If discovery is global (cross-tenant):
-        // $query->withoutGlobalScope(\App\Scopes\TenantScope::class);
-
+        // Filter & Search Opsional
         $courses = $query->with(['lpk', 'category'])
             ->when($request->category, fn($q) => $q->whereHas('category', fn($sq) => $sq->where('slug', $request->category)))
             ->when($request->search, fn($q) => $q->where('title', 'like', "%{$request->search}%"))
             ->latest()
             ->paginate(15);
 
+        // Menggunakan helper paginated dari BaseController
         return $this->paginated($courses, CourseResource::class);
     }
 
+    /**
+     * Mengambil detail satu kursus
+     */
     public function show(string $id)
     {
         $course = Course::with(['lpk.location', 'category', 'schedules'])
+            ->where('is_active', true)
             ->findOrFail($id);
 
-        return $this->success(new CourseResource($course));
+        // Helper success akan mengembalikan format: { status, message, data }
+        return $this->success(new CourseResource($course), 'Detail kursus berhasil diambil.');
     }
 
-    // Helper for pagination in BaseController might need update to accept resource class
-    // Or just return standard resource collection
-
+    // Helper Pagination (Tetap dipertahankan agar kompatibel dengan BaseController)
     protected function paginated($paginator, $resourceClass = null): \Illuminate\Http\JsonResponse
     {
         return $this->success(
-            $resourceClass ? $resourceClass::collection($paginator)->response()->getData(true) : $paginator
+            $resourceClass ? $resourceClass::collection($paginator)->response()->getData(true) : $paginator,
+            'Data berhasil diambil.'
         );
     }
 }

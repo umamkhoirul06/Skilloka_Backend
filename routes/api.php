@@ -2,37 +2,46 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
+// Imports Namespace Controller dengan benar
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CourseController;
 use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\LocationController;
 use App\Http\Controllers\Api\V1\LpkController;
+use App\Http\Controllers\Api\V1\BookingController;
 
-Route::prefix('v1')->group(function () {
-    // ─── Auth Public ─────────────────────────────────────────
-    Route::post('/auth/register', [AuthController::class, 'register']);
-    Route::post('/auth/login',    [AuthController::class, 'login']);
-    Route::post('/auth/request-otp', [AuthController::class, 'requestOtp']);
-    Route::post('/auth/verify-otp',  [AuthController::class, 'verifyOtp']);
+// 1. PUBLIC ROUTES (Tanpa Token)
+Route::post('/auth/register', [AuthController::class, 'register']);
+Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/auth/request-otp', [AuthController::class, 'requestOtp']);
+Route::post('/auth/verify-otp', [AuthController::class, 'verifyOtp']);
 
-    // ─── Public Discovery (tanpa login) ───────────────────────
-    Route::get('/courses',         [CourseController::class,  'index']);
-    Route::get('/courses/{id}',    [CourseController::class,  'show']);
-    Route::get('/lpks',            [LpkController::class,     'index']);
-    Route::get('/lpks/{id}',       [LpkController::class,     'show']);
-    Route::get('/categories',      [CategoryController::class,'index']);
-    Route::get('/locations',       [LocationController::class,'index']);
+Route::get('/courses', [CourseController::class, 'index']);
+Route::get('/courses/{id}', [CourseController::class, 'show']);
 
-    // ─── Protected (perlu login) ───────────────────────────────
-    Route::middleware('auth:sanctum')->group(function () {
-        // Auth
-        Route::get('/auth/me',       [AuthController::class, 'me']);
-        Route::post('/auth/logout',  [AuthController::class, 'logout']);
+// Rute LPK
+Route::get('/lpks', [LpkController::class, 'index']);
+Route::get('/lpks/{id}', [LpkController::class, 'show']);
 
-        // Bookings
-        Route::get('/bookings',              [\App\Http\Controllers\Api\V1\BookingController::class, 'index']);
-        Route::post('/bookings',             [\App\Http\Controllers\Api\V1\BookingController::class, 'store']);
-        Route::get('/bookings/{id}',         [\App\Http\Controllers\Api\V1\BookingController::class, 'show']);
-        Route::patch('/bookings/{id}/cancel',[\App\Http\Controllers\Api\V1\BookingController::class, 'cancel']);
-    });
+// Rute Lokasi dan Kategori
+Route::get('/locations', [LocationController::class, 'index']);
+Route::get('/categories', [CategoryController::class, 'index']);
+
+// 2. PROTECTED ROUTES (Wajib Token)
+Route::middleware('auth:sanctum')->group(function () {
+    
+    // Rute Profil
+    Route::get('/auth/me', [AuthController::class, 'me']);
+    Route::get('/user/profile', [AuthController::class, 'me']); // Alias untuk mobile
+    
+    // Rute Logout
+    Route::post('/auth/logout', [AuthController::class, 'logout']);
+
+    // Rute Bookings
+    Route::get('/bookings', [BookingController::class, 'index']);
+    Route::get('/user/bookings', [BookingController::class, 'index']); // Alias untuk mobile
+    Route::post('/bookings', [BookingController::class, 'store']);
+    Route::get('/bookings/{id}', [BookingController::class, 'show']);
+    Route::patch('/bookings/{id}/cancel', [BookingController::class, 'cancel']);
 });

@@ -22,47 +22,48 @@
 
         /* ── Status Banner ── */
         .status-banner {
-            border-radius: 20px;
-            padding: 18px 28px;
-            margin-bottom: 28px;
+            border-radius: 24px;
+            padding: 24px 32px;
+            margin-bottom: 32px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border: 1px solid transparent;
-            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
         }
 
         .banner-approved {
-            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
-            border-color: #6ee7b7;
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            border-color: #a7f3d0;
             color: #065f46;
         }
 
         .banner-pending {
-            background: linear-gradient(135deg, #fef9c3, #fde68a);
-            border-color: #fcd34d;
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+            border-color: #fde68a;
             color: #92400e;
         }
 
         .banner-rejected {
-            background: linear-gradient(135deg, #fee2e2, #fecaca);
-            border-color: #fca5a5;
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            border-color: #fecaca;
             color: #991b1b;
         }
 
         /* ── Stat Cards (Glassmorphism) ── */
         .stat-card {
-            background: rgba(255, 255, 255, 0.72);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-radius: 22px;
-            padding: 26px 24px;
-            border: 1px solid rgba(255, 255, 255, 0.85);
-            box-shadow: 0 4px 24px rgba(99, 102, 241, 0.06);
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 28px 24px;
+            border: 1px solid rgba(255, 255, 255, 1);
+            box-shadow: 0 10px 40px -10px rgba(99, 102, 241, 0.08);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
         }
@@ -71,95 +72,87 @@
             content: '';
             position: absolute;
             inset: 0;
-            border-radius: 22px;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 100%);
+            border-radius: 24px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 100%);
             pointer-events: none;
         }
 
         .stat-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.13);
-            border-color: rgba(165, 180, 252, 0.5);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.15);
+            border-color: rgba(165, 180, 252, 0.8);
         }
 
         .stat-title {
-            font-size: 12px;
-            color: #94a3b8;
-            font-weight: 600;
+            font-size: 13px;
+            color: #64748b;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.7px;
-            margin-bottom: 8px;
+            letter-spacing: 0.8px;
+            margin-bottom: 10px;
         }
 
         .stat-number {
-            font-size: 32px;
+            font-size: 36px;
             font-weight: 800;
-            color: #1e293b;
+            color: #0f172a;
             font-family: 'Outfit', sans-serif;
             line-height: 1;
+            letter-spacing: -1px;
         }
 
         .stat-trend {
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
-            margin-top: 6px;
+            margin-top: 8px;
             display: inline-flex;
             align-items: center;
-            gap: 3px;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.5);
         }
 
         .trend-up {
-            color: #10b981;
+            color: #059669;
+            background: #d1fae5;
         }
 
         .trend-down {
-            color: #f43f5e;
+            color: #e11d48;
+            background: #ffe4e6;
         }
 
         .icon-box {
-            width: 60px;
-            height: 60px;
-            border-radius: 18px;
+            width: 64px;
+            height: 64px;
+            border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
+            box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.5);
         }
 
-        .i1 {
-            background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
-            color: #6366f1;
-        }
-
-        .i2 {
-            background: linear-gradient(135deg, #ccfbf1, #99f6e4);
-            color: #0d9488;
-        }
-
-        .i3 {
-            background: linear-gradient(135deg, #fce7f3, #fbcfe8);
-            color: #ec4899;
-        }
-
-        .i4 {
-            background: linear-gradient(135deg, #fef3c7, #fde68a);
-            color: #d97706;
-        }
+        .i1 { background: linear-gradient(135deg, #e0e7ff, #c7d2fe); color: #4f46e5; }
+        .i2 { background: linear-gradient(135deg, #ccfbf1, #99f6e4); color: #0d9488; }
+        .i3 { background: linear-gradient(135deg, #fce7f3, #fbcfe8); color: #db2777; }
+        .i4 { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #d97706; }
 
         /* ── Content Cards ── */
         .content-card {
-            background: rgba(255, 255, 255, 0.78);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-radius: 22px;
-            border: 1px solid rgba(255, 255, 255, 0.9);
-            padding: 28px;
-            box-shadow: 0 4px 24px rgba(99, 102, 241, 0.06);
-            transition: box-shadow 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 1);
+            padding: 32px;
+            box-shadow: 0 10px 40px -10px rgba(99, 102, 241, 0.08);
+            transition: all 0.3s ease;
         }
 
         .content-card:hover {
-            box-shadow: 0 12px 40px rgba(99, 102, 241, 0.1);
+            box-shadow: 0 15px 50px -10px rgba(99, 102, 241, 0.12);
         }
 
         .card-header {
@@ -319,44 +312,37 @@
     {{-- ═══════════════════════════════════════
     Status Banner (JANGAN DIUBAH LOGIKANYA)
     ═══════════════════════════════════════ --}}
-    <<<<<<< Updated upstream <div class="flex items-center gap-2">
-        <select id="periodSelect" class="filter-select">
-            <option value="year">Tahun Ini</option>
-            <option value="month">Bulan Ini</option>
-            <option value="3months">3 Bulan</option>
-            <option value="6months">6 Bulan</option>
-        </select>
-        <a href="#" onclick="downloadPdf()" class="btn-pdf" id="btn-export-pdf">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-            </svg>
-            Download Report (PDF)
-        </a>
+        <div class="page-topbar bg-white/60 backdrop-blur-md p-5 rounded-2xl border border-white/80 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+            <h2 class="text-xl font-bold text-slate-800">Ringkasan Operasional LPK Anda</h2>
+            <p class="text-sm text-slate-500 mt-1">Pantau perkembangan pendaftaran dan metrik performa LPK</p>
         </div>
-
-        <script>
-            function downloadPdf() {
-                const period = document.getElementById('periodSelect').value;
-                window.open(`/admin/dashboard/report/pdf?period=${period}`, '_blank');
-            }
-        </script>
-        =======
-        <div class="page-topbar">
-            <div>
-                <p class="page-topbar-title">Ringkasan Operasional LPK Anda</p>
-            </div>
-            @if($status == 'approved')
-                <a href="{{ route('admin.dashboard.pdf') }}" class="btn-pdf" target="_blank" id="btn-export-pdf">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        @if($status == 'approved')
+            <div class="flex flex-wrap items-center gap-3">
+                <select id="periodSelect" class="filter-select bg-white shadow-sm border-slate-200 text-slate-600 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all font-medium text-sm cursor-pointer">
+                    <option value="year">Tahun Ini</option>
+                    <option value="month">Bulan Ini</option>
+                    <option value="3months">3 Bulan</option>
+                    <option value="6months">6 Bulan</option>
+                </select>
+                <button onclick="downloadPdf()" class="btn-pdf group relative overflow-hidden bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold py-2.5 px-5 rounded-xl shadow-[0_4px_12px_rgba(99,102,241,0.3)] hover:shadow-[0_6px_16px_rgba(99,102,241,0.4)] transition-all flex items-center gap-2">
+                    <svg class="w-4 h-4 group-hover:-translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
                     </svg>
-                    Download Report (PDF)
-                </a>
-            @endif
-        </div>
-        >>>>>>> Stashed changes
+                    Download Report
+                </button>
+            </div>
+
+            <script>
+                function downloadPdf() {
+                    const period = document.getElementById('periodSelect').value;
+                    // The route for exporting PDF as configured in the controller
+                    window.open(`{{ route('admin.dashboard.pdf') ?? '/admin/dashboard/export-pdf' }}?period=${period}`, '_blank');
+                }
+            </script>
+        @endif
+    </div>
 
         <div class="status-banner banner-{{ $status }}" style="margin-bottom:28px;">
             <div>
