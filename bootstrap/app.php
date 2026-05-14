@@ -15,6 +15,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+
+        // 🔥 INI JURUS PAMUNGKASNYA: Agar Laravel percaya pada Nginx Proxy & Cloudflare
+        // TANPA INI, LOGIN AKAN LOOPING TERUS!
+        $middleware->trustProxies(at: '*');
+
         $middleware->use([
             \Illuminate\Http\Middleware\HandleCors::class,
             \Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance::class,
@@ -25,17 +30,17 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->alias([
-    'super-admin' => \App\Http\Middleware\EnsureSuperAdmin::class,
-    'admin-lpk' => \App\Http\Middleware\EnsureAdminLpk::class,
+            'super-admin' => \App\Http\Middleware\EnsureSuperAdmin::class,
+            'admin-lpk' => \App\Http\Middleware\EnsureAdminLpk::class,
 
-    // 🔥 TAMBAHAN
-    'approved' => \App\Http\Middleware\CheckUserApproved::class,
+            // 🔥 TAMBAHAN
+            'approved' => \App\Http\Middleware\CheckUserApproved::class,
 
-    // Spatie
-    'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
-    'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
-    'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
-]);
+            // Spatie
+            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
 

@@ -20,11 +20,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Memaksa semua link CSS/JS (Tailwind) menjadi HTTPS
-        if (env('APP_ENV') !== 'local') {
-            URL::forceScheme('http');
-        } else {
-            // Khusus VPS/Production ini akan langsung memaksa HTTPS
+        // 🔥 INI YANG BENAR: Memaksa HTTPS untuk semua link dan form submit di VPS
+        if (config('app.env') !== 'local') {
+            URL::forceScheme('https');
         }
     }
 }
