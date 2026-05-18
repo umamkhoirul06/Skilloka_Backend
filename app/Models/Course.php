@@ -16,6 +16,7 @@ class Course extends Model
         'is_active' => 'boolean',
         'price' => 'decimal:2',
         'images' => 'array',
+        'facilities' => 'array',
     ];
 
     public function category()

@@ -63,6 +63,8 @@ class CourseController extends Controller
             'level'            => 'required|in:beginner,intermediate,advanced',
             'cert_type'        => 'nullable|string|max:255',
             'max_participants' => 'nullable|integer|min:1',
+            'image'            => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'facilities'       => 'nullable|array',
         ]);
 
         $user = Auth::user();
@@ -87,6 +89,15 @@ class CourseController extends Controller
             Str::slug($validated['title']) . '-' . uniqid();
 
         $validated['is_active'] = true;
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('courses', 'public');
+            $validated['images'] = [$path];
+        }
+
+        if ($request->has('facilities')) {
+            $validated['facilities'] = $request->facilities;
+        }
 
         Course::create($validated);
 
@@ -147,10 +158,21 @@ class CourseController extends Controller
             'cert_type'        => 'nullable|string|max:255',
             'max_participants' => 'nullable|integer|min:1',
             'is_active'        => 'nullable|boolean',
+            'image'            => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'facilities'       => 'nullable|array',
         ]);
 
         $validated['slug'] =
             Str::slug($validated['title']) . '-' . uniqid();
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('courses', 'public');
+            $validated['images'] = [$path];
+        }
+
+        if ($request->has('facilities')) {
+            $validated['facilities'] = $request->facilities;
+        }
 
         $course->update($validated);
 

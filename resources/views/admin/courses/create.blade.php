@@ -61,7 +61,8 @@
 
         {{-- FORM --}}
         <form method="POST"
-              action="{{ route('admin.courses.store') }}">
+              action="{{ route('admin.courses.store') }}"
+              enctype="multipart/form-data">
 
             @csrf
 
@@ -248,6 +249,39 @@
                             border-radius:6px
                        ">
 
+            </div>
+
+            {{-- IMAGE UPLOAD --}}
+            <div style="margin-bottom:16px">
+                <label>Course Image (Opsional)</label>
+                <input type="file"
+                       name="image"
+                       accept="image/*"
+                       style="
+                            width:100%;
+                            padding:10px;
+                            border:1px solid #ddd;
+                            border-radius:6px
+                       ">
+                <small style="color:gray;">Maksimal 2MB (JPG, JPEG, PNG)</small>
+            </div>
+
+            {{-- FACILITIES --}}
+            <div style="margin-bottom:20px">
+                <label style="display:block;margin-bottom:8px;">Facilities</label>
+                
+                @php
+                    $availableFacilities = ['Ruang Ber-AC', 'Modul Belajar', 'WiFi', 'Sertifikat', 'Makan Siang'];
+                @endphp
+                
+                <div style="display:flex; gap:16px; flex-wrap:wrap;">
+                    @foreach($availableFacilities as $facility)
+                    <label style="display:flex; align-items:center; gap:6px;">
+                        <input type="checkbox" name="facilities[]" value="{{ $facility }}">
+                        {{ $facility }}
+                    </label>
+                    @endforeach
+                </div>
             </div>
 
 

@@ -24,8 +24,11 @@ class CourseResource extends JsonResource
                 'id' => $this->category->id,
                 'name' => $this->category->name,
             ] : null,
-            'images' => $this->images,
+            'images' => collect($this->images)->map(function ($img) {
+                return asset('storage/' . $img);
+            })->toArray(),
             'level' => $this->level,
+            'facilities' => $this->facilities ?? [],
         ];
     }
 }
