@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\LocationController;
 use App\Http\Controllers\Api\V1\LpkController;
 use App\Http\Controllers\Api\V1\BookingController;
+use App\Http\Controllers\Api\PaymentController;
 
 // 1. PUBLIC ROUTES (Tanpa Token)
 Route::post('/auth/register', [AuthController::class, 'register']);
@@ -28,6 +29,9 @@ Route::get('/lpks/{id}', [LpkController::class, 'show']);
 Route::get('/locations', [LocationController::class, 'index']);
 Route::get('/categories', [CategoryController::class, 'index']);
 
+// Midtrans Payment Webhook (Public)
+Route::post('/payment/callback', [PaymentController::class, 'callback']);
+
 // 2. PROTECTED ROUTES (Wajib Token)
 Route::middleware('auth:sanctum')->group(function () {
     
@@ -44,4 +48,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/bookings', [BookingController::class, 'store']);
     Route::get('/bookings/{id}', [BookingController::class, 'show']);
     Route::patch('/bookings/{id}/cancel', [BookingController::class, 'cancel']);
+
+    // Midtrans Payment Transactions
+    Route::post('/payment/create-transaction', [PaymentController::class, 'createTransaction']);
 });

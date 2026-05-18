@@ -12,6 +12,7 @@
         "laravel/tinker": "^2.9",
         "league/flysystem-aws-s3-v3": "^3.31",
         "meilisearch/meilisearch-php": "^1.16",
+        "midtrans/midtrans-php": "^2.6",
         "predis/predis": "^3.4",
         "spatie/laravel-activitylog": "^4.11",
         "spatie/laravel-permission": "^6.25"
