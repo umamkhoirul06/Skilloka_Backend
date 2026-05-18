@@ -57,30 +57,30 @@
                     {{-- Left Panel: Avatar Section --}}
                     <div class="md:w-1/3 bg-gray-50 p-8 border-b md:border-b-0 md:border-r border-gray-200 flex flex-col items-center justify-start text-center">
                         
-                        <h3 class="text-sm font-bold text-gray-700 mb-6 uppercase tracking-wider">Foto Profil</h3>
+                        <h3 class="text-sm font-bold text-gray-700 mb-6 uppercase tracking-wider">Logo LPK</h3>
 
                         <div class="relative mb-6">
-                            {{-- Avatar Container --}}
+                            {{-- Logo Container --}}
                             <div class="w-40 h-40 rounded-full shadow-md border-4 border-white overflow-hidden bg-white">
                                 @php
-                                    $user = auth()->user();
-                                    $defaultAvatar = 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&color=1e3a8a&background=e0e7ff&size=200';
-                                    $avatarUrl = $user->avatar ? asset('storage/'.$user->avatar) : $defaultAvatar;
+                                    $defaultLogo = 'https://ui-avatars.com/api/?name='.urlencode($lpk->name ?? 'L').'&color=1e3a8a&background=e0e7ff&size=200';
+                                    $logoUrl = $lpk->logo ? asset('storage/'.$lpk->logo) : $defaultLogo;
                                 @endphp
-                                <img id="avatarPreview" src="{{ $avatarUrl }}" alt="Avatar" class="w-full h-full object-cover">
+                                <img id="logoPreview" src="{{ $logoUrl }}" alt="Logo LPK" class="w-full h-full object-cover">
                             </div>
                         </div>
 
                         {{-- Upload Button --}}
                         <div class="w-full max-w-xs">
-                            <label for="avatarInput" class="flex items-center justify-center w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl shadow-sm text-sm font-bold text-gray-700 hover:bg-gray-100 cursor-pointer transition-colors">
+                            <label for="logoInput" class="flex items-center justify-center w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl shadow-sm text-sm font-bold text-gray-700 hover:bg-gray-100 cursor-pointer transition-colors">
                                 <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
                                 </svg>
-                                Ubah Foto
+                                Pilih Logo LPK
                             </label>
-                            <input type="file" id="avatarInput" name="avatar" accept="image/*" class="hidden">
-                            <p class="text-xs text-gray-400 mt-3">Pilih gambar lalu atur area (Crop). Maks 2MB.</p>
+                            <input type="file" id="logoInput" name="logo" accept="image/jpeg,image/png,image/jpg" class="hidden">
+                            <input type="hidden" name="cropped_logo" id="croppedLogoInput">
+                            <p class="text-xs text-gray-400 mt-3">Pilih logo LPK lalu atur area (Crop). Maks 5MB.</p>
                         </div>
 
                     </div>
@@ -129,7 +129,18 @@
                                         </svg>
                                     </div>
                                 </div>
-                                <p class="text-xs text-gray-500 mt-2">Nama lembaga terkunci. Silakan hubungi Super Admin untuk mengajukan perubahan data legalitas.</p>
+                                <p class="text-xs text-gray-500 mt-2">Nama lembaga terkunci. Silakan hubungi Super Admin untuk mengubah nama.</p>
+                            </div>
+
+                            {{-- Kontak Informasi LPK --}}
+                            <div class="mt-6">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Kontak LPK Publik (Telp / Email / WA)</label>
+                                @php
+                                    $contactValue = is_array($lpk->contact_info) ? implode(', ', $lpk->contact_info) : ($lpk->contact_info ?? '');
+                                @endphp
+                                <textarea name="contact_info" rows="2" placeholder="Contoh: 08123456789 atau email@lpk.com"
+                                    class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-shadow">{{ old('contact_info', $contactValue) }}</textarea>
+                                <p class="text-xs text-gray-500 mt-1">Kontak ini akan ditampilkan di halaman dashboard utama Anda.</p>
                             </div>
 
                         </div>
@@ -176,8 +187,9 @@
 {{-- Script Integrasi Cropper.js --}}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const avatarInput = document.getElementById('avatarInput');
-        const avatarPreview = document.getElementById('avatarPreview');
+        const logoInput = document.getElementById('logoInput');
+        const logoPreview = document.getElementById('logoPreview');
+        const croppedLogoInput = document.getElementById('croppedLogoInput');
         const cropperModal = document.getElementById('cropperModal');
         const imageToCrop = document.getElementById('imageToCrop');
         const closeCropperBtn = document.getElementById('closeCropper');
@@ -186,31 +198,36 @@
         
         let cropper = null;
 
-        // Fungsi membuka modal
         function openModal() {
             cropperModal.classList.remove('hidden');
         }
 
-        // Fungsi tutup modal
         function closeModal() {
             cropperModal.classList.add('hidden');
             if (cropper) {
                 cropper.destroy();
                 cropper = null;
             }
-            avatarInput.value = ''; // Reset input value
+            // we don't reset logoInput.value here so the user can re-choose the same file if needed, 
+            // but for safety we can reset it to allow re-triggering change event.
+            logoInput.value = ''; 
         }
 
         closeCropperBtn.addEventListener('click', closeModal);
         cancelCropBtn.addEventListener('click', closeModal);
 
-        // Ketika user memilih file
-        avatarInput.addEventListener('change', function(e) {
+        logoInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
-                // Validasi gambar
                 if(!file.type.match('image.*')) {
                     alert('Hanya file gambar yang diperbolehkan.');
+                    this.value = '';
+                    return;
+                }
+
+                // Cek ukuran max 5MB di frontend
+                if(file.size > 5242880) {
+                    alert('Ukuran gambar maksimal 5MB.');
                     this.value = '';
                     return;
                 }
@@ -220,10 +237,9 @@
                     imageToCrop.src = event.target.result;
                     openModal();
                     
-                    // Inisialisasi cropper setelah modal terbuka
                     setTimeout(() => {
                         cropper = new Cropper(imageToCrop, {
-                            aspectRatio: 1, // Memaksa rasio 1:1 (bulat/persegi)
+                            aspectRatio: 1, // Memaksa rasio 1:1
                             viewMode: 1,
                             dragMode: 'move',
                             autoCropArea: 1,
@@ -241,37 +257,24 @@
             }
         });
 
-        // Ketika tombol "Terapkan (Crop)" diklik
         applyCropBtn.addEventListener('click', function() {
             if (!cropper) return;
 
-            // Dapatkan hasil crop dalam format canvas
             const canvas = cropper.getCroppedCanvas({
                 width: 500,
                 height: 500,
             });
 
-            // Ubah canvas menjadi Blob (File data)
-            canvas.toBlob(function(blob) {
-                // Tampilkan hasil crop ke lingkaran preview
-                const url = URL.createObjectURL(blob);
-                avatarPreview.src = url;
+            // Convert to Base64
+            const base64Image = canvas.toDataURL('image/jpeg', 0.9);
+            
+            // Tampilkan di preview bulat
+            logoPreview.src = base64Image;
 
-                // Buat objek File baru dari Blob
-                const croppedFile = new File([blob], "avatar_cropped.jpg", { type: "image/jpeg", lastModified: new Date().getTime() });
-                
-                // Gunakan DataTransfer untuk memasukkan File baru ke dalam <input type="file">
-                const dataTransfer = new DataTransfer();
-                dataTransfer.items.add(croppedFile);
-                avatarInput.files = dataTransfer.files;
+            // Simpan Base64 ke input hidden
+            croppedLogoInput.value = base64Image;
 
-                // Tutup modal
-                cropperModal.classList.add('hidden');
-                if (cropper) {
-                    cropper.destroy();
-                    cropper = null;
-                }
-            }, 'image/jpeg', 0.9);
+            closeModal();
         });
     });
 </script>

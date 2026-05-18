@@ -344,6 +344,38 @@
         @endif
     </div>
 
+    {{-- KOTAK KONTAK LPK --}}
+    @php
+        $contactStr = is_array($myLpk->contact_info) ? implode(', ', $myLpk->contact_info) : ($myLpk->contact_info ?? null);
+    @endphp
+    @if($contactStr)
+    <div class="bg-white/80 backdrop-blur-md p-5 rounded-2xl border border-gray-200 shadow-sm mb-7 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+            </div>
+            <div>
+                <h4 class="text-sm font-bold text-gray-800">Kontak Publik LPK</h4>
+                <p class="text-sm text-gray-600">{{ $contactStr }}</p>
+            </div>
+        </div>
+        <a href="{{ route('admin.profile') }}" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors">Edit</a>
+    </div>
+    @else
+    <div class="bg-white/80 backdrop-blur-md p-5 rounded-2xl border border-gray-200 shadow-sm mb-7 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center text-rose-600">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+            <div>
+                <h4 class="text-sm font-bold text-gray-800">Kontak LPK Kosong!</h4>
+                <p class="text-sm text-gray-600">Lengkapi kontak Anda agar mudah dihubungi pendaftar.</p>
+            </div>
+        </div>
+        <a href="{{ route('admin.profile') }}" class="text-xs font-semibold text-rose-600 hover:text-rose-800 bg-rose-50 px-3 py-1.5 rounded-lg transition-colors">Lengkapi Sekarang</a>
+    </div>
+    @endif
+
         <div class="status-banner banner-{{ $status }}" style="margin-bottom:28px;">
             <div>
                 <h3 class="font-bold text-lg mb-1">Selamat Datang di LPK Center</h3>
