@@ -69,12 +69,11 @@
 
             {{-- TITLE --}}
             <div style="margin-bottom:16px">
-
-                <label>Title</label>
-
+                <label class="block text-sm font-medium text-gray-900 mb-1">Title</label>
                 <input type="text"
                        name="title"
                        value="{{ old('title') }}"
+                       class="text-gray-900 placeholder-gray-400"
                        style="
                             width:100%;
                             padding:10px;
@@ -82,52 +81,46 @@
                             border-radius:6px
                        "
                        required>
-
             </div>
 
 
             {{-- DESCRIPTION --}}
             <div style="margin-bottom:16px">
-
-                <label>Description</label>
-
+                <label class="block text-sm font-medium text-gray-900 mb-1">Description</label>
                 <textarea name="description"
                           rows="4"
+                          class="text-gray-900 placeholder-gray-400"
                           style="
                                 width:100%;
                                 padding:10px;
                                 border:1px solid #ddd;
                                 border-radius:6px
                           ">{{ old('description') }}</textarea>
-
             </div>
 
 
             {{-- SYLLABUS --}}
             <div style="margin-bottom:16px">
-
-                <label>Syllabus</label>
-
+                <label class="block text-sm font-medium text-gray-900 mb-1">Syllabus</label>
                 <textarea name="syllabus"
                           rows="4"
+                          class="text-gray-900 placeholder-gray-400"
                           style="
                                 width:100%;
                                 padding:10px;
                                 border:1px solid #ddd;
                                 border-radius:6px
                           ">{{ old('syllabus') }}</textarea>
-
             </div>
 
 
             {{-- PRICE --}}
             <div style="margin-bottom:16px">
-
-                <label>Price</label>
-
+                <label class="block text-sm font-medium text-gray-900 mb-1">Price</label>
                 <input type="number"
                        name="price"
                        value="{{ old('price') }}"
+                       class="text-gray-900 placeholder-gray-400"
                        style="
                             width:100%;
                             padding:10px;
@@ -135,18 +128,16 @@
                             border-radius:6px
                        "
                        required>
-
             </div>
 
 
             {{-- DURATION --}}
             <div style="margin-bottom:16px">
-
-                <label>Duration Hours</label>
-
+                <label class="block text-sm font-medium text-gray-900 mb-1">Duration Hours</label>
                 <input type="number"
                        name="duration_hours"
                        value="{{ old('duration_hours') }}"
+                       class="text-gray-900 placeholder-gray-400"
                        style="
                             width:100%;
                             padding:10px;
@@ -154,16 +145,14 @@
                             border-radius:6px
                        "
                        required>
-
             </div>
 
 
             {{-- CATEGORY --}}
             <div style="margin-bottom:16px">
-
-                <label>Category</label>
-
+                <label class="block text-sm font-medium text-gray-900 mb-1">Category</label>
                 <select name="category_id"
+                        class="text-gray-900"
                         style="
                             width:100%;
                             padding:10px;
@@ -194,10 +183,9 @@
 
             {{-- LEVEL --}}
             <div style="margin-bottom:16px">
-
-                <label>Level</label>
-
+                <label class="block text-sm font-medium text-gray-900 mb-1">Level</label>
                 <select name="level"
+                        class="text-gray-900"
                         style="
                             width:100%;
                             padding:10px;
@@ -218,46 +206,43 @@
 
             {{-- CERT TYPE --}}
             <div style="margin-bottom:16px">
-
-                <label>Certificate Type</label>
-
+                <label class="block text-sm font-medium text-gray-900 mb-1">Certificate Type</label>
                 <input type="text"
                        name="cert_type"
                        value="{{ old('cert_type') }}"
+                       class="text-gray-900 placeholder-gray-400"
                        style="
                             width:100%;
                             padding:10px;
                             border:1px solid #ddd;
                             border-radius:6px
                        ">
-
             </div>
 
 
             {{-- MAX PARTICIPANTS --}}
             <div style="margin-bottom:20px">
-
-                <label>Max Participants</label>
-
+                <label class="block text-sm font-medium text-gray-900 mb-1">Max Participants</label>
                 <input type="number"
                        name="max_participants"
                        value="{{ old('max_participants') }}"
+                       class="text-gray-900 placeholder-gray-400"
                        style="
                             width:100%;
                             padding:10px;
                             border:1px solid #ddd;
                             border-radius:6px
                        ">
-
             </div>
 
             {{-- IMAGE UPLOAD --}}
             <div style="margin-bottom:16px">
-                <label>Course Images (Opsional, bisa pilih banyak)</label>
+                <label class="block text-sm font-medium text-gray-900 mb-1">Course Images (Opsional, bisa pilih banyak)</label>
                 <input type="file"
                        name="images[]"
                        multiple
                        accept="image/*"
+                       class="text-gray-900"
                        style="
                             width:100%;
                             padding:10px;
@@ -269,7 +254,7 @@
 
             {{-- FACILITIES --}}
             <div style="margin-bottom:20px">
-                <label style="display:block;margin-bottom:8px;">Facilities</label>
+                <label class="block text-sm font-medium text-gray-900 mb-3">Facilities</label>
                 
                 @php
                     $availableFacilities = ['Ruang Ber-AC', 'Modul Belajar', 'WiFi', 'Sertifikat', 'Makan Siang'];
@@ -277,7 +262,7 @@
                 
                 <div style="display:flex; gap:16px; flex-wrap:wrap;">
                     @foreach($availableFacilities as $facility)
-                    <label style="display:flex; align-items:center; gap:6px;">
+                    <label style="display:flex; align-items:center; gap:6px;" class="text-sm text-gray-900">
                         <input type="checkbox" name="facilities[]" value="{{ $facility }}">
                         {{ $facility }}
                     </label>

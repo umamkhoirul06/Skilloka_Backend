@@ -48,19 +48,19 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {{-- TITLE --}}
                 <div class="col-span-1 md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Title <span class="text-rose-500">*</span></label>
+                    <label class="block text-sm font-medium text-gray-900 mb-1">Title <span class="text-rose-500">*</span></label>
                     <input type="text"
                            name="title"
                            value="{{ old('title', $course->title) }}"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
                            required>
                 </div>
 
                 {{-- CATEGORY --}}
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Category <span class="text-rose-500">*</span></label>
+                    <label class="block text-sm font-medium text-gray-900 mb-1">Category <span class="text-rose-500">*</span></label>
                     <select name="category_id"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
                             required>
                         <option value="">-- Pilih Category --</option>
                         @foreach($categories ?? [] as $category)
@@ -73,9 +73,9 @@
 
                 {{-- LEVEL --}}
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Level <span class="text-rose-500">*</span></label>
+                    <label class="block text-sm font-medium text-gray-900 mb-1">Level <span class="text-rose-500">*</span></label>
                     <select name="level"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
                         <option value="beginner" {{ old('level', $course->level) == 'beginner' ? 'selected' : '' }}>Beginner</option>
                         <option value="intermediate" {{ old('level', $course->level) == 'intermediate' ? 'selected' : '' }}>Intermediate</option>
                         <option value="advanced" {{ old('level', $course->level) == 'advanced' ? 'selected' : '' }}>Advanced</option>
@@ -84,56 +84,56 @@
 
                 {{-- PRICE --}}
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Price (Rp) <span class="text-rose-500">*</span></label>
+                    <label class="block text-sm font-medium text-gray-900 mb-1">Price (Rp) <span class="text-rose-500">*</span></label>
                     <input type="number"
                            name="price"
                            value="{{ old('price', (int)$course->price) }}"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
                            required>
                 </div>
 
                 {{-- DURATION --}}
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Duration Hours <span class="text-rose-500">*</span></label>
+                    <label class="block text-sm font-medium text-gray-900 mb-1">Duration Hours <span class="text-rose-500">*</span></label>
                     <input type="number"
                            name="duration_hours"
                            value="{{ old('duration_hours', $course->duration_hours) }}"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
                            required>
                 </div>
 
                 {{-- CERT TYPE --}}
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Certificate Type</label>
+                    <label class="block text-sm font-medium text-gray-900 mb-1">Certificate Type</label>
                     <input type="text"
                            name="cert_type"
                            value="{{ old('cert_type', $course->cert_type) }}"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
                 </div>
 
                 {{-- MAX PARTICIPANTS --}}
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Max Participants</label>
+                    <label class="block text-sm font-medium text-gray-900 mb-1">Max Participants</label>
                     <input type="number"
                            name="max_participants"
                            value="{{ old('max_participants', $course->max_participants) }}"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
                 </div>
 
                 {{-- DESCRIPTION --}}
                 <div class="col-span-1 md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <label class="block text-sm font-medium text-gray-900 mb-1">Description</label>
                     <textarea name="description"
                               rows="4"
-                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">{{ old('description', $course->description) }}</textarea>
+                              class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">{{ old('description', $course->description) }}</textarea>
                 </div>
 
                 {{-- SYLLABUS --}}
                 <div class="col-span-1 md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Syllabus</label>
+                    <label class="block text-sm font-medium text-gray-900 mb-1">Syllabus</label>
                     <textarea name="syllabus"
                               rows="4"
-                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">{{ old('syllabus', $course->syllabus) }}</textarea>
+                              class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">{{ old('syllabus', $course->syllabus) }}</textarea>
                 </div>
                 
                 {{-- IS ACTIVE --}}
@@ -147,7 +147,7 @@
 
                 {{-- FACILITIES --}}
                 <div class="col-span-1 md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-3">Facilities</label>
+                    <label class="block text-sm font-medium text-gray-900 mb-3">Facilities</label>
                     
                     @php
                         $availableFacilities = ['Ruang Ber-AC', 'Modul Belajar', 'WiFi', 'Sertifikat', 'Makan Siang'];
@@ -166,7 +166,7 @@
 
                 {{-- IMAGE UPLOAD --}}
                 <div class="col-span-1 md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Course Images</label>
+                    <label class="block text-sm font-medium text-gray-900 mb-2">Course Images</label>
                     
                     @if(!empty($course->images) && is_array($course->images) && count($course->images) > 0)
                         <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-4">

@@ -72,7 +72,7 @@ class ProfileController extends Controller
 
             'admin.profile',
 
-            compact('lpk')
+            compact('lpk', 'user')
 
         );
 
@@ -113,6 +113,12 @@ class ProfileController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email,'.$user->id,
             'phone' => 'nullable|string|max:25',
+            'legal_name' => 'nullable|string|max:255',
+            'phone_lpk' => 'nullable|string|max:25',
+            'wa_number' => 'nullable|string|max:25',
+            'facilities' => 'nullable|array',
+            'gallery_images' => 'nullable|array',
+            'gallery_images.*' => 'image|mimes:jpeg,jpg,png|max:5120',
             'contact_info' => 'nullable|string|max:500',
             'logo' => 'nullable|image|mimes:jpeg,jpg,png|max:5120',
             'cropped_logo' => 'nullable|string'
@@ -136,10 +142,33 @@ class ProfileController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | UPLOAD LOGO LPK (CROPPER / FILE)
+        | UPLOAD LOGO LPK (CROPPER / FILE) & DATA BARU
         |--------------------------------------------------------------------------
         */
         if ($lpk) {
+            // Update additional info
+            if ($request->has('legal_name')) {
+                $lpk->legal_name = $request->legal_name;
+            }
+            if ($request->has('phone_lpk')) {
+                $lpk->phone = $request->phone_lpk;
+            }
+            if ($request->has('wa_number')) {
+                $lpk->wa_number = $request->wa_number;
+            }
+            if ($request->has('facilities')) {
+                $lpk->facilities = $request->facilities;
+            }
+
+            // Upload Gallery Images
+            if ($request->hasFile('gallery_images')) {
+                $existingImages = is_array($lpk->images) ? $lpk->images : [];
+                foreach ($request->file('gallery_images') as $image) {
+                    $existingImages[] = $image->store('lpks/gallery', 'public');
+                }
+                $lpk->images = $existingImages;
+            }
+
             // Update contact info
             if ($request->has('contact_info')) {
                 // contact_info is cast to array in Lpk model

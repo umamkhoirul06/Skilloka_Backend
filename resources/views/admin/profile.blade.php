@@ -93,24 +93,24 @@
                             
                             {{-- Nama Lengkap --}}
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Lengkap</label>
+                                <label class="block text-sm font-semibold text-gray-900 mb-2">Nama Lengkap</label>
                                 <input type="text" name="name" value="{{ old('name', $user->name) }}" 
-                                    class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-shadow">
+                                    class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-shadow">
                             </div>
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 {{-- Email --}}
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Alamat Email</label>
+                                    <label class="block text-sm font-semibold text-gray-900 mb-2">Alamat Email</label>
                                     <input type="email" name="email" value="{{ old('email', $user->email) }}" 
-                                        class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-shadow">
+                                        class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-shadow">
                                 </div>
 
                                 {{-- Nomor Telepon --}}
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Nomor Telepon / WA</label>
+                                    <label class="block text-sm font-semibold text-gray-900 mb-2">Nomor Telepon / WA (Pribadi)</label>
                                     <input type="text" name="phone" value="{{ old('phone', $user->phone) }}" 
-                                        class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-shadow">
+                                        class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-shadow">
                                 </div>
                             </div>
 
@@ -118,7 +118,7 @@
 
                             {{-- Nama LPK (Readonly) --}}
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Lembaga Pelatihan (LPK)</label>
+                                <label class="block text-sm font-semibold text-gray-900 mb-2">Lembaga Pelatihan (LPK)</label>
                                 <div class="relative">
                                     <input type="text" readonly value="{{ $lpk->name ?? 'Belum terhubung ke LPK' }}" 
                                         class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-100 text-gray-500 cursor-not-allowed focus:outline-none select-none">
@@ -132,15 +132,75 @@
                                 <p class="text-xs text-gray-500 mt-2">Nama lembaga terkunci. Silakan hubungi Super Admin untuk mengubah nama.</p>
                             </div>
 
+                            {{-- Legal Name --}}
+                            <div class="mt-6">
+                                <label class="block text-sm font-semibold text-gray-900 mb-2">Nama Legal LPK / Perusahaan</label>
+                                <input type="text" name="legal_name" value="{{ old('legal_name', $lpk->legal_name) }}" 
+                                    class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-shadow">
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
+                                {{-- Phone LPK --}}
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-900 mb-2">Nomor Telepon Dasar</label>
+                                    <input type="text" name="phone_lpk" value="{{ old('phone_lpk', $lpk->phone) }}" 
+                                        class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-shadow">
+                                </div>
+
+                                {{-- WA Number --}}
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-900 mb-2">Nomor WhatsApp LPK</label>
+                                    <input type="text" name="wa_number" value="{{ old('wa_number', $lpk->wa_number) }}" 
+                                        class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-shadow">
+                                </div>
+                            </div>
+
+                            {{-- Fasilitas LPK --}}
+                            <div class="mt-6">
+                                <label class="block text-sm font-semibold text-gray-900 mb-3">Fasilitas LPK</label>
+                                @php
+                                    $availableFacilities = ['Ruang Ber-AC', 'Modul Belajar', 'WiFi', 'Sertifikat', 'Makan Siang', 'Area Parkir', 'Mushola', 'Kantin'];
+                                    $selectedFacilities = old('facilities', is_array($lpk->facilities) ? $lpk->facilities : []);
+                                @endphp
+                                <div class="flex flex-wrap gap-4">
+                                    @foreach($availableFacilities as $facility)
+                                    <label class="flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors">
+                                        <input type="checkbox" name="facilities[]" value="{{ $facility }}" {{ in_array($facility, $selectedFacilities) ? 'checked' : '' }} class="text-indigo-600 rounded focus:ring-indigo-500 border-gray-300">
+                                        <span class="text-sm text-gray-900">{{ $facility }}</span>
+                                    </label>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            {{-- Gallery Images --}}
+                            <div class="mt-6">
+                                <label class="block text-sm font-semibold text-gray-900 mb-2">Galeri Foto LPK</label>
+                                @if(!empty($lpk->images) && is_array($lpk->images) && count($lpk->images) > 0)
+                                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-4">
+                                        <p class="text-xs text-gray-500 mb-3">Gambar saat ini:</p>
+                                        <div class="flex flex-wrap gap-4">
+                                            @foreach($lpk->images as $img)
+                                            <div class="relative group rounded-lg overflow-hidden border border-gray-200 shadow-sm">
+                                                <img src="{{ asset('storage/'.$img) }}" class="w-24 h-24 object-cover" alt="LPK Gallery Image">
+                                            </div>
+                                            @endforeach
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-3">Mengunggah gambar baru akan menambah koleksi galeri.</p>
+                                    </div>
+                                @endif
+                                <input type="file" name="gallery_images[]" multiple accept="image/*" class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-shadow">
+                                <p class="text-xs text-gray-400 mt-1">Maksimal 5MB per gambar (JPG, JPEG, PNG). Bisa pilih multiple file.</p>
+                            </div>
+
                             {{-- Kontak Informasi LPK --}}
                             <div class="mt-6">
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Kontak LPK Publik (Telp / Email / WA)</label>
+                                <label class="block text-sm font-semibold text-gray-900 mb-2">Kontak LPK Publik Tambahan</label>
                                 @php
                                     $contactValue = is_array($lpk->contact_info) ? implode(', ', $lpk->contact_info) : ($lpk->contact_info ?? '');
                                 @endphp
-                                <textarea name="contact_info" rows="2" placeholder="Contoh: 08123456789 atau email@lpk.com"
-                                    class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-shadow">{{ old('contact_info', $contactValue) }}</textarea>
-                                <p class="text-xs text-gray-500 mt-1">Kontak ini akan ditampilkan di halaman dashboard utama Anda.</p>
+                                <textarea name="contact_info" rows="2" placeholder="Contoh: Email lpk@gmail.com atau IG @lpk_anda"
+                                    class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-shadow">{{ old('contact_info', $contactValue) }}</textarea>
+                                <p class="text-xs text-gray-500 mt-1">Kontak tambahan yang akan ditampilkan di halaman dashboard utama Anda.</p>
                             </div>
 
                         </div>
