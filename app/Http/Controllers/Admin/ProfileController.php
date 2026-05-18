@@ -120,7 +120,7 @@ class ProfileController extends Controller
             'gallery_images' => 'nullable|array',
             'gallery_images.*' => 'image|mimes:jpeg,jpg,png|max:5120',
             'contact_info' => 'nullable|string|max:500',
-            'logo' => 'nullable|image|mimes:jpeg,jpg,png|max:5120',
+            'logo' => 'nullable', // Relaxed to allow both file and Base64 string
             'cropped_logo' => 'nullable|string'
         ]);
 
@@ -175,19 +175,16 @@ class ProfileController extends Controller
                 $lpk->contact_info = [$request->contact_info];
             }
 
-            // If Cropper sent a Base64 string
-            if ($request->filled('cropped_logo')) {
-                $image_parts = explode(";base64,", $request->cropped_logo);
+            // Handle Base64 from Cropper or standard file upload
+            $base64Input = $request->filled('cropped_logo') ? $request->cropped_logo : (is_string($request->logo) ? $request->logo : null);
+            
+            if ($base64Input && strpos($base64Input, 'data:image') === 0) {
+                $image_parts = explode(";base64,", $base64Input);
                 if (count($image_parts) == 2) {
                     $image_base64 = base64_decode($image_parts[1]);
-                    // Validate size (max 5MB)
-                    if (strlen($image_base64) <= 5242880) {
-                        $fileName = 'lpks/logo_' . time() . '.jpg';
-                        \Illuminate\Support\Facades\Storage::disk('public')->put($fileName, $image_base64);
-                        $lpk->logo = $fileName;
-                    } else {
-                        return back()->withErrors(['logo' => 'Ukuran gambar crop maksimal 5MB.']);
-                    }
+                    $fileName = 'lpks/' . uniqid() . '.png';
+                    \Illuminate\Support\Facades\Storage::disk('public')->put($fileName, $image_base64);
+                    $lpk->logo = $fileName;
                 }
             } 
             // Fallback to normal upload

@@ -9,9 +9,9 @@
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
 
     {{-- FORM TAMBAH --}}
-    <div class="bg-white p-6 rounded shadow">
+    <div class="bg-white/80 backdrop-blur-md p-6 rounded-xl border border-gray-200 shadow-sm">
 
-        <h2 style="font-size:18px;font-weight:600;margin-bottom:20px">
+        <h2 class="text-gray-900" style="font-size:18px;font-weight:600;margin-bottom:20px">
             Tambah Course
         </h2>
 
@@ -69,96 +69,60 @@
 
             {{-- TITLE --}}
             <div style="margin-bottom:16px">
-                <label class="block text-sm font-medium text-gray-900 mb-1">Title</label>
+                <label class="block text-sm font-medium text-gray-800 mb-1">Title</label>
                 <input type="text"
                        name="title"
                        value="{{ old('title') }}"
-                       class="text-gray-900 placeholder-gray-400"
-                       style="
-                            width:100%;
-                            padding:10px;
-                            border:1px solid #ddd;
-                            border-radius:6px
-                       "
+                       class="bg-white text-gray-900 placeholder-gray-400 border-gray-300 w-full p-2.5 rounded-lg border"
                        required>
             </div>
 
 
             {{-- DESCRIPTION --}}
             <div style="margin-bottom:16px">
-                <label class="block text-sm font-medium text-gray-900 mb-1">Description</label>
+                <label class="block text-sm font-medium text-gray-800 mb-1">Description</label>
                 <textarea name="description"
                           rows="4"
-                          class="text-gray-900 placeholder-gray-400"
-                          style="
-                                width:100%;
-                                padding:10px;
-                                border:1px solid #ddd;
-                                border-radius:6px
-                          ">{{ old('description') }}</textarea>
+                          class="bg-white text-gray-900 placeholder-gray-400 border-gray-300 w-full p-2.5 rounded-lg border">{{ old('description') }}</textarea>
             </div>
 
 
             {{-- SYLLABUS --}}
             <div style="margin-bottom:16px">
-                <label class="block text-sm font-medium text-gray-900 mb-1">Syllabus</label>
+                <label class="block text-sm font-medium text-gray-800 mb-1">Syllabus</label>
                 <textarea name="syllabus"
                           rows="4"
-                          class="text-gray-900 placeholder-gray-400"
-                          style="
-                                width:100%;
-                                padding:10px;
-                                border:1px solid #ddd;
-                                border-radius:6px
-                          ">{{ old('syllabus') }}</textarea>
+                          class="bg-white text-gray-900 placeholder-gray-400 border-gray-300 w-full p-2.5 rounded-lg border">{{ old('syllabus') }}</textarea>
             </div>
 
 
             {{-- PRICE --}}
             <div style="margin-bottom:16px">
-                <label class="block text-sm font-medium text-gray-900 mb-1">Price</label>
+                <label class="block text-sm font-medium text-gray-800 mb-1">Price</label>
                 <input type="number"
                        name="price"
                        value="{{ old('price') }}"
-                       class="text-gray-900 placeholder-gray-400"
-                       style="
-                            width:100%;
-                            padding:10px;
-                            border:1px solid #ddd;
-                            border-radius:6px
-                       "
+                       class="bg-white text-gray-900 placeholder-gray-400 border-gray-300 w-full p-2.5 rounded-lg border"
                        required>
             </div>
 
 
             {{-- DURATION --}}
             <div style="margin-bottom:16px">
-                <label class="block text-sm font-medium text-gray-900 mb-1">Duration Hours</label>
+                <label class="block text-sm font-medium text-gray-800 mb-1">Duration Hours</label>
                 <input type="number"
                        name="duration_hours"
                        value="{{ old('duration_hours') }}"
-                       class="text-gray-900 placeholder-gray-400"
-                       style="
-                            width:100%;
-                            padding:10px;
-                            border:1px solid #ddd;
-                            border-radius:6px
-                       "
+                       class="bg-white text-gray-900 placeholder-gray-400 border-gray-300 w-full p-2.5 rounded-lg border"
                        required>
             </div>
 
 
             {{-- CATEGORY --}}
             <div style="margin-bottom:16px">
-                <label class="block text-sm font-medium text-gray-900 mb-1">Category</label>
+                <label class="block text-sm font-medium text-gray-800 mb-1">Category</label>
                 <select name="category_id"
-                        class="text-gray-900"
-                        style="
-                            width:100%;
-                            padding:10px;
-                            border:1px solid #ddd;
-                            border-radius:6px
-                        "
+                        class="bg-white text-gray-900 border-gray-300 w-full p-2.5 rounded-lg border"
                         required>
 
                     <option value="">
@@ -183,15 +147,9 @@
 
             {{-- LEVEL --}}
             <div style="margin-bottom:16px">
-                <label class="block text-sm font-medium text-gray-900 mb-1">Level</label>
+                <label class="block text-sm font-medium text-gray-800 mb-1">Level</label>
                 <select name="level"
-                        class="text-gray-900"
-                        style="
-                            width:100%;
-                            padding:10px;
-                            border:1px solid #ddd;
-                            border-radius:6px
-                        ">
+                        class="bg-white text-gray-900 border-gray-300 w-full p-2.5 rounded-lg border">
 
                     <option value="beginner">Beginner</option>
 
@@ -206,49 +164,31 @@
 
             {{-- CERT TYPE --}}
             <div style="margin-bottom:16px">
-                <label class="block text-sm font-medium text-gray-900 mb-1">Certificate Type</label>
+                <label class="block text-sm font-medium text-gray-800 mb-1">Certificate Type</label>
                 <input type="text"
                        name="cert_type"
                        value="{{ old('cert_type') }}"
-                       class="text-gray-900 placeholder-gray-400"
-                       style="
-                            width:100%;
-                            padding:10px;
-                            border:1px solid #ddd;
-                            border-radius:6px
-                       ">
+                       class="bg-white text-gray-900 placeholder-gray-400 border-gray-300 w-full p-2.5 rounded-lg border">
             </div>
 
 
             {{-- MAX PARTICIPANTS --}}
             <div style="margin-bottom:20px">
-                <label class="block text-sm font-medium text-gray-900 mb-1">Max Participants</label>
+                <label class="block text-sm font-medium text-gray-800 mb-1">Max Participants</label>
                 <input type="number"
                        name="max_participants"
                        value="{{ old('max_participants') }}"
-                       class="text-gray-900 placeholder-gray-400"
-                       style="
-                            width:100%;
-                            padding:10px;
-                            border:1px solid #ddd;
-                            border-radius:6px
-                       ">
+                       class="bg-white text-gray-900 placeholder-gray-400 border-gray-300 w-full p-2.5 rounded-lg border">
             </div>
 
             {{-- IMAGE UPLOAD --}}
             <div style="margin-bottom:16px">
-                <label class="block text-sm font-medium text-gray-900 mb-1">Course Images (Opsional, bisa pilih banyak)</label>
+                <label class="block text-sm font-medium text-gray-800 mb-1">Course Images (Opsional, bisa pilih banyak)</label>
                 <input type="file"
                        name="images[]"
                        multiple
                        accept="image/*"
-                       class="text-gray-900"
-                       style="
-                            width:100%;
-                            padding:10px;
-                            border:1px solid #ddd;
-                            border-radius:6px
-                       ">
+                       class="bg-white text-gray-900 border-gray-300 w-full p-2.5 rounded-lg border">
                 <small style="color:gray;">Maksimal 5MB per gambar (JPG, JPEG, PNG)</small>
             </div>
 
@@ -262,7 +202,7 @@
                 
                 <div style="display:flex; gap:16px; flex-wrap:wrap;">
                     @foreach($availableFacilities as $facility)
-                    <label style="display:flex; align-items:center; gap:6px;" class="text-sm text-gray-900">
+                    <label style="display:flex; align-items:center; gap:6px;" class="text-sm text-gray-800">
                         <input type="checkbox" name="facilities[]" value="{{ $facility }}">
                         {{ $facility }}
                     </label>
@@ -293,13 +233,9 @@
 
 
     {{-- LIST COURSE --}}
-    <div class="bg-white p-6 rounded shadow">
+    <div class="bg-white/80 backdrop-blur-md p-6 rounded-xl border border-gray-200 shadow-sm">
 
-        <h2 style="
-            font-size:18px;
-            font-weight:600;
-            margin-bottom:20px
-        ">
+        <h2 class="text-gray-900" style="font-size:18px;font-weight:600;margin-bottom:20px">
             Daftar Course
         </h2>
 
@@ -313,28 +249,28 @@
 
                 <tr>
 
-                    <th style="
+                    <th class="text-gray-800 bg-gray-50" style="
                         padding:10px;
                         border:1px solid #e5e7eb
                     ">
                         Title
                     </th>
 
-                    <th style="
+                    <th class="text-gray-800 bg-gray-50" style="
                         padding:10px;
                         border:1px solid #e5e7eb
                     ">
                         Category
                     </th>
 
-                    <th style="
+                    <th class="text-gray-800 bg-gray-50" style="
                         padding:10px;
                         border:1px solid #e5e7eb
                     ">
                         Price
                     </th>
 
-                    <th style="
+                    <th class="text-gray-800 bg-gray-50" style="
                         padding:10px;
                         border:1px solid #e5e7eb
                     ">
@@ -353,7 +289,7 @@
 
                 <tr>
 
-                    <td style="
+                    <td class="text-gray-800 bg-white" style="
                         padding:10px;
                         border:1px solid #e5e7eb
                     ">
@@ -361,7 +297,7 @@
                     </td>
 
 
-                    <td style="
+                    <td class="text-gray-800 bg-white" style="
                         padding:10px;
                         border:1px solid #e5e7eb
                     ">
@@ -369,7 +305,7 @@
                     </td>
 
 
-                    <td style="
+                    <td class="text-gray-800 bg-white" style="
                         padding:10px;
                         border:1px solid #e5e7eb
                     ">
@@ -377,7 +313,7 @@
                     </td>
 
 
-                    <td style="
+                    <td class="text-gray-800 bg-white" style="
                         padding:10px;
                         border:1px solid #e5e7eb
                     ">
