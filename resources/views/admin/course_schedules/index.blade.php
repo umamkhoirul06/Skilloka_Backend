@@ -4,7 +4,7 @@
 
 @section('content')
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="w-full px-4 sm:px-6 lg:px-8 py-8">
 
     {{-- HEADER --}}
     <div class="flex justify-between items-center mb-8">
@@ -28,9 +28,9 @@
     @endif
 
     {{-- TABLE CARD --}}
-    <div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
+    <div class="w-full bg-white/80 backdrop-blur-sm rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="w-full overflow-x-auto">
+            <table class="w-full min-w-full table-auto divide-y divide-gray-200">
                 <thead class="bg-gray-50/50">
                     <tr>
                         <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Course</th>
