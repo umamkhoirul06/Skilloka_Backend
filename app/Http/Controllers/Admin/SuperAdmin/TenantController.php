@@ -58,10 +58,10 @@ class TenantController extends Controller
     public function show($id)
     {
         $tenant = Tenant::with([
-
                 'users',
-                'lpk'
-
+                'lpk.courses' => function ($query) {
+                    $query->withCount('bookings');
+                }
             ])
 
             ->findOrFail($id);
