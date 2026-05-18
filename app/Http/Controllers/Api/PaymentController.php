@@ -24,7 +24,7 @@ class PaymentController extends Controller
     public function createTransaction(Request $request)
     {
         $request->validate([
-            'order_id' => 'required|string|unique:transactions,invoice', // Sesuaikan dengan tabel transaksimu
+            'order_id' => 'required|string|unique:bookings,id', // Diubah ke tabel bookings, kolom id
             'gross_amount' => 'required|numeric',
         ]);
 
@@ -70,13 +70,13 @@ class PaymentController extends Controller
             // Catat di log Laravel biar ketahuan kalau ada yang bayar
             Log::info("Midtrans Callback - Order ID: {$orderId} | Status: {$transactionStatus}");
 
-            // Di sini nanti logika update status di database kamu
+            // Di sini logika update status di tabel bookings
             if ($transactionStatus == 'capture' || $transactionStatus == 'settlement') {
-                // UPDATE status transaksi jadi LUNAS (Paid) di database
-                // Transaction::where('invoice', $orderId)->update(['status' => 'paid']);
+                // UPDATE status transaksi jadi Selesai (Paid) di database
+                \App\Models\Booking::where('id', $orderId)->update(['status' => 'Selesai']);
             } else if ($transactionStatus == 'cancel' || $transactionStatus == 'deny' || $transactionStatus == 'expire') {
-                // UPDATE status transaksi jadi GAGAL/KEDALUWARSA (Failed) di database
-                // Transaction::where('invoice', $orderId)->update(['status' => 'failed']);
+                // UPDATE status transaksi jadi Dibatalkan (Failed) di database
+                \App\Models\Booking::where('id', $orderId)->update(['status' => 'Dibatalkan']);
             }
 
             return response()->json(['message' => 'Callback diterima']);

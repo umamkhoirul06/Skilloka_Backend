@@ -17,7 +17,7 @@ class BookingController extends BaseController
     {
         $bookings = Booking::query()
             ->where('user_id', $request->user()->id)
-            ->with(['course', 'lpk'])
+            ->with(['course.category', 'lpk'])
             ->latest('booking_date')
             ->get();
 
@@ -29,7 +29,7 @@ class BookingController extends BaseController
      */
     public function show(string $id)
     {
-        $booking = Booking::with(['course', 'lpk'])->findOrFail($id);
+        $booking = Booking::with(['course.category', 'lpk'])->findOrFail($id);
 
         if ($booking->user_id !== auth()->id()) {
             return $this->error('Unauthorized access to booking data.', 403);

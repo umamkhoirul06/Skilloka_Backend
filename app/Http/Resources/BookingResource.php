@@ -9,22 +9,35 @@ class BookingResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        // Translasi status kembali ke bahasa Inggris agar Flutter (isPending, isCompleted, dll) tidak rusak
+        $statusMap = [
+            'Menunggu' => 'pending',
+            'Selesai' => 'completed',
+            'Dibatalkan' => 'cancelled',
+        ];
+
         return [
             'id' => $this->id,
-            'user_id' => $this->user_id,
-            'course_id' => $this->course_id,
-            'lpk_id' => $this->lpk_id,
+            'code' => $this->id, // Menggunakan id sebagai code karena tabel baru tidak ada code
+            'status' => $statusMap[$this->status] ?? 'pending',
+            'amount' => (float) $this->total_price, // Diubah kembali ke amount
+            'expires_at' => null,
+            'created_at' => $this->booking_date,
             
-            // Sertakan data course jika sudah diload
-            'course' => new CourseResource($this->whenLoaded('course')),
-            
-            // Sertakan data LPK jika sudah diload
-            'lpk' => $this->whenLoaded('lpk'),
-            
-            'status' => $this->status,
-            'total_price' => (float) $this->total_price,
-            'booking_date' => $this->booking_date,
-            'created_at' => $this->created_at,
+            // Bungkus ke dalam object schedule agar cocok dengan UI Flutter
+            'schedule' => [
+                'id' => $this->id,
+                'courseId' => $this->course_id,
+                'courseTitle' => $this->whenLoaded('course', fn() => $this->course->title),
+                'courseImageUrl' => $this->whenLoaded('course', function() {
+                    return !empty($this->course->images) ? $this->course->images[0] : null;
+                }),
+                'lpkName' => $this->whenLoaded('lpk', fn() => $this->lpk->name),
+                'lpkLogoUrl' => $this->whenLoaded('lpk', fn() => $this->lpk->logo),
+                'categoryName' => $this->whenLoaded('course', function() {
+                    return $this->course->relationLoaded('category') ? $this->course->category->name : null;
+                }),
+            ],
         ];
     }
 }
