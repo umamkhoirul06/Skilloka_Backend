@@ -253,9 +253,10 @@
 
             {{-- IMAGE UPLOAD --}}
             <div style="margin-bottom:16px">
-                <label>Course Image (Opsional)</label>
+                <label>Course Images (Opsional, bisa pilih banyak)</label>
                 <input type="file"
-                       name="image"
+                       name="images[]"
+                       multiple
                        accept="image/*"
                        style="
                             width:100%;
@@ -263,7 +264,7 @@
                             border:1px solid #ddd;
                             border-radius:6px
                        ">
-                <small style="color:gray;">Maksimal 2MB (JPG, JPEG, PNG)</small>
+                <small style="color:gray;">Maksimal 5MB per gambar (JPG, JPEG, PNG)</small>
             </div>
 
             {{-- FACILITIES --}}
