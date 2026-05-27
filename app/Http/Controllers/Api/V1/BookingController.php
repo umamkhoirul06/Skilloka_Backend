@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 class BookingController extends BaseController
 {
     /**
-     * GET /api/user/bookings
+     * GET /api/user/bookingsa
      * Ambil riwayat pesanan milik user yang sedang login
      */
     public function index(Request $request)

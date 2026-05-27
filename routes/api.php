@@ -38,9 +38,18 @@ Route::middleware('auth:sanctum')->group(function () {
     // Rute Profil
     Route::get('/auth/me', [AuthController::class, 'me']);
     Route::get('/user/profile', [AuthController::class, 'me']); // Alias untuk mobile
+    // Upload foto profil
+Route::post('/user/profile/photo', [AuthController::class, 'updatePhoto']);
+
+// Update profil
+Route::put('/user/profile', [AuthController::class, 'updateProfile']);
     
     // Rute Logout
     Route::post('/auth/logout', [AuthController::class, 'logout']);
+
+    // Update profil & foto
+    Route::put('/user/profile', [AuthController::class, 'updateProfile']);
+    Route::post('/user/profile/photo', [AuthController::class, 'updatePhoto']);
 
     // Rute Bookings
     Route::get('/bookings', [BookingController::class, 'index']);
