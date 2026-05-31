@@ -114,6 +114,7 @@ class AuthController extends BaseController
                         'target' => $phone,
                         'message' => $message,
                         'countryCode' => '62', // Format otomatis ke 628...
+                        'typing' => 'true',
                     ]);
 
             $responseData = $response->json();
