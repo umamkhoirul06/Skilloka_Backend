@@ -84,8 +84,15 @@ class AuthController extends BaseController
 
         $user = User::where('phone', $request->phone)->first();
 
+        // 🌟 LOGIKA BARU: AUTO-REGISTER JIKA NOMOR BELUM ADA
         if (!$user) {
-            return $this->error('Nomor belum terdaftar.', 404);
+            $user = User::create([
+                'name' => 'Pengguna Baru', // Nama default sementara
+                'phone' => $request->phone,
+            ]);
+
+            // Berikan role student secara otomatis
+            $user->assignRole('student');
         }
 
         // Generate OTP 4 digit
@@ -97,7 +104,7 @@ class AuthController extends BaseController
         $phone = $request->phone;
         $message = "🔔 *Skilloka OTP Login*\n\nKode OTP Anda: *{$otpCode}*\n\n_Berlaku 5 menit. Jangan bagikan ke siapapun._";
 
-        // Mengambil token dari .env, dengan fallback ke token yang kamu berikan
+        // Mengambil token dari .env, dengan fallback
         $fonnteToken = env('FONNTE_TOKEN', 'i3wzy35ABcN9t7kLvp39');
 
         try {
@@ -115,7 +122,6 @@ class AuthController extends BaseController
             if ($response->successful() && isset($responseData['status']) && ($responseData['status'] === true || $responseData['status'] === 'true')) {
                 return $this->success(null, 'OTP berhasil dikirim via WhatsApp.');
             } else {
-                // Jika Fonnte menolak (misal kuota habis/nomor tidak valid)
                 $reason = $responseData['reason'] ?? $responseData['detail'] ?? 'Unknown error';
                 return $this->error('Gagal mengirim WhatsApp: ' . $reason, 500);
             }
