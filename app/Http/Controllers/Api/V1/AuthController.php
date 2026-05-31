@@ -75,7 +75,7 @@ class AuthController extends BaseController
         return $this->success(new UserResource($request->user()));
     }
 
-    // ─── Request OTP ──────────────────────────────────────────────────────────
+    // ─── Request OTP (HANYA VIA WHATSAPP FONNTE) ──────────────────────────────
     public function requestOtp(Request $request)
     {
         $request->validate([
@@ -97,40 +97,32 @@ class AuthController extends BaseController
         $phone = $request->phone;
         $message = "🔔 *Skilloka OTP Login*\n\nKode OTP Anda: *{$otpCode}*\n\n_Berlaku 5 menit. Jangan bagikan ke siapapun._";
 
-        // Kirim via WhatsApp Fonnte (prioritas utama)
-        $fonnteToken = env('FONNTE_TOKEN');
-        $fonnteOk = false;
+        // Mengambil token dari .env, dengan fallback ke token yang kamu berikan
+        $fonnteToken = env('FONNTE_TOKEN', 'i3wzy35ABcN9t7kLvp39');
 
-        if ($fonnteToken) {
-            try {
-                $response = Http::withHeaders([
-                    'Authorization' => $fonnteToken,
-                ])->post('https://api.fonnte.com/send', [
-                            'target' => $phone,
-                            'message' => $message,
-                            'countryCode' => '62',
-                        ]);
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => $fonnteToken,
+            ])->post('https://api.fonnte.com/send', [
+                        'target' => $phone,
+                        'message' => $message,
+                        'countryCode' => '62', // Format otomatis ke 628...
+                    ]);
 
-                $fonnteOk = $response->successful() &&
-                    ($response->json('status') === true ||
-                        $response->json('status') === 'true');
+            $responseData = $response->json();
 
-            } catch (\Exception $e) {
-                $fonnteOk = false;
+            // Cek apakah pesan WA benar-benar terkirim menurut server Fonnte
+            if ($response->successful() && isset($responseData['status']) && ($responseData['status'] === true || $responseData['status'] === 'true')) {
+                return $this->success(null, 'OTP berhasil dikirim via WhatsApp.');
+            } else {
+                // Jika Fonnte menolak (misal kuota habis/nomor tidak valid)
+                $reason = $responseData['reason'] ?? $responseData['detail'] ?? 'Unknown error';
+                return $this->error('Gagal mengirim WhatsApp: ' . $reason, 500);
             }
-        }
 
-        // Fallback ke Telegram kalau Fonnte gagal atau belum diset
-        if (!$fonnteOk) {
-            $this->_kirimTelegram($phone, $otpCode);
+        } catch (\Exception $e) {
+            return $this->error('Terjadi kesalahan koneksi ke server Fonnte.', 500);
         }
-
-        return $this->success(
-            null,
-            $fonnteOk
-            ? 'OTP berhasil dikirim via WhatsApp.'
-            : 'OTP berhasil dikirim.'
-        );
     }
 
     // ─── Verify OTP ───────────────────────────────────────────────────────────
@@ -212,27 +204,5 @@ class AuthController extends BaseController
             'photo_url' => Storage::url($path),
             'photo' => $path,
         ], 'Foto profil berhasil diperbarui.');
-    }
-
-    // ─── Helper: Kirim OTP via Telegram ──────────────────────────────────────
-    private function _kirimTelegram(string $phone, int $otpCode): void
-    {
-        $telegramToken = env('TELEGRAM_BOT_TOKEN');
-        $chatId = env('TELEGRAM_CHAT_ID');
-
-        if ($telegramToken && $chatId) {
-            try {
-                Http::post(
-                    "https://api.telegram.org/bot{$telegramToken}/sendMessage",
-                    [
-                        'chat_id' => $chatId,
-                        'text' => "🔔 *Skilloka OTP Login*\n\nNomor HP: {$phone}\nKode OTP: *{$otpCode}*\n\n_Berlaku 5 menit._",
-                        'parse_mode' => 'Markdown',
-                    ]
-                );
-            } catch (\Exception $e) {
-                // Silent fail
-            }
-        }
     }
 }
