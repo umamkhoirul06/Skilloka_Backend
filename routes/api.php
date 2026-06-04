@@ -12,12 +12,15 @@ use App\Http\Controllers\Api\V1\LpkController;
 use App\Http\Controllers\Api\V1\BookingController;
 use App\Http\Controllers\Api\PaymentController;
 
-// 1. PUBLIC ROUTES (Tanpa Token)
+// ==========================================
+// 1. PUBLIC ROUTES (Tanpa Token / Bebas Akses)
+// ==========================================
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/request-otp', [AuthController::class, 'requestOtp']);
 Route::post('/auth/verify-otp', [AuthController::class, 'verifyOtp']);
 
+// Rute Kursus
 Route::get('/courses', [CourseController::class, 'index']);
 Route::get('/courses/{id}', [CourseController::class, 'show']);
 
@@ -32,24 +35,18 @@ Route::get('/categories', [CategoryController::class, 'index']);
 // Midtrans Payment Webhook (Public)
 Route::post('/payment/callback', [PaymentController::class, 'callback']);
 
-// 2. PROTECTED ROUTES (Wajib Token)
+
+// ==========================================
+// 2. PROTECTED ROUTES (Wajib Punya Token)
+// ==========================================
 Route::middleware('auth:sanctum')->group(function () {
-    
-    // Rute Profil
+
+    // Rute Profil & Autentikasi
     Route::get('/auth/me', [AuthController::class, 'me']);
     Route::get('/user/profile', [AuthController::class, 'me']); // Alias untuk mobile
-    // Upload foto profil
-Route::post('/user/profile/photo', [AuthController::class, 'updatePhoto']);
-
-// Update profil
-Route::put('/user/profile', [AuthController::class, 'updateProfile']);
-    
-    // Rute Logout
-    Route::post('/auth/logout', [AuthController::class, 'logout']);
-
-    // Update profil & foto
     Route::put('/user/profile', [AuthController::class, 'updateProfile']);
     Route::post('/user/profile/photo', [AuthController::class, 'updatePhoto']);
+    Route::post('/auth/logout', [AuthController::class, 'logout']);
 
     // Rute Bookings
     Route::get('/bookings', [BookingController::class, 'index']);

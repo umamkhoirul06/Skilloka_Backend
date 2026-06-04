@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Str; // Tambahan untuk random string
 
 class AuthController extends BaseController
 {
@@ -25,6 +26,7 @@ class AuthController extends BaseController
         $user = User::create([
             'name' => $request->name,
             'phone' => $request->phone,
+            'password' => Hash::make(Str::random(16)), // Cegah error null password
         ]);
 
         $user->assignRole('student');
@@ -42,15 +44,12 @@ class AuthController extends BaseController
             'password' => 'required',
         ]);
 
-        $field = filter_var($request->email_or_phone, FILTER_VALIDATE_EMAIL)
-            ? 'email'
-            : 'phone';
-
+        $field = filter_var($request->email_or_phone, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
         $user = User::where($field, $request->email_or_phone)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
-                'email_or_phone' => ['Invalid credentials provided.'],
+                'email_or_phone' => ['Kredensial tidak valid.'],
             ]);
         }
 
@@ -59,14 +58,14 @@ class AuthController extends BaseController
         return $this->success([
             'user' => new UserResource($user),
             'token' => $token,
-        ], 'Login successful');
+        ], 'Login berhasil');
     }
 
     // ─── Logout ───────────────────────────────────────────────────────────────
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
-        return $this->success(null, 'Logged out successfully');
+        return $this->success(null, 'Berhasil logout');
     }
 
     // ─── Me (profil sendiri) ──────────────────────────────────────────────────
@@ -75,6 +74,7 @@ class AuthController extends BaseController
         return $this->success(new UserResource($request->user()));
     }
 
+    // ─── Request OTP ──────────────────────────────────────────────────────────
     public function requestOtp(Request $request)
     {
         $request->validate([
@@ -84,16 +84,16 @@ class AuthController extends BaseController
 
         $channel = $request->channel ?? 'whatsapp';
 
-        $user = User::where('phone', $request->phone)->first();
+        // 🌟 LOGIKA BARU: AUTO-REGISTER LEBIH BERSIH
+        $user = User::firstOrCreate(
+            ['phone' => $request->phone],
+            [
+                'name' => 'Pengguna Baru',
+                'password' => Hash::make(Str::random(16)) // Cegah null constraint
+            ]
+        );
 
-        // 🌟 LOGIKA BARU: AUTO-REGISTER JIKA NOMOR BELUM ADA
-        if (!$user) {
-            $user = User::create([
-                'name' => 'Pengguna Baru', // Nama default sementara
-                'phone' => $request->phone,
-            ]);
-
-            // Berikan role student secara otomatis
+        if ($user->wasRecentlyCreated) {
             $user->assignRole('student');
         }
 
@@ -108,10 +108,10 @@ class AuthController extends BaseController
 
         if ($channel === 'telegram') {
             $telegramToken = env('TELEGRAM_BOT_TOKEN', '');
-            $telegramChatId = env('TELEGRAM_CHAT_ID', $phone); // Anda mungkin perlu logika mapping no hp ke chat_id
+            $telegramChatId = env('TELEGRAM_CHAT_ID', $phone);
 
             if (empty($telegramToken)) {
-                return $this->success(['dev_otp' => $otpCode], 'Telegram token belum diset, OTP via Telegram dilewati (OTP Dev: '.$otpCode.').');
+                return $this->success(['dev_otp' => $otpCode], 'Telegram token belum diset, OTP via Telegram dilewati (OTP Dev: ' . $otpCode . ').');
             }
 
             try {
@@ -131,32 +131,28 @@ class AuthController extends BaseController
             }
         }
 
-        // Mengambil token dari .env, dengan fallback
+        // ─── WhatsApp Fonnte ───
         $fonnteToken = env('FONNTE_TOKEN', 'i3wzy35ABcN9t7kLvp39');
 
         try {
-            // Gunakan asForm() karena Fonnte seringkali tidak menerima application/json
             $response = Http::asForm()->withHeaders([
                 'Authorization' => $fonnteToken,
             ])->post('https://api.fonnte.com/send', [
-                'target' => $phone,
-                'message' => $message,
-                'countryCode' => '62',
-            ]);
+                        'target' => $phone,
+                        'message' => $message,
+                        'countryCode' => '62',
+                    ]);
 
             $responseData = $response->json();
 
             if ($response->successful() && isset($responseData['status']) && ($responseData['status'] === true || $responseData['status'] === 'true')) {
-                // Untuk tahap development, sertakan otpCode di response agar mudah login
                 return $this->success(['dev_otp' => $otpCode], 'OTP berhasil dikirim via WhatsApp.');
             } else {
                 $reason = $responseData['reason'] ?? $responseData['detail'] ?? 'Unknown error';
-                // Meskipun gagal dikirim, demi proses development kita sertakan OTP-nya
-                return $this->success(['dev_otp' => $otpCode], 'Gagal WA ('.$reason.'). Namun Anda tetap bisa login dengan OTP Dev ini.');
+                return $this->success(['dev_otp' => $otpCode], 'Gagal WA (' . $reason . '). Gunakan OTP Dev ini.');
             }
 
         } catch (\Exception $e) {
-            // Return OTP for development fallback
             return $this->success(['dev_otp' => $otpCode], 'Kesalahan server WA. OTP Dev: ' . $otpCode);
         }
     }
@@ -183,6 +179,8 @@ class AuthController extends BaseController
 
         Cache::forget('otp_' . $request->phone);
 
+        // Hapus token lama agar tidak menumpuk (Opsional tapi bagus)
+        $user->tokens()->delete();
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return $this->success([
@@ -237,7 +235,7 @@ class AuthController extends BaseController
         $user->update(['photo' => $path]);
 
         return $this->success([
-            'photo_url' => Storage::url($path),
+            'photo_url' => url('storage/' . $path),
             'photo' => $path,
         ], 'Foto profil berhasil diperbarui.');
     }
