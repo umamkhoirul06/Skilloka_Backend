@@ -7,37 +7,30 @@ use App\Http\Resources\LpkResource;
 use App\Http\Resources\CourseResource;
 use App\Models\Lpk;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class LpkController extends BaseController
 {
     /**
      * GET /api/lpks
-     * Menampilkan daftar LPK yang aktif dan terverifikasi
      */
     public function index(Request $request)
     {
         $query = Lpk::query()
-            ->with(['location']) // Eager load lokasi agar tidak N+1 query
+            ->with(['location'])
             ->withCount('courses')
-            // Kita filter yang statusnya 'active'. 
-            // NOTE: LPK kamu yang 'rejected' di database TIDAK AKAN muncul.
             ->where('status', 'active');
 
-        // 1. Filter berdasarkan lokasi jika ada request location_id
         if ($request->filled('location_id')) {
             $query->where('location_id', $request->location_id);
         }
 
-        // 2. Filter Terverifikasi (Default: true untuk user umum)
-        // Jika di Flutter dikirim verified=false baru muncul semua
         if ($request->has('verified')) {
             $query->where('is_verified', $request->boolean('verified'));
         } else {
-            // Standarnya kita tampilkan yang sudah terverifikasi saja
             $query->where('is_verified', true);
         }
 
-        // 3. Pencarian Nama LPK atau Alamat
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -46,7 +39,6 @@ class LpkController extends BaseController
             });
         }
 
-        // 4. Sorting yang lebih aman
         $sortBy = $request->get('sort_by', 'created_at');
         $sortDir = $request->get('sort_dir', 'desc');
         $allowedSorts = ['name', 'created_at', 'courses_count'];
@@ -55,29 +47,31 @@ class LpkController extends BaseController
             $query->orderBy($sortBy, $sortDir);
         }
 
-        // 5. Eksekusi dengan Pagination
-        $perPage = $request->get('per_page', 10);
-        $lpks = $query->paginate($perPage);
-
-        return $this->paginated($lpks, LpkResource::class);
+        return $this->paginated($query->paginate($request->get('per_page', 10)), LpkResource::class);
     }
 
     /**
      * GET /api/lpks/{id}
-     * Detail LPK beserta kursus yang tersedia
      */
     public function show(string $id)
     {
-        // Cari LPK yang aktif, kalau tidak ada langsung 404
+        // FIX: Membersihkan ID dari karakter ':' yang tidak sengaja terbawa dari route binding
+        $cleanId = ltrim($id, ':');
+
         $lpk = Lpk::with([
             'location',
             'courses' => function ($q) {
-                $q->where('is_active', true); // Hanya ambil kursus yang aktif
+                $q->where('is_active', true);
             }
         ])
             ->withCount('courses')
             ->where('status', 'active')
-            ->findOrFail($id);
+            ->where('id', $cleanId) // Menggunakan where ID agar lebih aman
+            ->first();
+
+        if (!$lpk) {
+            return $this->error('LPK tidak ditemukan atau tidak aktif.', 404);
+        }
 
         return $this->success([
             'lpk' => new LpkResource($lpk),
