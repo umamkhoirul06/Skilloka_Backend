@@ -22,19 +22,25 @@ class User extends Authenticatable
 
     protected $guard_name = 'web';
 
+    // Konfigurasi UUID bawaan
     public $incrementing = false;
     protected $keyType = 'string';
 
+    // 🔥 FIX 1: Menambahkan kolom yang dibutuhkan aplikasi Mobile agar bisa di-save
     protected $fillable = [
         'tenant_id',
         'name',
         'email',
         'phone',
         'password',
-        'avatar',
+        'photo',       // Ditambahkan untuk fitur Update Foto Profil Mobile
+        'avatar',      // Tetap dibiarkan jika Web Admin memakainya
+        'address',     // Ditambahkan untuk fitur Update Profil
+        'gender',      // Ditambahkan untuk fitur Update Profil
+        'birth_date',  // Ditambahkan untuk fitur Update Profil
         'location_id',
         'fcm_token',
-        'status', // pending / active / rejected
+        'status',      // pending / active / rejected
     ];
 
     protected $hidden = [
@@ -42,9 +48,11 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    // 🔥 FIX 2: Menambahkan cast birth_date agar otomatis jadi format tanggal
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'birth_date' => 'date',
     ];
 
     /*
@@ -95,6 +103,12 @@ class User extends Authenticatable
     public function isUser()
     {
         return $this->hasRole('user');
+    }
+
+    // 🔥 FIX 3: Tambahan Helper Student (Karena auto-register pakai role 'student')
+    public function isStudent()
+    {
+        return $this->hasRole('student');
     }
 
     /*
