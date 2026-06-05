@@ -131,4 +131,8 @@ class User extends Authenticatable
     {
         return $this->status === 'rejected';
     }
+    public function favorites()
+    {
+    return $this->hasMany(Favorite::class);
+    }
 }

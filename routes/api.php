@@ -59,4 +59,18 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Midtrans Payment Transactions
     Route::post('/payment/create-transaction', [PaymentController::class, 'createTransaction']);
+//favorite
+Route::middleware('auth:sanctum')->group(function () {
+
+    Route::get('/favorites', [
+        FavoriteController::class,
+        'index'
+    ]);
+
+    Route::post('/favorites/{course}', [
+        FavoriteController::class,
+        'toggle'
+    ]);
+
 });
+    });
