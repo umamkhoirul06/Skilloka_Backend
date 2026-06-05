@@ -15,7 +15,8 @@ use App\Http\Controllers\Admin\BookingController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\CourseScheduleController;
 use App\Http\Controllers\Admin\ProfileController;
-use App\Http\Controllers\Admin\AdminDashboardController; // 🔥 WAJIB INI
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\BannerController; // 🔥 WAJIB INI
 
 use App\Http\Controllers\Admin\SuperAdmin\DashboardController;
 use App\Http\Controllers\Admin\SuperAdmin\TenantController;
@@ -54,8 +55,8 @@ Route::get('/admin/reset-password/{token}', function (string $token) {
 // Proses reset password
 Route::post('/admin/reset-password', function (Request $request) {
     $request->validate([
-        'token'    => 'required',
-        'email'    => 'required|email',
+        'token' => 'required',
+        'email' => 'required|email',
         'password' => 'required|confirmed|min:8',
     ]);
 
@@ -121,15 +122,16 @@ Route::middleware(['auth', 'role:admin_lpk'])
 
         Route::resource('courses', CourseController::class);
         Route::resource('students', StudentController::class)
-    ->only([
-        'index',
-        'show',
-        'edit',
-        'update',
-        'destroy'
-    ]);
+            ->only([
+                'index',
+                'show',
+                'edit',
+                'update',
+                'destroy'
+            ]);
+        Route::resource('banners', BannerController::class);
         Route::get('/dashboard/report/pdf', [AdminDashboardController::class, 'exportPdf'])
-    ->name('admin.dashboard.pdf');
+            ->name('admin.dashboard.pdf');
         Route::resource('bookings', BookingController::class)->except(['edit', 'update']);
         Route::patch('/bookings/{booking}/status', [BookingController::class, 'updateStatus'])->name('bookings.status');
         /*
@@ -138,16 +140,16 @@ Route::middleware(['auth', 'role:admin_lpk'])
 |--------------------------------------------------------------------------
 */
 
-Route::resource('payments', PaymentController::class)
-    ->only([
-        'index',
-        'show'
-    ]);
+        Route::resource('payments', PaymentController::class)
+            ->only([
+                'index',
+                'show'
+            ]);
 
-Route::patch(
-    '/payments/{payment}/status',
-    [PaymentController::class, 'updateStatus']
-)->name('payments.status');
+        Route::patch(
+            '/payments/{payment}/status',
+            [PaymentController::class, 'updateStatus']
+        )->name('payments.status');
 
         Route::resource('course-schedules', CourseScheduleController::class);
     });
@@ -167,18 +169,18 @@ Route::middleware(['auth', 'role:super_admin'])
             ->name('dashboard');
 
         Route::get('/tenants', [TenantController::class, 'index'])
-    ->name('tenants');
+            ->name('tenants');
 
-Route::get('/tenants/report/pdf', [TenantController::class, 'exportPdf'])
-    ->name('super.tenants.pdf');
+        Route::get('/tenants/report/pdf', [TenantController::class, 'exportPdf'])
+            ->name('super.tenants.pdf');
 
-Route::get('/tenants/{id}', [TenantController::class, 'show'])
-    ->name('tenants.show');
+        Route::get('/tenants/{id}', [TenantController::class, 'show'])
+            ->name('tenants.show');
 
 
 
-Route::delete('/tenants/{id}', [TenantController::class, 'destroy'])
-    ->name('tenants.delete');
+        Route::delete('/tenants/{id}', [TenantController::class, 'destroy'])
+            ->name('tenants.delete');
         Route::get(
             '/verifications',
             [VerificationController::class, 'index']
@@ -201,15 +203,15 @@ Route::delete('/tenants/{id}', [TenantController::class, 'destroy'])
 
         Route::get('/users', [UserController::class, 'index'])->name('users');
 
-Route::get('/finance', [FinanceController::class, 'index'])->name('finance');
+        Route::get('/finance', [FinanceController::class, 'index'])->name('finance');
 
-Route::get('/logs', [LogController::class, 'index'])->name('logs');
+        Route::get('/logs', [LogController::class, 'index'])->name('logs');
 
-Route::get('/settings', [SettingsController::class, 'index'])
-    ->name('settings');
+        Route::get('/settings', [SettingsController::class, 'index'])
+            ->name('settings');
 
-Route::post('/settings', [SettingsController::class, 'update'])
-    ->name('settings.update');
-    Route::get('/finance/report/pdf', [\App\Http\Controllers\Admin\SuperAdmin\FinanceController::class, 'exportPdf'])
-    ->name('super.finance.pdf');
+        Route::post('/settings', [SettingsController::class, 'update'])
+            ->name('settings.update');
+        Route::get('/finance/report/pdf', [\App\Http\Controllers\Admin\SuperAdmin\FinanceController::class, 'exportPdf'])
+            ->name('super.finance.pdf');
     });
