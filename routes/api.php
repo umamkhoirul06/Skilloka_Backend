@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\LocationController;
 use App\Http\Controllers\Api\V1\LpkController;
 use App\Http\Controllers\Api\V1\BookingController;
 use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\V1\BannerController;
 
 // ==========================================
 // 1. PUBLIC ROUTES (Tanpa Token / Bebas Akses)
@@ -47,6 +48,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/user/profile', [AuthController::class, 'updateProfile']);
     Route::post('/user/profile/photo', [AuthController::class, 'updatePhoto']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
+    Route::get('/banners', [BannerController::class, 'index']); // Rute untuk menampilkan Banner
 
     // Rute Bookings
     Route::get('/bookings', [BookingController::class, 'index']);

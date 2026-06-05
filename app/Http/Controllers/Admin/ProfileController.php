@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
 use App\Models\Lpk;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
@@ -20,65 +19,36 @@ class ProfileController extends Controller
 
     public function index()
     {
-
         /*
         |--------------------------------------------------------------------------
         | USER LOGIN
         |--------------------------------------------------------------------------
         */
-
         $user = Auth::user();
-
-
 
         /*
         |--------------------------------------------------------------------------
         | SAFETY LOGIN
         |--------------------------------------------------------------------------
         */
-
         if (!$user) {
-
             abort(403);
-
         }
-
-
 
         /*
         |--------------------------------------------------------------------------
         | GET LPK BY TENANT
         |--------------------------------------------------------------------------
         */
-
-        $lpk = Lpk::where(
-
-                'tenant_id',
-                $user->tenant_id
-
-            )
-
-            ->firstOrFail();
-
-
+        $lpk = Lpk::where('tenant_id', $user->tenant_id)->firstOrFail();
 
         /*
         |--------------------------------------------------------------------------
         | VIEW
         |--------------------------------------------------------------------------
         */
-
-        return view(
-
-            'admin.profile',
-
-            compact('lpk', 'user')
-
-        );
-
+        return view('admin.profile', compact('lpk', 'user'));
     }
-
-
 
     /*
     |--------------------------------------------------------------------------
@@ -111,7 +81,7 @@ class ProfileController extends Controller
         */
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email,'.$user->id,
+            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
             'phone' => 'nullable|string|max:25',
             'legal_name' => 'nullable|string|max:255',
             'phone_lpk' => 'nullable|string|max:25',
@@ -119,7 +89,8 @@ class ProfileController extends Controller
             'facilities' => 'nullable|array',
             'gallery_images' => 'nullable|array',
             'gallery_images.*' => 'image|mimes:jpeg,jpg,png|max:5120',
-            'contact_info' => 'nullable|string|max:500',
+            // VALIDASI DILONGGARKAN AGAR BISA MENERIMA JSON STRING DARI FORM
+            'contact_info' => 'nullable|string|max:1000',
             'logo' => 'nullable', // Relaxed to allow both file and Base64 string
             'cropped_logo' => 'nullable|string'
         ]);
@@ -169,29 +140,40 @@ class ProfileController extends Controller
                 $lpk->images = $existingImages;
             }
 
-            // Update contact info
+            // 🔥 FIX BUG: KONVERSI CONTACT INFO MENJADI ARRAY YANG BENAR 🔥
             if ($request->has('contact_info')) {
-                // contact_info is cast to array in Lpk model
-                $lpk->contact_info = [$request->contact_info];
+                $contactInfo = $request->contact_info;
+
+                // Jika input berupa string (termasuk string JSON), kita decode menjadi array
+                if (is_string($contactInfo)) {
+                    $decoded = json_decode($contactInfo, true);
+                    // Jika proses decode sukses dan menghasilkan array, pakai hasil decodenya
+                    // Jika gagal (bukan format json), paksa masuk ke dalam array 1 dimensi
+                    $contactInfo = (json_last_error() === JSON_ERROR_NONE && is_array($decoded))
+                        ? $decoded
+                        : [$contactInfo];
+                }
+
+                $lpk->contact_info = $contactInfo;
             }
 
             // Handle Base64 from Cropper or standard file upload
             $base64Input = $request->filled('cropped_logo') ? $request->cropped_logo : (is_string($request->logo) ? $request->logo : null);
-            
+
             if ($base64Input && strpos($base64Input, 'data:image') === 0) {
                 $image_parts = explode(";base64,", $base64Input);
                 if (count($image_parts) == 2) {
                     $image_base64 = base64_decode($image_parts[1]);
                     $fileName = 'lpks/' . uniqid() . '.png';
-                    \Illuminate\Support\Facades\Storage::disk('public')->put($fileName, $image_base64);
+                    Storage::disk('public')->put($fileName, $image_base64);
                     $lpk->logo = $fileName;
                 }
-            } 
+            }
             // Fallback to normal upload
             elseif ($request->hasFile('logo')) {
                 $lpk->logo = $request->file('logo')->store('lpks', 'public');
             }
-            
+
             $lpk->save();
         }
 
