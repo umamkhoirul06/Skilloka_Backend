@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-    class Favorite extends Model
+class Favorite extends Model
 {
     use HasFactory;
 
@@ -22,5 +23,4 @@ use Illuminate\Database\Eloquent\Model;
     {
         return $this->belongsTo(Course::class);
     }
-}//
-
+}

@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\V1\LpkController;
 use App\Http\Controllers\Api\V1\BookingController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\V1\BannerController;
+use App\Http\Controllers\Api\FavoriteController;
 
 // ==========================================
 // 1. PUBLIC ROUTES (Tanpa Token / Bebas Akses)
@@ -59,8 +60,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Midtrans Payment Transactions
     Route::post('/payment/create-transaction', [PaymentController::class, 'createTransaction']);
-//favorite
-Route::middleware('auth:sanctum')->group(function () {
+
+    //favorite
 
     Route::get('/favorites', [
         FavoriteController::class,
@@ -73,4 +74,4 @@ Route::middleware('auth:sanctum')->group(function () {
     ]);
 
 });
-    });
+    
