@@ -154,6 +154,12 @@ Route::middleware(['auth', 'role:admin_lpk'])
         Route::resource('course-schedules', CourseScheduleController::class);
     });
 
+
+
+Route::patch('/students/booking/{bookingId}/status', [
+    App\Http\Controllers\Admin\StudentController::class,
+    'updateStatusBelajar'
+])->name('admin.students.updateStatusBelajar');
 /*
 |--------------------------------------------------------------------------
 | SUPER ADMIN AREA

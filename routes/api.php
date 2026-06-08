@@ -57,6 +57,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/bookings', [BookingController::class, 'store']);
     Route::get('/bookings/{id}', [BookingController::class, 'show']);
     Route::patch('/bookings/{id}/cancel', [BookingController::class, 'cancel']);
+    
 
     // 🔥 PAYMENT TRANSACTION
     Route::post('/payment/create-transaction', [PaymentController::class, 'createTransaction']);

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Booking;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 
@@ -12,94 +13,45 @@ class StudentController extends Controller
 {
     /**
      * LIST STUDENT
-     * (user yang pernah booking di tenant admin ini)
      */
     public function index()
     {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
+        $tenantId = Auth::user()->tenant_id;
 
-        $tenantId = $user->tenant_id;
-
-        $students = User::withCount('bookings')
-            ->whereHas('bookings', function ($q) use ($tenantId) {
-
-                $q->where('tenant_id', $tenantId);
-
-            })
+        $students = User::whereHas('bookings', function ($q) use ($tenantId) {
+            $q->where('tenant_id', $tenantId);
+        })
+            ->withCount([
+                'bookings' => function ($q) use ($tenantId) {
+                    $q->where('tenant_id', $tenantId);
+                }
+            ])
             ->latest()
             ->paginate(10);
 
-        return view(
-            'admin.students.index',
-            compact('students')
-        );
+        return view('admin.students.index', compact('students'));
     }
-
-
-
-    /**
-     * CREATE TIDAK DIPAKAI
-     */
-    public function create()
-    {
-        abort(404);
-    }
-
-
-
-    /**
-     * STORE TIDAK DIPAKAI
-     */
-    public function store(Request $request)
-    {
-        abort(404);
-    }
-
-
 
     /**
      * DETAIL STUDENT
      */
     public function show(User $student)
     {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
+        $tenantId = Auth::user()->tenant_id;
 
-        $tenantId = $user->tenant_id;
+        // Security Check: Pastikan user ini terdaftar di LPK ini
+        if (!$student->bookings()->where('tenant_id', $tenantId)->exists()) {
+            return redirect()->route('admin.students.index')->with('error', 'Siswa tidak ditemukan.');
+        }
 
-        // hanya booking dari tenant admin ini
         $student->load([
-
             'bookings' => function ($q) use ($tenantId) {
-
-                $q->where('tenant_id', $tenantId)
-                    ->latest();
-
+                $q->where('tenant_id', $tenantId)->latest();
             }
-
         ]);
 
-        return view(
-            'admin.students.show',
-            compact('student')
-        );
+        return view('admin.students.show', compact('student'));
     }
-
-
-
-    /**
-     * FORM EDIT STUDENT
-     */
-    public function edit(User $student)
-    {
-        return view(
-            'admin.students.edit',
-            compact('student')
-        );
-    }
-
-
 
     /**
      * UPDATE STUDENT
@@ -107,56 +59,52 @@ class StudentController extends Controller
     public function update(Request $request, User $student)
     {
         $validated = $request->validate([
-
             'name' => 'required|string|max:255',
-
             'email' => 'required|email|unique:users,email,' . $student->id,
-
             'phone' => 'nullable|string|max:20',
-
         ]);
 
-
-        // update password kalau diisi
         if ($request->filled('password')) {
-
-            $request->validate([
-
-                'password' => 'required|string|min:8|confirmed'
-
-            ]);
-
-            $validated['password'] = Hash::make(
-                $request->password
-            );
+            $request->validate(['password' => 'required|string|min:8|confirmed']);
+            $validated['password'] = Hash::make($request->password);
         }
-
 
         $student->update($validated);
 
-
         return redirect()
             ->route('admin.students.show', $student)
-            ->with(
-                'success',
-                'Data student berhasil diperbarui'
-            );
+            ->with('success', 'Data siswa berhasil diperbarui');
     }
 
+    /**
+     * 🔥 FITUR BARU: UPDATE STATUS BELAJAR
+     * Dipanggil via form/dropdown di blade
+     */
+    public function updateStatusBelajar(Request $request, $bookingId)
+    {
+        $request->validate([
+            'status_belajar' => 'required|in:sedang_belajar,lulus,magang',
+        ]);
 
+        $booking = Booking::where('id', $bookingId)
+            ->where('tenant_id', Auth::user()->tenant_id)
+            ->firstOrFail();
+
+        $booking->update(['status_belajar' => $request->status_belajar]);
+
+        return back()->with('success', 'Status belajar siswa berhasil diperbarui!');
+    }
 
     /**
      * DELETE STUDENT
      */
     public function destroy(User $student)
     {
+        // Pastikan admin hanya bisa menghapus jika user tsb tidak memiliki booking aktif
         $student->delete();
 
         return redirect()
             ->route('admin.students.index')
-            ->with(
-                'success',
-                'Student berhasil dihapus'
-            );
+            ->with('success', 'Data siswa berhasil dihapus');
     }
 }
