@@ -56,12 +56,11 @@ class BookingController extends Controller
                 abort(403);
             }
 
-            // 🔥 FIX: 'created_by' sudah dihapus dari sini
+            // 🔥 FIX: Kolom 'created_by' & 'source' sudah dihapus dari sini
             Booking::create([
                 'user_id' => $request->user_id,
                 'schedule_id' => $schedule->id,
                 'tenant_id' => $schedule->course->tenant_id,
-                'source' => 'admin_booking',
                 'amount' => $schedule->course->price,
                 'payment_status' => 'unpaid',
                 'status' => 'pending',
@@ -128,7 +127,6 @@ class BookingController extends Controller
             abort(403);
         }
 
-        // 🔥 FIX: Menghapus 'creator' dari load data relasi
         $booking->load(['user', 'schedule.course', 'payment']);
         return view('admin.bookings.show', compact('booking'));
     }

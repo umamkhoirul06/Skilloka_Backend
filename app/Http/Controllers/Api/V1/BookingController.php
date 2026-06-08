@@ -61,12 +61,11 @@ class BookingController extends BaseController
             $user = $request->user();
             $schedule = CourseSchedule::with('course')->findOrFail($request->schedule_id);
 
-            // 🔥 FIX: 'created_by' sudah dihapus dari sini
+            // 🔥 FIX: Kolom 'created_by' & 'source' sudah dihapus agar tidak bentrok dengan DB
             $booking = Booking::create([
                 'user_id' => $user->id,
                 'schedule_id' => $schedule->id,
                 'tenant_id' => $schedule->course->tenant_id,
-                'source' => 'mobile_booking',
                 'amount' => $schedule->course->price,
                 'payment_status' => 'unpaid',
                 'status' => 'pending',
