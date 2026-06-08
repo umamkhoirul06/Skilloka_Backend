@@ -319,8 +319,8 @@
                             </div>
                         @endif
 
-                        {{-- 2. JIKA BOOKING SUDAH DI-ACC --}}
-                        @if(in_array(trim(strtolower($booking->status)), ['confirmed', 'disetujui']))
+                        {{-- 2. JIKA BOOKING SUDAH DI-ACC (Sekarang pakai kata 'selesai') --}}
+                        @if(trim(strtolower($booking->status)) == 'selesai')
                             @if($booking->payment && trim(strtolower($booking->payment->status)) == 'pending')
                                 <form action="{{ route('admin.payments.status', $booking->payment->id) }}" method="POST"
                                     class="w-full">
@@ -340,12 +340,11 @@
                             @endif
                         @endif
 
-                        {{-- 3. JIKA BOOKING DITOLAK --}}
-                        {{-- 3. JIKA BOOKING DITOLAK --}}
-                        @if(in_array(trim(strtolower($booking->status)), ['cancelled', 'ditolak']))
+                        {{-- 3. JIKA BOOKING DITOLAK (Sekarang pakai kata 'dibatalkan') --}}
+                        @if(trim(strtolower($booking->status)) == 'dibatalkan')
                             <div
                                 style="background-color: #fee2e2 !important; color: #991b1b !important; padding: 16px; border-radius: 8px; font-weight: bold; text-align: center; font-size: 15px;">
-                                ❌ Pendaftaran ini Telah Ditolak
+                                ❌ Pendaftaran ini Telah Dibatalkan
                             </div>
                         @endif
                     </div>

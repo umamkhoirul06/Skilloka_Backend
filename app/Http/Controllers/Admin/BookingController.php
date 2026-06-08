@@ -90,9 +90,9 @@ class BookingController extends Controller
 
                 Storage::disk('public')->put($qrPath, QrCode::format('png')->size(300)->generate($qrData));
 
-                // 🔥 FIX: Mengubah 'confirmed' menjadi 'Disetujui' agar lolos Check Constraint PostgreSQL
+                // 🔥 FIX: Pakai kata 'Selesai' sesuai izin database
                 $booking->update([
-                    'status' => 'Disetujui',
+                    'status' => 'Selesai',
                     'qr_code_url' => $qrPath
                 ]);
 
@@ -109,8 +109,8 @@ class BookingController extends Controller
                     ]
                 );
             } else {
-                // 🔥 FIX: Mengubah 'cancelled' menjadi 'Ditolak' agar lolos Check Constraint PostgreSQL
-                $booking->update(['status' => 'Ditolak']);
+                // 🔥 FIX: Pakai kata 'Dibatalkan' sesuai izin database
+                $booking->update(['status' => 'Dibatalkan']);
             }
 
             DB::commit();
@@ -120,7 +120,6 @@ class BookingController extends Controller
             return back()->withErrors(['error' => 'Gagal: ' . $e->getMessage()]);
         }
     }
-
     public function show(Booking $booking)
     {
         $user = Auth::user();
