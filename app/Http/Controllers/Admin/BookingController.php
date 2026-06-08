@@ -90,23 +90,27 @@ class BookingController extends Controller
 
                 Storage::disk('public')->put($qrPath, QrCode::format('png')->size(300)->generate($qrData));
 
+                // 🔥 FIX: Mengubah 'confirmed' menjadi 'Disetujui' agar lolos Check Constraint PostgreSQL
                 $booking->update([
-                    'status' => 'confirmed',
+                    'status' => 'Disetujui',
                     'qr_code_url' => $qrPath
                 ]);
+
+                $coursePrice = optional(optional($booking->schedule)->course)->price ?? 0;
 
                 Payment::updateOrCreate(
                     ['booking_id' => $booking->id],
                     [
                         'user_id' => $booking->user_id,
                         'tenant_id' => $booking->tenant_id,
-                        'amount' => $booking->total_price, // Diambil langsung dari total_price booking
+                        'amount' => $coursePrice,
                         'status' => 'pending',
                         'method' => 'manual',
                     ]
                 );
             } else {
-                $booking->update(['status' => 'cancelled']);
+                // 🔥 FIX: Mengubah 'cancelled' menjadi 'Ditolak' agar lolos Check Constraint PostgreSQL
+                $booking->update(['status' => 'Ditolak']);
             }
 
             DB::commit();

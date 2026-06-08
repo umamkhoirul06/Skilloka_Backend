@@ -341,7 +341,8 @@
                         @endif
 
                         {{-- 3. JIKA BOOKING DITOLAK --}}
-                        @if(trim(strtolower($booking->status)) == 'cancelled')
+                        {{-- 3. JIKA BOOKING DITOLAK --}}
+                        @if(in_array(trim(strtolower($booking->status)), ['cancelled', 'ditolak']))
                             <div
                                 style="background-color: #fee2e2 !important; color: #991b1b !important; padding: 16px; border-radius: 8px; font-weight: bold; text-align: center; font-size: 15px;">
                                 ❌ Pendaftaran ini Telah Ditolak
