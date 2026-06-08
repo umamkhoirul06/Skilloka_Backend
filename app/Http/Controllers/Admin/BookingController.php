@@ -56,16 +56,14 @@ class BookingController extends Controller
                 abort(403);
             }
 
-            // 🔥 FIX: Kolom 'created_by' & 'source' sudah dihapus dari sini
+            // 🔥 FIX: Menyelaraskan penyimpanan data dari panel admin web
             Booking::create([
                 'user_id' => $request->user_id,
-                'schedule_id' => $schedule->id,
+                'course_id' => $schedule->course->id,
                 'tenant_id' => $schedule->course->tenant_id,
-                'amount' => $schedule->course->price,
-                'payment_status' => 'unpaid',
-                'status' => 'pending',
-                'notes' => $request->notes,
-                'expires_at' => now()->addHours(24),
+                'total_price' => $schedule->course->price,
+                'schedule_id' => $schedule->id,
+                'status' => 'Menunggu',
             ]);
 
             DB::commit();
@@ -102,7 +100,7 @@ class BookingController extends Controller
                     [
                         'user_id' => $booking->user_id,
                         'tenant_id' => $booking->tenant_id,
-                        'amount' => $booking->amount,
+                        'amount' => $booking->total_price, // Diambil langsung dari total_price booking
                         'status' => 'pending',
                         'method' => 'manual',
                     ]

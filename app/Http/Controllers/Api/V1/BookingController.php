@@ -39,7 +39,7 @@ class BookingController extends BaseController
         return $this->success([
             'id' => $booking->id,
             'status' => $booking->status,
-            'amount' => $booking->amount,
+            'amount' => (float) $booking->total_price, // 🔥 Menggunakan total_price
             'qr_code_url' => $booking->qr_code_url ? asset('storage/' . $booking->qr_code_url) : null,
             'course' => optional($booking->schedule)->course,
             'schedule' => $booking->schedule,
@@ -61,16 +61,14 @@ class BookingController extends BaseController
             $user = $request->user();
             $schedule = CourseSchedule::with('course')->findOrFail($request->schedule_id);
 
-            // 🔥 FIX: Kolom 'created_by' & 'source' sudah dihapus agar tidak bentrok dengan DB
+            // 🔥 FIX: Hanya memasukkan kolom yang benar-benar ada di database kamu
             $booking = Booking::create([
                 'user_id' => $user->id,
-                'schedule_id' => $schedule->id,
+                'course_id' => $schedule->course->id,
                 'tenant_id' => $schedule->course->tenant_id,
-                'amount' => $schedule->course->price,
-                'payment_status' => 'unpaid',
-                'status' => 'pending',
-                'notes' => $request->notes ?? 'Pendaftaran via Aplikasi Mobile',
-                'expires_at' => now()->addHours(24),
+                'total_price' => $schedule->course->price, // Kolom pengganti amount
+                'schedule_id' => $schedule->id,
+                'status' => 'Menunggu', // Sesuai default value di database kamu
             ]);
 
             DB::commit();
@@ -79,7 +77,7 @@ class BookingController extends BaseController
                 'booking_id' => $booking->id,
                 'id' => $booking->id,
                 'status' => $booking->status,
-                'amount' => $booking->amount,
+                'amount' => (float) $booking->total_price,
             ], 'Booking berhasil dibuat, menunggu persetujuan admin LPK.');
 
         } catch (\Exception $e) {
