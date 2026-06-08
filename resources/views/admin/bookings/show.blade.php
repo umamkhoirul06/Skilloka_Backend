@@ -326,7 +326,7 @@
                                     class="w-full">
                                     @csrf
                                     @method('PATCH')
-                                    <input type="hidden" name="status" value="success">
+                                    <input type="hidden" name="status" value="paid">
                                     <button type="submit"
                                         style="background-color: #2563eb !important; color: #ffffff !important; padding: 14px; border-radius: 8px; width: 100%; font-weight: bold; border: none; cursor: pointer; display: block; text-align: center; font-size: 16px;">
                                         Konfirmasi Pembayaran Lunas

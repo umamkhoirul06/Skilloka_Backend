@@ -71,9 +71,25 @@ class AuthController extends BaseController
     // ─── Me (profil sendiri) ──────────────────────────────────────────────────
     public function me(Request $request)
     {
-        return $this->success(new UserResource($request->user()));
-    }
+        $user = $request->user();
+        
+        // Hitung kursus yang sudah di-ACC (Lunas)
+        $activeBookingsCount = \App\Models\Booking::where('user_id', $user->id)
+            ->where('status', 'Selesai') 
+            ->count();
+            
+        // Hitung sertifikat (asumsi logic sertifikat Anda)
+        $certificatesCount = 0; // Sesuaikan logic sertifikat Anda jika ada
 
+        $userData = new UserResource($user);
+        $data = $userData->toArray($request);
+        
+        // Masukkan data tambahan ke response
+        $data['active_bookings_count'] = $activeBookingsCount;
+        $data['certificates_count'] = $certificatesCount;
+
+        return $this->success($data);
+    }
     // ─── Request OTP ──────────────────────────────────────────────────────────
     public function requestOtp(Request $request)
     {
