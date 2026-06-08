@@ -84,4 +84,20 @@ class PaymentController extends Controller
         }
         return response()->json(['status' => 'ok']);
     }
+
+    /**
+     * 🔥 TAMBAHAN BARU: Memperbarui status pembayaran manual dari admin
+     */
+    public function updateStatus(Request $request, Payment $payment)
+    {
+        $request->validate([
+            'status' => 'required'
+        ]);
+
+        $payment->update([
+            'status' => $request->status
+        ]);
+
+        return back()->with('success', 'Pembayaran berhasil dikonfirmasi sebagai LUNAS!');
+    }
 }
