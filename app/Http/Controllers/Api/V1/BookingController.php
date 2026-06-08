@@ -5,32 +5,39 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\BaseController;
 use App\Http\Resources\BookingResource;
 use App\Models\Booking;
+use App\Models\CourseSchedule;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class BookingController extends BaseController
 {
+    /**
+     * GET /api/v1/user/bookings
+     * Ambil riwayat pesanan milik user yang sedang login
+     */
     public function index(Request $request)
     {
-        // Pastikan relasi schedule.course terpasang di Model Booking
         $bookings = Booking::query()
             ->where('user_id', $request->user()->id)
             ->with(['schedule.course', 'schedule.course.lpk'])
             ->latest()
             ->get();
 
-        return $this->success(BookingResource::collection($bookings), 'Riwayat pesanan berhasil diambil.');
+        return $this->success(BookingResource::collection($bookings), 'Daftar riwayat pesanan berhasil diambil.');
     }
 
+    /**
+     * GET /api/v1/bookings/{id}
+     * Ambil detail booking berdasarkan ID
+     */
     public function show(string $id)
     {
-        // 🔥 TAMBAHAN LOGIKA: Ambil QR Code jika status confirmed
         $booking = Booking::with(['schedule.course', 'schedule.course.lpk'])->findOrFail($id);
 
         if ($booking->user_id !== auth()->id()) {
-            return $this->error('Unauthorized access.', 403);
+            return $this->error('Unauthorized access to booking data.', 403);
         }
 
-        // Kita return data booking termasuk QR Code
         return $this->success([
             'id' => $booking->id,
             'status' => $booking->status,
@@ -38,54 +45,55 @@ class BookingController extends BaseController
             'qr_code_url' => $booking->qr_code_url ? asset('storage/' . $booking->qr_code_url) : null,
             'course' => $booking->schedule->course,
             'schedule' => $booking->schedule,
-        ]);
+        ], 'Detail booking berhasil diambil.');
     }
 
-    public function history(Request $request)
+    /**
+     * POST /api/v1/bookings
+     * 🔥 METHOD STORE: Menangani pendaftaran/booking baru dari aplikasi Mobile
+     */
+    public function store(Request $request)
     {
-        $user = $request->user();
-
-        // Ambil semua booking user (termasuk yang statusnya 'pending' atau 'paid')
-        $bookings = Booking::with([
-            'schedule.course',
-            'schedule.course.lpk',
-        ])
-            ->where('user_id', $user->id)
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        // Map data sesuai struktur yang dibutuhkan frontend
-        $data = $bookings->map(function ($booking) {
-            return [
-                'id' => $booking->id,
-                'status' => $booking->status, // pending / paid / cancelled
-                'amount' => $booking->amount,
-                'payment_method' => $booking->payment_method,
-                'course' => [
-                    'id' => $booking->schedule->course_id,
-                    'title' => $booking->schedule->course->title,
-                    'image' => $booking->schedule->course->thumbnail_url,
-                ],
-                'schedule' => [
-                    'date' => $booking->schedule->date,
-                    'start_time' => $booking->schedule->start_time,
-                    'end_time' => $booking->schedule->end_time,
-                    'location' => $booking->schedule->location,
-                ],
-                'lpk' => [
-                    'id' => $booking->schedule->course->lpk_id,
-                    'name' => $booking->schedule->course->lpk->name,
-                    'address' => $booking->schedule->course->lpk->address,
-                ],
-                'qr_code' => $booking->qr_code_url ? asset('storage/' . $booking->qr_code_url) : null,
-            ];
-        });
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Riwayat pesanan berhasil diambil',
-            'data' => $data,
+        // Validasi input dari aplikasi mobile
+        $request->validate([
+            'course_id' => 'required',
+            'schedule_id' => 'required|exists:course_schedules,id',
         ]);
-    }
 
+        DB::beginTransaction();
+        try {
+            $user = $request->user();
+            
+            // Ambil data jadwal beserta kursusnya untuk mendapatkan tenant_id & harga
+            $schedule = CourseSchedule::with('course')->findOrFail($request->schedule_id);
+
+            // Buat record booking baru dengan status awal 'pending'
+            $booking = Booking::create([
+                'user_id' => $user->id,
+                'schedule_id' => $schedule->id,
+                'tenant_id' => $schedule->course->tenant_id,
+                'created_by' => $user->id,
+                'source' => 'mobile_booking',
+                'amount' => $schedule->course->price,
+                'payment_status' => 'unpaid',
+                'status' => 'pending', // Menunggu persetujuan admin di Web
+                'notes' => $request->notes ?? 'Pendaftaran via Aplikasi Mobile',
+                'expires_at' => now()->addHours(24),
+            ]);
+
+            DB::commit();
+
+            // Return response sukses dengan membawa data id booking untuk dibaca Flutter
+            return $this->success([
+                'booking_id' => $booking->id,
+                'id' => $booking->id,
+                'status' => $booking->status,
+                'amount' => $booking->amount,
+            ], 'Booking berhasil dibuat, menunggu persetujuan admin LPK.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->error('Gagal membuat booking: ' . $e->getMessage(), 500);
+        }
+    }
 }
