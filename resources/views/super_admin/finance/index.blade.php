@@ -1,222 +1,135 @@
 @extends('layouts.super_admin')
 
-@section('title','Finance')
+@section('title', 'Finance')
 
 @section('content')
-
-<style>
-
-.stat{
-background:white;
-border-radius:12px;
-padding:18px;
-border:1px solid #e5e7eb;
-display:flex;
-align-items:center;
-justify-content:space-between;
-}
-
-.stat-title{
-font-size:13px;
-color:#6b7280;
-}
-
-.stat-number{
-font-size:22px;
-font-weight:600;
-}
-
-.icon{
-width:42px;
-height:42px;
-border-radius:10px;
-display:flex;
-align-items:center;
-justify-content:center;
-}
-
-.i1{
-background:#eef2ff;
-color:#4f46e5;
-}
-
-.i2{
-background:#ecfdf5;
-color:#059669;
-}
-
-.card{
-background:white;
-border-radius:12px;
-border:1px solid #e5e7eb;
-padding:20px;
-}
-
-.table th{
-font-size:13px;
-color:#6b7280;
-font-weight:500;
-}
-
-.table tr{
-border-bottom:1px solid #f1f5f9;
-}
-
-</style>
-
-
-<div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
-    <select id="financePeriod" style="padding:8px 14px; border:1px solid #e2e8f0; border-radius:10px; font-size:13px;">
-        <option value="month">Bulan Ini</option>
-        <option value="3months">3 Bulan</option>
-        <option value="6months">6 Bulan</option>
-        <option value="year">Tahun Ini</option>
-    </select>
-    <a href="#" onclick="downloadFinancePdf()" 
-       style="background:linear-gradient(135deg,#4f46e5,#7c3aed); color:white; padding:10px 20px; border-radius:10px; font-size:13px; font-weight:600; text-decoration:none;">
-        📥 Download Report PDF
-    </a>
-</div>
-
-<script>
-function downloadFinancePdf() {
-    const period = document.getElementById('financePeriod').value;
-    window.open(`/super-admin/finance/report/pdf?period=${period}`, '_blank');
-}
-</script>
-<!-- statistik -->
-<div class="grid md:grid-cols-2 gap-6 mb-6">
-
-<div class="stat">
-
-<div>
-
-<p class="stat-title">
-Total Transaksi
-</p>
-
-<p class="stat-number">
-{{ $totalPayments }}
-</p>
-
-</div>
-
-<div class="icon i1">
-💳
-</div>
-
-</div>
-
-
-
-<div class="stat">
-
-<div>
-
-<p class="stat-title">
-Total Revenue
-</p>
-
-<p class="stat-number text-emerald-600">
-Rp {{ number_format($totalRevenue) }}
-</p>
-
-</div>
-
-<div class="icon i2">
-💰
-</div>
-
-</div>
-
-</div>
-
-
-
-
-
-<!-- tabel transaksi -->
-<div class="card">
-
-<h3 class="text-sm font-semibold mb-4">
-Transaksi Terbaru
-</h3>
-
-
-<table class="table w-full">
-
-<thead>
-
-<tr>
-
-<th class="p-2 text-left">
-ID
-</th>
-
-<th class="p-2 text-left">
-User
-</th>
-
-<th class="p-2 text-left">
-Amount
-</th>
-
-<th class="p-2 text-left">
-Tanggal
-</th>
-
-</tr>
-
-</thead>
-
-
-
-<tbody>
-
-@forelse($recentPayments as $payment)
-
-<tr>
-
-<td class="p-2">
-#{{ $payment->id }}
-</td>
-
-<td class="p-2">
-{{ $payment->user->name ?? '-' }}
-</td>
-
-<td class="p-2 text-emerald-600 font-medium">
-Rp {{ number_format($payment->amount) }}
-</td>
-
-<td class="p-2 text-gray-500">
-{{ $payment->created_at->format('d M Y') }}
-</td>
-
-</tr>
-
-@empty
-
-<tr>
-
-<td colspan="4"
-class="text-center p-4 text-gray-400">
-
-Belum ada transaksi
-
-</td>
-
-</tr>
-
-@endforelse
-
-
-</tbody>
-
-</table>
-
-</div>
-
-
-
+    <style>
+        .stat {
+            background: white;
+            border-radius: 12px;
+            padding: 18px;
+            border: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .stat-title {
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        .stat-number {
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .i1 {
+            background: #eef2ff;
+            color: #4f46e5;
+        }
+
+        .i2 {
+            background: #ecfdf5;
+            color: #059669;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            padding: 20px;
+        }
+
+        .table th {
+            font-size: 13px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .table tr {
+            border-bottom: 1px solid #f1f5f9;
+        }
+    </style>
+
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+        <select id="financePeriod" onchange="filterData()"
+            style="padding:8px 14px; border:1px solid #e2e8f0; border-radius:10px; font-size:13px;">
+            <option value="month" {{ request('period') == 'month' ? 'selected' : '' }}>Bulan Ini</option>
+            <option value="3months" {{ request('period') == '3months' ? 'selected' : '' }}>3 Bulan Terakhir</option>
+            <option value="6months" {{ request('period') == '6months' ? 'selected' : '' }}>6 Bulan Terakhir</option>
+            <option value="year" {{ request('period') == 'year' ? 'selected' : '' }}>Tahun Ini</option>
+        </select>
+
+        <a href="#" onclick="downloadFinancePdf()"
+            style="background:linear-gradient(135deg,#4f46e5,#7c3aed); color:white; padding:10px 20px; border-radius:10px; font-size:13px; font-weight:600; text-decoration:none;">
+            📥 Download Report PDF
+        </a>
+    </div>
+
+    <script>
+        function filterData() {
+            const period = document.getElementById('financePeriod').value;
+            window.location.href = `{{ route('super.finance') }}?period=${period}`;
+        }
+
+        function downloadFinancePdf() {
+            const period = document.getElementById('financePeriod').value;
+            window.open(`{{ route('super.finance.pdf') }}?period=${period}`, '_blank');
+        }
+    </script>
+
+    <div class="grid md:grid-cols-2 gap-6 mb-6">
+        <div class="stat">
+            <div>
+                <p class="stat-title">Total Transaksi</p>
+                <p class="stat-number">{{ $totalPayments }}</p>
+            </div>
+            <div class="icon i1">💳</div>
+        </div>
+        <div class="stat">
+            <div>
+                <p class="stat-title">Total Revenue</p>
+                <p class="stat-number text-emerald-600">Rp {{ number_format($totalRevenue, 0, ',', '.') }}</p>
+            </div>
+            <div class="icon i2">💰</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 class="text-sm font-semibold mb-4">Transaksi Terbaru</h3>
+        <table class="table w-full">
+            <thead>
+                <tr>
+                    <th class="p-2 text-left">ID</th>
+                    <th class="p-2 text-left">User</th>
+                    <th class="p-2 text-left">Amount</th>
+                    <th class="p-2 text-left">Tanggal</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($recentPayments as $payment)
+                    <tr>
+                        <td class="p-2 text-xs text-gray-500">#{{ substr($payment->id, 0, 8) }}</td>
+                        <td class="p-2">{{ $payment->user->name ?? '-' }}</td>
+                        <td class="p-2 text-emerald-600 font-medium">Rp {{ number_format($payment->amount, 0, ',', '.') }}</td>
+                        <td class="p-2 text-gray-500">{{ $payment->created_at->format('d M Y') }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="4" class="text-center p-4 text-gray-400">Belum ada transaksi</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 @endsection

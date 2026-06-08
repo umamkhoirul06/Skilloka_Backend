@@ -9,6 +9,7 @@ use App\Models\Payment;
 use Midtrans\Config;
 use Midtrans\Snap;
 use Midtrans\Notification;
+use Illuminate\Support\Facades\DB;
 
 class PaymentController extends Controller
 {
@@ -20,6 +21,7 @@ class PaymentController extends Controller
         Config::$is3ds = true;
     }
 
+    // ── 1. Create Transaction (Midtrans) ──────────────────────────
     public function createTransaction(Request $request)
     {
         $request->validate([
@@ -30,74 +32,97 @@ class PaymentController extends Controller
         $user = $request->user();
         $orderId = 'SKL-' . time();
 
-        // 1. Simpan ke Booking
-        $booking = Booking::create([
-            'user_id' => $user->id,
-            'course_id' => $request->course_id,
-            'code' => $orderId,
-            'amount' => $request->amount,
-            'status' => 'pending',
-        ]);
-
-        // 2. Request ke Midtrans
-        $params = [
-            'transaction_details' => [
-                'order_id' => $orderId,
-                'gross_amount' => (int) $request->amount,
-            ],
-            'customer_details' => [
-                'first_name' => $user->name,
-                'email' => $user->email,
-            ],
-        ];
-
+        DB::beginTransaction();
         try {
+            $booking = Booking::create([
+                'user_id' => $user->id,
+                'course_id' => $request->course_id,
+                'code' => $orderId,
+                'amount' => $request->amount,
+                'status' => 'Menunggu', // Sesuai Constraint DB kamu
+            ]);
+
+            $params = [
+                'transaction_details' => [
+                    'order_id' => $orderId,
+                    'gross_amount' => (int) $request->amount,
+                ],
+                'customer_details' => [
+                    'first_name' => $user->name,
+                    'email' => $user->email,
+                ],
+            ];
+
             $snapToken = Snap::getSnapToken($params);
             $booking->update(['snap_token' => $snapToken]);
 
+            DB::commit();
             return response()->json([
                 'success' => true,
                 'data' => ['snap_token' => $snapToken, 'order_id' => $orderId]
             ]);
         } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
-    // 3. Webhook untuk update status (Midtrans nembak ke sini)
+    // ── 2. Webhook Otomatis ──────────────────────────────────────
     public function webhook(Request $request)
     {
-        $notif = new Notification();
-        $booking = Booking::where('code', $notif->order_id)->first();
+        try {
+            $notif = new Notification();
+            $booking = Booking::where('code', $notif->order_id)->first();
 
-        if ($notif->transaction_status == 'settlement') {
-            $booking->update(['status' => 'confirmed']);
+            if (!$booking)
+                return response()->json(['status' => 'not_found'], 404);
 
-            // Catat di tabel Payments
-            Payment::create([
-                'booking_id' => $booking->id,
-                'user_id' => $booking->user_id,
-                'amount' => $booking->amount,
-                'status' => 'success',
-                'paid_at' => now(),
-            ]);
+            if ($notif->transaction_status == 'settlement') {
+                // Update booking jadi Selesai (ACC)
+                $booking->update(['status' => 'Selesai']);
+
+                Payment::updateOrCreate(
+                    ['booking_id' => $booking->id],
+                    [
+                        'user_id' => $booking->user_id,
+                        'amount' => $booking->amount,
+                        'status' => 'success', // Sesuai Constraint DB (payments_status_check)
+                        'paid_at' => now(),
+                    ]
+                );
+            }
+            return response()->json(['status' => 'ok']);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
-        return response()->json(['status' => 'ok']);
     }
 
-    /**
-     * 🔥 TAMBAHAN BARU: Memperbarui status pembayaran manual dari admin
-     */
+    // ── 3. Update Status Manual oleh Admin ──────────────────────
     public function updateStatus(Request $request, Payment $payment)
     {
-        $request->validate([
-            'status' => 'required'
-        ]);
+        $request->validate(['status' => 'required']);
 
-        $payment->update([
-            'status' => $request->status
-        ]);
+        // Mapping agar aman dari Error Constraint Violation
+        // DB Payments cuma terima: 'pending', 'success', 'failed'
+        $finalStatus = (in_array(strtolower($request->status), ['paid', 'lunas', 'success']))
+            ? 'success'
+            : $request->status;
 
-        return back()->with('success', 'Pembayaran berhasil dikonfirmasi sebagai LUNAS!');
+        try {
+            DB::beginTransaction();
+
+            $payment->update(['status' => $finalStatus]);
+
+            // Jika pembayaran sukses, booking otomatis dianggap Lunas/Selesai
+            if ($finalStatus == 'success' && $payment->booking) {
+                $payment->booking->update(['status' => 'Selesai']);
+            }
+
+            DB::commit();
+            return back()->with('success', 'Pembayaran dikonfirmasi LUNAS!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal: ' . $e->getMessage());
+        }
     }
 }

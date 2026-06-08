@@ -5,37 +5,53 @@ namespace App\Http\Controllers\Admin\SuperAdmin;
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\View;
 
 class FinanceController extends Controller
 {
     /**
      * Tampilan Dashboard Finansial Super Admin
      */
-    public function index()
+    public function index(Request $request)
     {
-        // 1. Total Transaksi: Menghitung SEMUA data pendaftaran yang masuk (baik pending maupun lunas)
-        $totalTransactions = Payment::count();
+        $period = $request->query('period', 'month');
+        $query = Payment::query();
 
-        // 2. Total Revenue: Hanya menjumlahkan dana dari transaksi yang SUDAH LUNAS (success)
-        $totalRevenue = Payment::where('status', 'success')->sum('amount');
+        // Logika Filter Periode
+        if ($period == '3months')
+            $query->where('created_at', '>=', now()->subMonths(3));
+        elseif ($period == '6months')
+            $query->where('created_at', '>=', now()->subMonths(6));
+        elseif ($period == 'year')
+            $query->where('created_at', '>=', now()->startOfYear());
+        else
+            $query->where('created_at', '>=', now()->startOfMonth());
 
-        // 3. Transaksi Terbaru: Menampilkan semua riwayat pembayaran sebagai bukti rekapan platform
-        $transactions = Payment::with(['user', 'booking.schedule.course'])
-            ->latest()
-            ->paginate(10);
+        $totalPayments = $query->count();
+        $totalRevenue = $query->where('status', 'success')->sum('amount');
+        $recentPayments = $query->with('user')->latest()->limit(10)->get();
 
-        return view('super-admin.finance.index', compact('totalTransactions', 'totalRevenue', 'transactions'));
+        return view('super-admin.finance.index', compact('totalPayments', 'totalRevenue', 'recentPayments', 'period'));
     }
-
     /**
-     * Export PDF Rekapan Finansial untuk Super Admin
+     * Export PDF Rekapan Finansial
      */
     public function exportPdf()
     {
-        $transactions = Payment::with(['user', 'booking.schedule.course'])->latest()->get();
-        $totalRevenue = Payment::where('status', 'success')->sum('amount');
+        try {
+            $transactions = Payment::with(['user', 'booking.schedule.course'])->latest()->get();
+            $totalRevenue = Payment::where('status', 'success')->sum('amount');
 
-        $pdf = \PDF::loadView('super-admin.finance.pdf', compact('transactions', 'totalRevenue'));
-        return $pdf->download('rekapan-finansial-skilloka-' . now()->format('Y-m-d') . '.pdf');
+            // 🔥 Pastikan file PDF view sudah ada
+            if (!View::exists('super-admin.finance.pdf')) {
+                return back()->with('error', 'Template PDF belum tersedia.');
+            }
+
+            $pdf = \PDF::loadView('super-admin.finance.pdf', compact('transactions', 'totalRevenue'));
+            return $pdf->download('rekapan-finansial-skilloka-' . now()->format('Y-m-d') . '.pdf');
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal export PDF: ' . $e->getMessage());
+        }
     }
 }
