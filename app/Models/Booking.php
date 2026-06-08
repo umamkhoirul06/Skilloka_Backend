@@ -10,7 +10,6 @@ class Booking extends Model
 {
     use HasFactory, HasUuids;
 
-    // 🔥 Kolom disesuaikan dengan struktur asli PostgreSQL kamu
     protected $fillable = [
         'user_id',
         'course_id',
@@ -24,13 +23,27 @@ class Booking extends Model
         'qr_code_url',
     ];
 
+    /**
+     * Relasi ke Jadwal Kursus
+     */
     public function schedule()
     {
         return $this->belongsTo(CourseSchedule::class, 'schedule_id');
     }
 
+    /**
+     * Relasi ke Data Siswa/User
+     */
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * 🔥 FIX: Relasi ke tabel Payments agar Eager Loading di Admin Panel tidak crash
+     */
+    public function payment()
+    {
+        return $this->hasOne(Payment::class, 'booking_id');
     }
 }
