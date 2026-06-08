@@ -286,57 +286,62 @@
 
                     <div class="p-6 flex flex-col gap-4">
 
-                        {{-- 1. JIKA STATUS MASIH "Menunggu" / "pending" (Pengecekan Kebal Huruf Kapital & Spasi) --}}
-                        @if(in_array(trim(strtolower($booking->status)), ['menunggu', 'pending']))
-                            <div class="flex flex-col gap-2 w-full">
-                                <form action="{{ route('admin.bookings.status', $booking->id) }}" method="POST" class="w-full">
-                                    @csrf
-                                    @method('PATCH')
-                                    <input type="hidden" name="status" value="confirmed">
-                                    <button type="submit"
-                                        class="bg-emerald-600 hover:bg-emerald-700 text-white p-3 rounded-lg w-full font-bold transition block text-center">
-                                        Setujui Pendaftaran (ACC)
-                                    </button>
-                                </form>
+    {{-- 🔥 NOTIFIKASI ERROR: Menampilkan alasan utama mengapa proses ACC gagal di VPS --}}
+    @if($errors->any())
+        <div style="background-color: #ffeeee !important; color: #cc0000 !important; padding: 16px; border-radius: 8px; font-weight: bold; border-left: 5px solid #cc0000; margin-bottom: 12px; font-size: 14px;">
+            ⚠️ Gagal Memproses: {{ $errors->first() }}
+        </div>
+    @endif
 
-                                <form action="{{ route('admin.bookings.status', $booking->id) }}" method="POST" class="w-full">
-                                    @csrf
-                                    @method('PATCH')
-                                    <input type="hidden" name="status" value="cancelled">
-                                    <button type="submit"
-                                        class="bg-rose-600 hover:bg-rose-700 text-white p-3 rounded-lg w-full font-bold transition block text-center">
-                                        Tolak Pendaftaran
-                                    </button>
-                                </form>
-                            </div>
-                        @endif
+    {{-- 1. JIKA STATUS MASIH "Menunggu" / "pending" --}}
+    @if(in_array(trim(strtolower($booking->status)), ['menunggu', 'pending']))
+        <div class="flex flex-col gap-3 w-full">
+            <form action="{{ route('admin.bookings.status', $booking->id) }}" method="POST" class="w-full">
+                @csrf
+                @method('PATCH')
+                <input type="hidden" name="status" value="confirmed">
+                <button type="submit" style="background-color: #10b981 !important; color: #ffffff !important; padding: 14px; border-radius: 8px; width: 100%; font-weight: bold; border: none; cursor: pointer; display: block; text-align: center; font-size: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                    Setujui Pendaftaran (ACC)
+                </button>
+            </form>
 
-                        {{-- 2. JIKA BOOKING SUDAH DI-ACC --}}
-                        @if(in_array(trim(strtolower($booking->status)), ['confirmed', 'disetujui']))
-                            @if($booking->payment && trim(strtolower($booking->payment->status)) == 'pending')
-                                <form action="{{ route('admin.payments.status', $booking->payment->id) }}" method="POST"
-                                    class="w-full">
-                                    @csrf
-                                    @method('PATCH')
-                                    <input type="hidden" name="status" value="success">
-                                    <button type="submit"
-                                        class="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg w-full font-bold transition block text-center">
-                                        Konfirmasi Pembayaran Lunas
-                                    </button>
-                                </form>
-                            @else
-                                <div class="p-4 bg-green-100 text-green-800 rounded-lg font-bold text-center">
-                                    ✅ Pendaftaran Disetujui & Lunas
-                                </div>
-                            @endif
-                        @endif
+            <form action="{{ route('admin.bookings.status', $booking->id) }}" method="POST" class="w-full">
+                @csrf
+                @method('PATCH')
+                <input type="hidden" name="status" value="cancelled">
+                <button type="submit" style="background-color: #ef4444 !important; color: #ffffff !important; padding: 14px; border-radius: 8px; width: 100%; font-weight: bold; border: none; cursor: pointer; display: block; text-align: center; font-size: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                    Tolak Pendaftaran
+                </button>
+            </form>
+        </div>
+    @endif
 
-                        {{-- 3. JIKA BOOKING DITOLAK --}}
-                        @if(trim(strtolower($booking->status)) == 'cancelled')
-                            <div class="p-4 bg-red-100 text-red-800 rounded-lg font-bold text-center">
-                                ❌ Pendaftaran ini Telah Ditolak
-                            </div>
-                        @endif
+    {{-- 2. JIKA BOOKING SUDAH DI-ACC --}}
+    @if(in_array(trim(strtolower($booking->status)), ['confirmed', 'disetujui']))
+        @if($booking->payment && trim(strtolower($booking->payment->status)) == 'pending')
+            <form action="{{ route('admin.payments.status', $booking->payment->id) }}" method="POST" class="w-full">
+                @csrf
+                @method('PATCH')
+                <input type="hidden" name="status" value="success">
+                <button type="submit" style="background-color: #2563eb !important; color: #ffffff !important; padding: 14px; border-radius: 8px; width: 100%; font-weight: bold; border: none; cursor: pointer; display: block; text-align: center; font-size: 16px;">
+                    Konfirmasi Pembayaran Lunas
+                </button>
+            </form>
+        @else
+            <div style="background-color: #d1fae5 !important; color: #065f46 !important; padding: 16px; border-radius: 8px; font-weight: bold; text-align: center; font-size: 15px;">
+                ✅ Pendaftaran Disetujui & Lunas
+            </div>
+        @endif
+    @endif
+
+    {{-- 3. JIKA BOOKING DITOLAK --}}
+    @if(trim(strtolower($booking->status)) == 'cancelled')
+        <div style="background-color: #fee2e2 !important; color: #991b1b !important; padding: 16px; border-radius: 8px; font-weight: bold; text-align: center; font-size: 15px;">
+            ❌ Pendaftaran ini Telah Ditolak
+        </div>
+    @endif
+
+</div>
 
                     </div>
                 </div>
