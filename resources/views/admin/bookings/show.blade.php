@@ -286,15 +286,15 @@
 
                     <div class="p-6 flex flex-col gap-4">
 
-                        {{-- 1. JIKA STATUS MASIH "Menunggu" (Tampilkan Tombol ACC / TOLAK BOOKING) --}}
-                        @if($booking->status == 'Menunggu')
-                            <div class="flex gap-2 w-full">
+                        {{-- 1. JIKA STATUS MASIH "Menunggu" / "pending" (Pengecekan Kebal Huruf Kapital & Spasi) --}}
+                        @if(in_array(trim(strtolower($booking->status)), ['menunggu', 'pending']))
+                            <div class="flex flex-col gap-2 w-full">
                                 <form action="{{ route('admin.bookings.status', $booking->id) }}" method="POST" class="w-full">
                                     @csrf
                                     @method('PATCH')
                                     <input type="hidden" name="status" value="confirmed">
                                     <button type="submit"
-                                        class="bg-emerald-600 hover:bg-emerald-700 text-white p-3 rounded-lg w-full font-bold transition">
+                                        class="bg-emerald-600 hover:bg-emerald-700 text-white p-3 rounded-lg w-full font-bold transition block text-center">
                                         Setujui Pendaftaran (ACC)
                                     </button>
                                 </form>
@@ -304,46 +304,43 @@
                                     @method('PATCH')
                                     <input type="hidden" name="status" value="cancelled">
                                     <button type="submit"
-                                        class="bg-rose-600 hover:bg-rose-700 text-white p-3 rounded-lg w-full font-bold transition">
-                                        Tolak
+                                        class="bg-rose-600 hover:bg-rose-700 text-white p-3 rounded-lg w-full font-bold transition block text-center">
+                                        Tolak Pendaftaran
                                     </button>
                                 </form>
                             </div>
                         @endif
 
-                        {{-- 2. JIKA BOOKING SUDAH DI-ACC (Tampilkan Tombol Konfirmasi Pembayaran jika ada tagihan) --}}
-                        @if($booking->status == 'confirmed' && $booking->payment)
-                            @if($booking->payment->status == 'pending')
+                        {{-- 2. JIKA BOOKING SUDAH DI-ACC --}}
+                        @if(in_array(trim(strtolower($booking->status)), ['confirmed', 'disetujui']))
+                            @if($booking->payment && trim(strtolower($booking->payment->status)) == 'pending')
                                 <form action="{{ route('admin.payments.status', $booking->payment->id) }}" method="POST"
                                     class="w-full">
                                     @csrf
                                     @method('PATCH')
                                     <input type="hidden" name="status" value="success">
                                     <button type="submit"
-                                        class="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg w-full font-bold transition">
+                                        class="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg w-full font-bold transition block text-center">
                                         Konfirmasi Pembayaran Lunas
                                     </button>
                                 </form>
                             @else
                                 <div class="p-4 bg-green-100 text-green-800 rounded-lg font-bold text-center">
-                                    ✅ Pembayaran Sudah Lunas
+                                    ✅ Pendaftaran Disetujui & Lunas
                                 </div>
                             @endif
                         @endif
 
                         {{-- 3. JIKA BOOKING DITOLAK --}}
-                        @if($booking->status == 'cancelled')
+                        @if(trim(strtolower($booking->status)) == 'cancelled')
                             <div class="p-4 bg-red-100 text-red-800 rounded-lg font-bold text-center">
                                 ❌ Pendaftaran ini Telah Ditolak
                             </div>
                         @endif
 
                     </div>
-
-                    {{-- Penutup tag div layout bawaan halamanmu --}}
                 </div>
             </div>
         </div>
-    </div>
 
 @endsection

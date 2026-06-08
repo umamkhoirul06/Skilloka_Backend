@@ -46,4 +46,9 @@ class Booking extends Model
     {
         return $this->hasOne(Payment::class, 'booking_id');
     }
+
+    public function getAmountAttribute()
+    {
+        return $this->total_price;
+    }
 }
