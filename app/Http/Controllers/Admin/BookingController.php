@@ -15,11 +15,6 @@ use Illuminate\Support\Facades\Storage;
 
 class BookingController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | LIST BOOKING
-    |--------------------------------------------------------------------------
-    */
     public function index()
     {
         $user = Auth::user();
@@ -33,11 +28,6 @@ class BookingController extends Controller
         return view('admin.bookings.index', compact('bookings'));
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | FORM CREATE
-    |--------------------------------------------------------------------------
-    */
     public function create()
     {
         $user = Auth::user();
@@ -50,11 +40,6 @@ class BookingController extends Controller
         return view('admin.bookings.create', compact('students', 'schedules'));
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | STORE BOOKING (ADMIN PANEL)
-    |--------------------------------------------------------------------------
-    */
     public function store(Request $request)
     {
         $request->validate([
@@ -67,17 +52,15 @@ class BookingController extends Controller
             $admin = Auth::user();
             $schedule = CourseSchedule::with('course')->findOrFail($request->schedule_id);
 
-            // Proteksi Tenant Keamanan
             if (!$admin->hasRole('super_admin') && $schedule->course->tenant_id != $admin->tenant_id) {
                 abort(403);
             }
 
-            // Status awal wajib 'pending' menunggu konfirmasi pembayaran/berkas
+            // 🔥 FIX: 'created_by' sudah dihapus dari sini
             Booking::create([
                 'user_id' => $request->user_id,
                 'schedule_id' => $schedule->id,
                 'tenant_id' => $schedule->course->tenant_id,
-                'created_by' => $admin->id,
                 'source' => 'admin_booking',
                 'amount' => $schedule->course->price,
                 'payment_status' => 'unpaid',
@@ -94,11 +77,6 @@ class BookingController extends Controller
         }
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | UPDATE STATUS (APPROVE & GENERATE QR)
-    |--------------------------------------------------------------------------
-    */
     public function updateStatus(Request $request, Booking $booking)
     {
         $request->validate(['status' => 'required|in:confirmed,cancelled']);
@@ -110,22 +88,16 @@ class BookingController extends Controller
         DB::beginTransaction();
         try {
             if ($request->status == 'confirmed') {
-                // 1. Generate path unik untuk QR Code
                 $qrPath = 'qrs/booking_' . $booking->id . '.png';
-
-                // 2. Isi dari QR: ID Booking unik platform Skilloka
                 $qrData = "SKILLOKA-PAYMENT-ID:" . $booking->id;
 
-                // 3. Simpan gambar QR Code ke storage public
                 Storage::disk('public')->put($qrPath, QrCode::format('png')->size(300)->generate($qrData));
 
-                // 4. Sinkronisasi data kolom baru ke baris booking terkait
                 $booking->update([
                     'status' => 'confirmed',
                     'qr_code_url' => $qrPath
                 ]);
 
-                // 5. Inisialisasi Invoice Pembayaran Record Baru
                 Payment::updateOrCreate(
                     ['booking_id' => $booking->id],
                     [
@@ -148,34 +120,23 @@ class BookingController extends Controller
         }
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | DETAIL BOOKING (PROTECTED)
-    |--------------------------------------------------------------------------
-    */
     public function show(Booking $booking)
     {
         $user = Auth::user();
 
-        // 🔥 FIX: Validasi Keamanan Tenant agar LPK lain tidak bisa mengintip
         if (!$user->hasRole('super_admin') && $booking->tenant_id != $user->tenant_id) {
             abort(403);
         }
 
-        $booking->load(['user', 'schedule.course', 'payment', 'creator']);
+        // 🔥 FIX: Menghapus 'creator' dari load data relasi
+        $booking->load(['user', 'schedule.course', 'payment']);
         return view('admin.bookings.show', compact('booking'));
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | DELETE BOOKING (PROTECTED)
-    |--------------------------------------------------------------------------
-    */
     public function destroy(Booking $booking)
     {
         $user = Auth::user();
 
-        // 🔥 FIX: Validasi Keamanan Tenant agar LPK lain tidak bisa asal menghapus data
         if (!$user->hasRole('super_admin') && $booking->tenant_id != $user->tenant_id) {
             abort(403);
         }

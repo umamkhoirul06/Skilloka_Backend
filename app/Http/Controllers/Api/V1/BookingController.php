@@ -13,7 +13,6 @@ class BookingController extends BaseController
 {
     /**
      * GET /api/v1/user/bookings
-     * Ambil riwayat pesanan milik user yang sedang login
      */
     public function index(Request $request)
     {
@@ -28,7 +27,6 @@ class BookingController extends BaseController
 
     /**
      * GET /api/v1/bookings/{id}
-     * Ambil detail booking berdasarkan ID
      */
     public function show(string $id)
     {
@@ -50,11 +48,9 @@ class BookingController extends BaseController
 
     /**
      * POST /api/v1/bookings
-     * 🔥 METHOD STORE: Menangani pendaftaran/booking baru dari aplikasi Mobile
      */
     public function store(Request $request)
     {
-        // Validasi input dari aplikasi mobile
         $request->validate([
             'course_id' => 'required',
             'schedule_id' => 'required|exists:course_schedules,id',
@@ -63,27 +59,23 @@ class BookingController extends BaseController
         DB::beginTransaction();
         try {
             $user = $request->user();
-
-            // Ambil data jadwal beserta kursusnya untuk mendapatkan tenant_id & harga
             $schedule = CourseSchedule::with('course')->findOrFail($request->schedule_id);
 
-            // Buat record booking baru dengan status awal 'pending'
+            // 🔥 FIX: 'created_by' sudah dihapus dari sini
             $booking = Booking::create([
                 'user_id' => $user->id,
                 'schedule_id' => $schedule->id,
                 'tenant_id' => $schedule->course->tenant_id,
-                'created_by' => $user->id,
                 'source' => 'mobile_booking',
                 'amount' => $schedule->course->price,
                 'payment_status' => 'unpaid',
-                'status' => 'pending', // Menunggu persetujuan admin di Web
+                'status' => 'pending',
                 'notes' => $request->notes ?? 'Pendaftaran via Aplikasi Mobile',
                 'expires_at' => now()->addHours(24),
             ]);
 
             DB::commit();
 
-            // Return response sukses dengan membawa data id booking untuk dibaca Flutter
             return $this->success([
                 'booking_id' => $booking->id,
                 'id' => $booking->id,
