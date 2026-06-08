@@ -19,6 +19,6 @@ class FinanceController extends Controller
             ->get(); // Hapus ->limit() untuk memastikan semua data muncul
 
         // 3. Panggil view dengan path yang sudah dipastikan benar
-        return view('super-admin.finance.index', compact('totalPayments', 'totalRevenue', 'recentPayments'));
+        return view('super_admin.finance.index', compact('totalPayments', 'totalRevenue', 'recentPayments'));
     }
 }
