@@ -56,7 +56,6 @@ class BookingController extends Controller
                 abort(403);
             }
 
-            // 🔥 FIX: Menyelaraskan penyimpanan data dari panel admin web
             Booking::create([
                 'user_id' => $request->user_id,
                 'course_id' => $schedule->course->id,
@@ -90,7 +89,6 @@ class BookingController extends Controller
 
                 Storage::disk('public')->put($qrPath, QrCode::format('png')->size(300)->generate($qrData));
 
-                // 🔥 FIX: Pakai kata 'Selesai' sesuai izin database
                 $booking->update([
                     'status' => 'Selesai',
                     'qr_code_url' => $qrPath
@@ -106,10 +104,10 @@ class BookingController extends Controller
                         'amount' => $coursePrice,
                         'status' => 'pending',
                         'method' => 'manual',
+                        'provider' => 'manual', // 🔥 SUDAH DITAMBAHKAN AGAR LOLOS NOT NULL
                     ]
                 );
             } else {
-                // 🔥 FIX: Pakai kata 'Dibatalkan' sesuai izin database
                 $booking->update(['status' => 'Dibatalkan']);
             }
 
@@ -120,6 +118,7 @@ class BookingController extends Controller
             return back()->withErrors(['error' => 'Gagal: ' . $e->getMessage()]);
         }
     }
+
     public function show(Booking $booking)
     {
         $user = Auth::user();
