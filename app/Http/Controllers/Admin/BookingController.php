@@ -3,531 +3,142 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-
 use App\Models\Booking;
 use App\Models\Payment;
 use App\Models\User;
 use App\Models\CourseSchedule;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Illuminate\Support\Facades\Storage; // Pastikan sudah install library ini
 
 class BookingController extends Controller
 {
-
-    /*
-    |--------------------------------------------------------------------------
-    | LIST BOOKING
-    |--------------------------------------------------------------------------
-    */
-
     public function index()
     {
-
         $user = Auth::user();
-
-
-
-        $bookings = Booking::with([
-
-                'user',
-                'schedule.course',
-                'payment'
-
-            ])
-
-            ->when(
-
-                !$user->hasRole('super_admin'),
-
-                function ($q) use ($user) {
-
-                    $q->where(
-                        'tenant_id',
-                        $user->tenant_id
-                    );
-
-                }
-
-            )
-
+        $bookings = Booking::with(['user', 'schedule.course', 'payment'])
+            ->when(!$user->hasRole('super_admin'), function ($q) use ($user) {
+                $q->where('tenant_id', $user->tenant_id);
+            })
             ->latest()
-
             ->paginate(10);
 
-
-
-        return view(
-            'admin.bookings.index',
-            compact('bookings')
-        );
-
+        return view('admin.bookings.index', compact('bookings'));
     }
-
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | FORM CREATE
-    |--------------------------------------------------------------------------
-    */
 
     public function create()
     {
-
         $user = Auth::user();
-
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | STUDENTS
-        |--------------------------------------------------------------------------
-        |
-        | sementara TANPA ROLE FILTER
-        | supaya booking pasti jalan
-        |
-        */
-
-        $students = User::where(
-
-                'tenant_id',
-                $user->tenant_id
-
-            )
-
-            ->whereIn('status', [
-
-                'active',
-                'pending'
-
-            ])
-
-            ->latest()
-
-            ->get();
-
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | SCHEDULES
-        |--------------------------------------------------------------------------
-        */
-
+        $students = User::where('tenant_id', $user->tenant_id)->whereIn('status', ['active', 'pending'])->get();
         $schedules = CourseSchedule::with('course')
-
             ->whereHas('course', function ($q) use ($user) {
+                $q->where('tenant_id', $user->tenant_id);
+            })->latest()->get();
 
-                $q->where(
-                    'tenant_id',
-                    $user->tenant_id
-                );
-
-            })
-
-            ->latest()
-
-            ->get();
-
-
-
-        return view(
-
-            'admin.bookings.create',
-
-            compact(
-
-                'students',
-                'schedules'
-
-            )
-
-        );
-
+        return view('admin.bookings.create', compact('students', 'schedules'));
     }
-
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | STORE BOOKING
-    |--------------------------------------------------------------------------
-    */
 
     public function store(Request $request)
     {
-
         $request->validate([
-
-            'user_id' => [
-
-                'required',
-                'exists:users,id'
-
-            ],
-
-            'schedule_id' => [
-
-                'required',
-                'exists:course_schedules,id'
-
-            ],
-
-            'status' => [
-
-                'required',
-
-                'in:pending,paid,cancelled,completed'
-
-            ],
-
+            'user_id' => 'required|exists:users,id',
+            'schedule_id' => 'required|exists:course_schedules,id',
         ]);
 
-
-
         DB::beginTransaction();
-
-
-
         try {
-
             $admin = Auth::user();
+            $schedule = CourseSchedule::with('course')->findOrFail($request->schedule_id);
 
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | SCHEDULE
-            |--------------------------------------------------------------------------
-            */
-
-            $schedule = CourseSchedule::with('course')
-
-                ->findOrFail(
-                    $request->schedule_id
-                );
-
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | SECURITY TENANT
-            |--------------------------------------------------------------------------
-            */
-
-            if (
-
-                !$admin->hasRole('super_admin')
-
-                &&
-
-                $schedule->course->tenant_id
-                    !=
-                $admin->tenant_id
-
-            ) {
-
+            // Security check
+            if (!$admin->hasRole('super_admin') && $schedule->course->tenant_id != $admin->tenant_id) {
                 abort(403);
-
             }
 
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | PAYMENT STATUS
-            |--------------------------------------------------------------------------
-            */
-
-            $paymentStatus = 'unpaid';
-
-            if ($request->status == 'paid') {
-
-                $paymentStatus = 'paid';
-
-            }
-
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | CREATE BOOKING
-            |--------------------------------------------------------------------------
-            */
-
-            $booking = Booking::create([
-
+            // Status awal WAJIB 'pending' agar menunggu persetujuan admin
+            Booking::create([
                 'user_id' => $request->user_id,
-
                 'schedule_id' => $schedule->id,
-
                 'tenant_id' => $schedule->course->tenant_id,
-
                 'created_by' => $admin->id,
-
                 'source' => 'admin_booking',
-
                 'amount' => $schedule->course->price,
-
-                'payment_status' => $paymentStatus,
-
-                'status' => $request->status,
-
+                'payment_status' => 'unpaid',
+                'status' => 'pending',
                 'notes' => $request->notes,
-
                 'expires_at' => now()->addHours(24),
-
             ]);
-
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | PAYMENT
-            |--------------------------------------------------------------------------
-            */
-
-            $paymentDbStatus = 'pending';
-
-            $paidAt = null;
-
-
-
-            if ($request->status == 'paid') {
-
-                $paymentDbStatus = 'success';
-
-                $paidAt = now();
-
-            }
-
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | CREATE PAYMENT
-            |--------------------------------------------------------------------------
-            */
-
-            Payment::create([
-
-                'booking_id' => $booking->id,
-
-                'user_id' => $booking->user_id,
-
-                'tenant_id' => $booking->tenant_id,
-
-                'amount' => $booking->amount,
-
-                'method' => 'manual',
-
-                'provider' => 'manual',
-
-                'status' => $paymentDbStatus,
-
-                'paid_at' => $paidAt,
-
-            ]);
-
-
 
             DB::commit();
-
-
-
-            return redirect()
-
-                ->route('admin.bookings.index')
-
-                ->with(
-
-                    'success',
-
-                    'Booking berhasil dibuat'
-
-                );
-
+            return redirect()->route('admin.bookings.index')->with('success', 'Booking berhasil dibuat, menunggu konfirmasi.');
         } catch (\Exception $e) {
-
             DB::rollBack();
-
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | DEBUG ERROR
-            |--------------------------------------------------------------------------
-            */
-
-            dd($e->getMessage());
-
+            return back()->withErrors(['error' => $e->getMessage()]);
         }
-
     }
 
+    // Fungsi untuk Admin Approve
+    public function updateStatus(Request $request, Booking $booking)
+    {
+        $request->validate(['status' => 'required|in:confirmed,cancelled']);
 
+        if (Auth::user()->tenant_id != $booking->tenant_id && !Auth::user()->hasRole('super_admin')) {
+            abort(403);
+        }
 
-    /*
-    |--------------------------------------------------------------------------
-    | DETAIL BOOKING
-    |--------------------------------------------------------------------------
-    */
+        DB::beginTransaction();
+        try {
+            if ($request->status == 'confirmed') {
+                // 1. Generate path unik untuk QR Code
+                $qrPath = 'qrs/booking_' . $booking->id . '.png';
+
+                // 2. Isi dari QR: Ini adalah "key" unik yang nanti discan oleh LPK
+                $qrData = "SKILLOKA-PAYMENT-ID:" . $booking->id;
+
+                // 3. Generate dan simpan ke folder storage/app/public/qrs/
+                // Kita menggunakan Storage::put agar bisa diakses public
+                Storage::disk('public')->put($qrPath, QrCode::format('png')->size(300)->generate($qrData));
+
+                // 4. Update Booking dengan status confirmed dan path QR
+                $booking->update([
+                    'status' => 'confirmed',
+                    'qr_code_url' => $qrPath
+                ]);
+
+                // 5. Update Payment Record
+                \App\Models\Payment::updateOrCreate(
+                    ['booking_id' => $booking->id],
+                    [
+                        'user_id' => $booking->user_id,
+                        'tenant_id' => $booking->tenant_id,
+                        'amount' => $booking->amount,
+                        'status' => 'pending',
+                        'method' => 'manual',
+                    ]
+                );
+            } else {
+                $booking->update(['status' => 'cancelled']);
+            }
+
+            DB::commit();
+            return back()->with('success', 'Status booking berhasil diperbarui.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'Gagal: ' . $e->getMessage()]);
+        }
+    }
 
     public function show(Booking $booking)
     {
-
-        $user = Auth::user();
-
-
-
-        if (
-
-            !$user->hasRole('super_admin')
-
-            &&
-
-            $booking->tenant_id != $user->tenant_id
-
-        ) {
-
-            abort(403);
-
-        }
-
-
-
-        $booking->load([
-
-            'user',
-            'schedule.course',
-            'payment',
-            'creator',
-
-        ]);
-
-
-
-        return view(
-
-            'admin.bookings.show',
-
-            compact('booking')
-
-        );
-
+        $booking->load(['user', 'schedule.course', 'payment', 'creator']);
+        return view('admin.bookings.show', compact('booking'));
     }
-
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | DELETE BOOKING
-    |--------------------------------------------------------------------------
-    */
 
     public function destroy(Booking $booking)
     {
-
-        $user = Auth::user();
-
-
-
-        if (
-
-            !$user->hasRole('super_admin')
-
-            &&
-
-            $booking->tenant_id != $user->tenant_id
-
-        ) {
-
-            abort(403);
-
-        }
-
-
-
         $booking->delete();
-
-
-
-        return back()->with(
-
-            'success',
-
-            'Booking berhasil dihapus'
-
-        );
-
+        return back()->with('success', 'Booking berhasil dihapus');
     }
-
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | UPDATE STATUS
-    |--------------------------------------------------------------------------
-    */
-
-    public function updateStatus(
-        Request $request,
-        Booking $booking
-    )
-    {
-
-        $request->validate([
-
-            'status' => [
-
-                'required',
-
-                'in:pending,paid,cancelled,completed'
-
-            ]
-
-        ]);
-
-
-
-        $user = Auth::user();
-
-
-
-        if (
-
-            !$user->hasRole('super_admin')
-
-            &&
-
-            $booking->tenant_id != $user->tenant_id
-
-        ) {
-
-            abort(403);
-
-        }
-
-
-
-        $booking->update([
-
-            'status' => $request->status
-
-        ]);
-
-
-
-        return back()->with(
-
-            'success',
-
-            'Status booking berhasil diperbarui'
-
-        );
-
-    }
-
 }
