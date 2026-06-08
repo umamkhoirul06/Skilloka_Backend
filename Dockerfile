@@ -7,6 +7,10 @@ RUN apk add --no-cache \
 # Install ekstensi PHP (Ubah pdo_mysql jadi pdo_pgsql)
 RUN docker-php-ext-install pdo_pgsql pgsql mbstring exif pcntl bcmath gd opcache zip
 
+RUN apk update && apk add --no-cache autoconf g++ make imagemagick-dev imagemagick \
+    && pecl install imagick \
+    && docker-php-ext-enable imagick
+
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 COPY . .
