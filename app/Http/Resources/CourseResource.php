@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Carbon\Carbon;
 
 class CourseResource extends JsonResource
 {
@@ -42,6 +43,20 @@ class CourseResource extends JsonResource
             'facilities' => is_string($this->facilities)
                 ? json_decode($this->facilities, true)
                 : ($this->facilities ?? []),
+
+            // 🔥 FIX FINAL: Tambahkan schedules di sini agar lolos sensor API Resource!
+            // Kita petakan datanya menjadi format 'date' dan 'time' sesuai kebutuhan UI Flutter
+            'schedules' => $this->schedules ? $this->schedules->map(function ($schedule) {
+                return [
+                    'id' => $schedule->id,
+                    // Format tanggal menjadi: "08 Jun 2026 s.d 23 Dec 2026"
+                    'date' => Carbon::parse($schedule->start_date)->format('d M Y') . ' s.d ' . Carbon::parse($schedule->end_date)->format('d M Y'),
+                    // Format jam menjadi: "08:00 - 12:00 (Senin-Rabu-Jumat)"
+                    'time' => substr($schedule->daily_start, 0, 5) . ' - ' . substr($schedule->daily_end, 0, 5) . ' (' . $schedule->days_of_week . ')',
+                    'slots' => $schedule->max_capacity,
+                    'status' => $schedule->status,
+                ];
+            })->toArray() : [],
         ];
     }
 }

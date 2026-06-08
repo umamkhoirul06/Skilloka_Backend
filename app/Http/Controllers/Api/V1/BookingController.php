@@ -43,7 +43,7 @@ class BookingController extends BaseController
             'status' => $booking->status,
             'amount' => $booking->amount,
             'qr_code_url' => $booking->qr_code_url ? asset('storage/' . $booking->qr_code_url) : null,
-            'course' => $booking->schedule->course,
+            'course' => optional($booking->schedule)->course,
             'schedule' => $booking->schedule,
         ], 'Detail booking berhasil diambil.');
     }
@@ -63,7 +63,7 @@ class BookingController extends BaseController
         DB::beginTransaction();
         try {
             $user = $request->user();
-            
+
             // Ambil data jadwal beserta kursusnya untuk mendapatkan tenant_id & harga
             $schedule = CourseSchedule::with('course')->findOrFail($request->schedule_id);
 
