@@ -4,57 +4,24 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use App\Traits\BelongsToTenant;
+use Illuminate\Database\Eloquent\Concerns\HasUuids; // Tambahkan ini jika ID-mu berupa UUID (huruf acak)
 
 class Booking extends Model
 {
-    use HasFactory, HasUuids, BelongsToTenant;
+    use HasFactory, HasUuids;
 
-    protected $fillable = [
-        'tenant_id',
-        'user_id',
-        'course_id',
-        'lpk_id',
-        'status',
-        'total_price',
-        'booking_date'
-    ];
+    // Izinkan semua kolom diisi
+    protected $guarded = [];
 
-    protected $casts = [
-        'total_price' => 'decimal:2',
-        'booking_date' => 'datetime',
-    ];
-
-    /**
-     * Relasi ke User
-     */
+    // Relasi ke User
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Relasi ke Course
-     */
+    // Relasi ke Course
     public function course()
     {
         return $this->belongsTo(Course::class);
-    }
-
-    /**
-     * Relasi ke LPK
-     */
-    public function lpk()
-    {
-        return $this->belongsTo(Lpk::class);
-    }
-
-    /**
-     * Relasi ke Tenant (Wajib untuk trait BelongsToTenant)
-     */
-    public function tenant()
-    {
-        return $this->belongsTo(Tenant::class);
     }
 }

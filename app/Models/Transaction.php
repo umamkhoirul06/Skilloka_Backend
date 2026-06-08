@@ -28,6 +28,11 @@ class Transaction extends Model
         return $this->belongsTo(User::class);
     }
 
+    // Tambahkan protected $casts di App\Models\Transaction
+    protected $casts = [
+        'amount' => 'decimal:2',
+    ];
+
     // relasi tenant
     public function tenant()
     {

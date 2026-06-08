@@ -3,345 +3,85 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-
-use App\Models\Payment;
-
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Models\Booking;
+use App\Models\Payment;
+use Midtrans\Config;
+use Midtrans\Snap;
+use Midtrans\Notification;
 
 class PaymentController extends Controller
 {
-
-    /*
-    |--------------------------------------------------------------------------
-    | LIST PAYMENTS
-    |--------------------------------------------------------------------------
-    */
-
-    public function index()
+    public function __construct()
     {
-
-        $user = Auth::user();
-
-
-
-        $payments = Payment::with([
-
-                'booking.user',
-                'booking.schedule.course'
-
-            ])
-
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | ADMIN LPK HANYA LIHAT TENANT SENDIRI
-            |--------------------------------------------------------------------------
-            */
-            ->when(
-
-                !$user->hasRole('super_admin'),
-
-                function ($q) use ($user) {
-
-                    $q->where(
-                        'tenant_id',
-                        $user->tenant_id
-                    );
-
-                }
-
-            )
-
-
-
-            ->latest()
-
-            ->paginate(10);
-
-
-
-        return view(
-
-            'admin.payments.index',
-
-            compact('payments')
-
-        );
-
+        Config::$serverKey = config('midtrans.server_key');
+        Config::$isProduction = config('midtrans.is_production');
+        Config::$isSanitized = true;
+        Config::$is3ds = true;
     }
 
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | DETAIL PAYMENT
-    |--------------------------------------------------------------------------
-    */
-
-    public function show(Payment $payment)
+    public function createTransaction(Request $request)
     {
-
-        $user = Auth::user();
-
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | SECURITY TENANT
-        |--------------------------------------------------------------------------
-        */
-
-        if (
-
-            !$user->hasRole('super_admin')
-
-            &&
-
-            $payment->tenant_id != $user->tenant_id
-
-        ) {
-
-            abort(403);
-
-        }
-
-
-
-        $payment->load([
-
-            'booking.user',
-            'booking.schedule.course'
-
-        ]);
-
-
-
-        return view(
-
-            'admin.payments.show',
-
-            compact('payment')
-
-        );
-
-    }
-
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | UPDATE STATUS PAYMENT
-    |--------------------------------------------------------------------------
-    */
-
-    public function updateStatus(
-        Request $request,
-        Payment $payment
-    )
-    {
-
-        /*
-        |--------------------------------------------------------------------------
-        | VALIDATION
-        |--------------------------------------------------------------------------
-        */
-
         $request->validate([
-
-            'status' => [
-
-                'required',
-
-                'in:pending,success,failed'
-
-            ]
-
+            'course_id' => 'required',
+            'amount' => 'required|numeric',
         ]);
 
+        $user = $request->user();
+        $orderId = 'SKL-' . time();
 
-
-        $user = Auth::user();
-
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | SECURITY TENANT
-        |--------------------------------------------------------------------------
-        */
-
-        if (
-
-            !$user->hasRole('super_admin')
-
-            &&
-
-            $payment->tenant_id != $user->tenant_id
-
-        ) {
-
-            abort(403);
-
-        }
-
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | UPDATE PAYMENT
-        |--------------------------------------------------------------------------
-        */
-
-        $payment->update([
-
-            'status' => $request->status,
-
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | VERIFIED
-            |--------------------------------------------------------------------------
-            */
-
-            'verified_by' => $user->id,
-
-            'verified_at' => now(),
-
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | PAID TIME
-            |--------------------------------------------------------------------------
-            */
-
-            'paid_at' =>
-
-                $request->status == 'success'
-
-                    ? now()
-
-                    : null,
-
+        // 1. Simpan ke Booking
+        $booking = Booking::create([
+            'user_id' => $user->id,
+            'course_id' => $request->course_id,
+            'code' => $orderId,
+            'amount' => $request->amount,
+            'status' => 'pending',
         ]);
 
+        // 2. Request ke Midtrans
+        $params = [
+            'transaction_details' => [
+                'order_id' => $orderId,
+                'gross_amount' => (int) $request->amount,
+            ],
+            'customer_details' => [
+                'first_name' => $user->name,
+                'email' => $user->email,
+            ],
+        ];
 
+        try {
+            $snapToken = Snap::getSnapToken($params);
+            $booking->update(['snap_token' => $snapToken]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | SYNC BOOKING STATUS
-        |--------------------------------------------------------------------------
-        */
-
-        if ($payment->booking) {
-
-            /*
-            |--------------------------------------------------------------------------
-            | PAYMENT SUCCESS
-            |--------------------------------------------------------------------------
-            */
-
-            if ($request->status == 'success') {
-
-                $payment->booking->update([
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | BOOKING PAYMENT STATUS
-                    |--------------------------------------------------------------------------
-                    */
-
-                    'payment_status' => 'paid',
-
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | BOOKING STATUS
-                    |--------------------------------------------------------------------------
-                    */
-
-                    'status' => 'paid',
-
-                ]);
-
-            }
-
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | PAYMENT FAILED
-            |--------------------------------------------------------------------------
-            */
-
-            if ($request->status == 'failed') {
-
-                $payment->booking->update([
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | BOOKING PAYMENT STATUS
-                    |--------------------------------------------------------------------------
-                    */
-
-                    'payment_status' => 'failed',
-
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | BOOKING STATUS
-                    |--------------------------------------------------------------------------
-                    */
-
-                    'status' => 'cancelled',
-
-                ]);
-
-            }
-
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | PAYMENT PENDING
-            |--------------------------------------------------------------------------
-            */
-
-            if ($request->status == 'pending') {
-
-                $payment->booking->update([
-
-                    'payment_status' => 'pending',
-
-                    'status' => 'pending',
-
-                ]);
-
-            }
-
+            return response()->json([
+                'success' => true,
+                'data' => ['snap_token' => $snapToken, 'order_id' => $orderId]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
-
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | REDIRECT
-        |--------------------------------------------------------------------------
-        */
-
-        return back()->with(
-
-            'success',
-
-            'Status payment berhasil diperbarui'
-
-        );
-
     }
 
+    // 3. Webhook untuk update status (Midtrans nembak ke sini)
+    public function webhook(Request $request)
+    {
+        $notif = new Notification();
+        $booking = Booking::where('code', $notif->order_id)->first();
+
+        if ($notif->transaction_status == 'settlement') {
+            $booking->update(['status' => 'confirmed']);
+
+            // Catat di tabel Payments
+            Payment::create([
+                'booking_id' => $booking->id,
+                'user_id' => $booking->user_id,
+                'amount' => $booking->amount,
+                'status' => 'success',
+                'paid_at' => now(),
+            ]);
+        }
+        return response()->json(['status' => 'ok']);
+    }
 }
