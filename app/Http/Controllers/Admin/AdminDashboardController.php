@@ -17,28 +17,89 @@ class AdminDashboardController extends Controller
     public function index()
     {
         $user = Auth::user();
+        $tenantId = $user->tenant_id;
 
-        $totalStudents = User::where('tenant_id', $user->tenant_id)->count();
+        $myLpk = \App\Models\Lpk::where('tenant_id', $tenantId)->first();
 
-        $totalCourses = Course::where('tenant_id', $user->tenant_id)->count();
+        $totalStudents = User::where('tenant_id', $tenantId)->count();
+        $totalCourses = Course::where('tenant_id', $tenantId)->count();
+        $activeCourses = Course::where('tenant_id', $tenantId)->where('is_active', true)->count();
 
-        $upcomingClasses = Course::where('tenant_id', $user->tenant_id)->count();
+        $upcomingClasses = CourseSchedule::whereHas('course', fn($q) => $q->where('tenant_id', $tenantId))
+            ->where('start_date', '>=', now())
+            ->count();
 
-        $pendingBookings = Booking::where('tenant_id', $user->tenant_id)
+        $pendingBookings = Booking::where('tenant_id', $tenantId)
             ->where('status', 'pending')
             ->count();
 
-        $recentBookings = Booking::where('tenant_id', $user->tenant_id)
+        $confirmedBookings = Booking::where('tenant_id', $tenantId)
+            ->whereIn('status', ['paid', 'confirmed', 'ongoing', 'completed'])
+            ->count();
+
+        $totalRevenue = Booking::where('tenant_id', $tenantId)
+            ->whereIn('status', ['paid', 'confirmed', 'ongoing', 'completed'])
+            ->sum('total_price');
+
+        $recentBookings = Booking::with(['user', 'course'])
+            ->where('tenant_id', $tenantId)
             ->latest()
-            ->take(5)
+            ->take(6)
             ->get();
+
+        $upcomingSchedules = CourseSchedule::with('course')
+            ->whereHas('course', fn($q) => $q->where('tenant_id', $tenantId))
+            ->where('start_date', '>=', now()->toDateString())
+            ->orderBy('start_date', 'asc')
+            ->take(4)
+            ->get();
+
+        $popularCourses = Course::where('tenant_id', $tenantId)
+            ->withCount('bookings')
+            ->orderBy('bookings_count', 'desc')
+            ->take(4)
+            ->get();
+
+        // ── Dynamic Chart Data (Last 6 Months) ──
+        $chartLabels = [];
+        $chartBookings = [];
+        $chartRevenue = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $monthDate = Carbon::now()->subMonths($i);
+            $chartLabels[] = $monthDate->translatedFormat('M Y');
+            $chartBookings[] = Booking::where('tenant_id', $tenantId)
+                ->whereYear('created_at', $monthDate->year)
+                ->whereMonth('created_at', $monthDate->month)
+                ->count();
+            $chartRevenue[] = (int) Booking::where('tenant_id', $tenantId)
+                ->whereIn('status', ['paid', 'confirmed', 'ongoing', 'completed', 'Selesai'])
+                ->whereYear('created_at', $monthDate->year)
+                ->whereMonth('created_at', $monthDate->month)
+                ->sum('total_price');
+        }
+
+        $bookingDistribution = [
+            'Pending' => Booking::where('tenant_id', $tenantId)->whereIn('status', ['pending', 'Menunggu'])->count(),
+            'Lunas' => Booking::where('tenant_id', $tenantId)->whereIn('status', ['paid', 'confirmed', 'completed', 'Selesai'])->count(),
+            'Batal' => Booking::where('tenant_id', $tenantId)->whereIn('status', ['cancelled', 'Dibatalkan'])->count(),
+        ];
 
         return view('admin.dashboard', compact(
             'totalStudents',
             'totalCourses',
+            'activeCourses',
             'upcomingClasses',
             'pendingBookings',
-            'recentBookings'
+            'confirmedBookings',
+            'totalRevenue',
+            'recentBookings',
+            'upcomingSchedules',
+            'popularCourses',
+            'myLpk',
+            'chartLabels',
+            'chartBookings',
+            'chartRevenue',
+            'bookingDistribution'
         ));
     }
 

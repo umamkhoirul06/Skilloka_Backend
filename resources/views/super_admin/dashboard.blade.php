@@ -1,253 +1,329 @@
 @extends('layouts.super_admin')
 
-@section('title', 'Super Admin Dashboard')
+@section('title', 'Platform Control & Monitoring')
 
 @section('content')
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <style>
-        body {
-            background-color: #f9fafb;
-        }
+<!-- ═══════════════════════════════════════
+     HEADER GREETING & VERIFICATION ALERT
+═══════════════════════════════════════ -->
+<div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+        <h2 class="font-outfit text-2xl font-black text-slate-900 tracking-tight">Ringkasan Platform Skilloka</h2>
+        <p class="text-sm text-slate-500 mt-1">Pemantauan ekosistem pelatihan kerja LPK di wilayah Kabupaten Indramayu.</p>
+    </div>
 
-        .stat {
-            background: white;
-            border-radius: 16px;
-            padding: 20px;
-            border: 1px solid #f1f5f9;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: transform 0.2s;
-        }
-
-        .stat:hover {
-            transform: translateY(-3px);
-        }
-
-        .stat-title {
-            font-size: 13px;
-            color: #94a3b8;
-            font-weight: 500;
-        }
-
-        .stat-number {
-            font-size: 24px;
-            font-weight: 700;
-            color: #1e293b;
-        }
-
-        .icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-        }
-
-        /* Palet Warna Soft Calming */
-        .i1 {
-            background: #e0e7ff;
-            color: #6366f1;
-        }
-
-        /* Soft Indigo */
-        .i2 {
-            background: #ccfbf1;
-            color: #14b8a6;
-        }
-
-        /* Soft Teal */
-        .i3 {
-            background: #fef3c7;
-            color: #d97706;
-        }
-
-        /* Soft Amber */
-        .i4 {
-            background: #fae8ff;
-            color: #d946ef;
-        }
-
-        /* Soft Pink */
-
-        .card {
-            background: white;
-            border-radius: 16px;
-            border: 1px solid #f1f5f9;
-            padding: 24px;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
-        }
-
-        .table th {
-            font-size: 12px;
-            color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .table tr {
-            border-bottom: 1px solid #f8fafc;
-        }
-
-        .status-badge {
-            padding: 4px 12px;
-            border-radius: 9999px;
-            font-size: 11px;
-            font-weight: 700;
-        }
-
-        .bg-pending {
-            background: #fffbeb;
-            color: #92400e;
-        }
-    </style>
-
-    <div class="grid md:grid-cols-4 gap-6 mb-8">
-        <div class="stat">
-            <div>
-                <p class="stat-title">Total LPK</p>
-                <p class="stat-number">{{ $totalLpk }}</p>
-            </div>
-            <div class="icon i1">🏫</div>
+    @if(($pendingVerifications ?? 0) > 0)
+        <a href="{{ route('super.verifications') }}"
+           class="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-md shadow-amber-500/20 transition-all">
+            <span class="w-2 h-2 rounded-full bg-slate-950 animate-ping"></span>
+            <span>Ada {{ $pendingVerifications }} LPK Menunggu Verifikasi Dokumen</span>
+            <i class="fa-solid fa-arrow-right text-[11px]"></i>
+        </a>
+    @else
+        <div class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold">
+            <i class="fa-solid fa-circle-check text-emerald-600"></i>
+            <span>Seluruh antrean verifikasi telah terselesaikan.</span>
         </div>
+    @endif
+</div>
 
-        <div class="stat">
-            <div>
-                <p class="stat-title">Total Courses</p>
-                <p class="stat-number">{{ $totalCourses }}</p>
+<!-- ═══════════════════════════════════════
+     SUMMARY METRICS (4 CARDS)
+═══════════════════════════════════════ -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+    
+    <!-- Total LPK -->
+    <div class="p-6 rounded-3xl bg-white border border-slate-200/90 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Lembaga</span>
+            <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-base">
+                <i class="fa-solid fa-building-columns"></i>
             </div>
-            <div class="icon i2">📚</div>
         </div>
-
-        <div class="stat">
-            <div>
-                <p class="stat-title">Total Users</p>
-                <p class="stat-number">{{ $totalUsers }}</p>
-            </div>
-            <div class="icon i4">👨‍🎓</div>
-        </div>
-
-        <div class="stat">
-            <div>
-                <p class="stat-title">Pending</p>
-                <p class="stat-number">{{ $pendingVerifications }}</p>
-            </div>
-            <div class="icon i3">⏳</div>
+        <div class="font-outfit text-3xl font-extrabold text-slate-900 mt-3">{{ number_format($totalLpk ?? 0) }}</div>
+        <div class="text-xs font-semibold text-emerald-600 mt-2 flex items-center gap-1">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>{{ $verifiedLpk ?? 0 }} terverifikasi aktif</span>
         </div>
     </div>
 
-    <div class="grid lg:grid-cols-2 gap-8 mb-8">
-        <div class="card">
-            <h3 class="text-gray-700 font-bold mb-6">Pertumbuhan Platform</h3>
-            <div style="height:320px">
-                <canvas id="chartLine"></canvas>
+    <!-- Total Courses -->
+    <div class="p-6 rounded-3xl bg-white border border-slate-200/90 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Program</span>
+            <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-base">
+                <i class="fa-solid fa-shapes"></i>
             </div>
         </div>
-
-        <div class="card flex flex-col items-center">
-            <h3 class="text-gray-700 font-bold mb-6 w-full">Komposisi Data</h3>
-            <div style="width:280px;height:280px">
-                <canvas id="chartPie"></canvas>
-            </div>
+        <div class="font-outfit text-3xl font-extrabold text-slate-900 mt-3">{{ number_format($totalCourses ?? 0) }}</div>
+        <div class="text-xs font-semibold text-indigo-600 mt-2 flex items-center gap-1">
+            <i class="fa-solid fa-layer-group"></i>
+            <span>Kursus & pelatihan kerja</span>
         </div>
     </div>
 
-    <div class="card">
-        <h3 class="text-gray-700 font-bold mb-4">Menunggu Verifikasi</h3>
-        <table class="table w-full">
+    <!-- Total Users -->
+    <div class="p-6 rounded-3xl bg-white border border-slate-200/90 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Pengguna</span>
+            <div class="w-10 h-10 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center text-base">
+                <i class="fa-solid fa-users"></i>
+            </div>
+        </div>
+        <div class="font-outfit text-3xl font-extrabold text-slate-900 mt-3">{{ number_format($totalUsers ?? 0) }}</div>
+        <div class="text-xs font-semibold text-violet-600 mt-2 flex items-center gap-1">
+            <i class="fa-solid fa-user-check"></i>
+            <span>Akun pencari kerja & siswa</span>
+        </div>
+    </div>
+
+    <!-- Pending Verification -->
+    <div class="p-6 rounded-3xl {{ ($pendingVerifications ?? 0) > 0 ? 'bg-amber-50/70 border-amber-200' : 'bg-white border-slate-200/90' }} border shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider {{ ($pendingVerifications ?? 0) > 0 ? 'text-amber-800' : 'text-slate-400' }}">Verifikasi LPK</span>
+            <div class="w-10 h-10 rounded-xl {{ ($pendingVerifications ?? 0) > 0 ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500' }} flex items-center justify-center text-base">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+        </div>
+        <div class="font-outfit text-3xl font-extrabold {{ ($pendingVerifications ?? 0) > 0 ? 'text-amber-900' : 'text-slate-900' }} mt-3">
+            {{ number_format($pendingVerifications ?? 0) }}
+        </div>
+        <div class="text-xs font-semibold {{ ($pendingVerifications ?? 0) > 0 ? 'text-amber-800' : 'text-slate-500' }} mt-2 flex items-center gap-1">
+            @if(($pendingVerifications ?? 0) > 0)
+                <i class="fa-solid fa-clock text-amber-600"></i>
+                <span>Menunggu persetujuan Anda</span>
+            @else
+                <i class="fa-solid fa-check text-emerald-500"></i>
+                <span>Semua LPK tervalidasi</span>
+            @endif
+        </div>
+    </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════
+     HIGH-UTILITY CHARTS (PRD: MAX 1-2 CHARTS)
+═══════════════════════════════════════ -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    
+    <!-- Chart 1: Pertumbuhan Platform (2 Cols) -->
+    <div class="lg:col-span-2 p-6 sm:p-7 rounded-3xl bg-white border border-slate-200/90 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+            <div>
+                <h3 class="font-outfit text-base font-bold text-slate-900">Pertumbuhan Ekosistem Pelatihan</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Penambahan LPK, Pengguna, dan Kursus tahun {{ date('Y') }}</p>
+            </div>
+            <div class="flex items-center gap-3 text-xs font-semibold">
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> LPK</span>
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span> Kursus</span>
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-violet-400"></span> Pengguna</span>
+            </div>
+        </div>
+        <div class="h-72 w-full">
+            <canvas id="growthChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Chart 2: Sebaran Kategori Kursus Terpopuler (1 Col) -->
+    <div class="p-6 sm:p-7 rounded-3xl bg-white border border-slate-200/90 shadow-sm flex flex-col justify-between">
+        <div class="mb-4">
+            <h3 class="font-outfit text-base font-bold text-slate-900">Kategori Kejuruan Populer</h3>
+            <p class="text-xs text-slate-500 mt-0.5">Distribusi program kursus per kategori</p>
+        </div>
+        <div class="h-56 w-full flex items-center justify-center my-auto">
+            <canvas id="categoryDonutChart"></canvas>
+        </div>
+        <div class="pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+            <span>Total Kategori: {{ count($categoryDistribution ?? []) }}</span>
+            <a href="{{ route('super.categories.index') }}" class="font-bold text-emerald-600 hover:text-emerald-800">
+                Kelola Kategori &rarr;
+            </a>
+        </div>
+    </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════
+     ACTIONABLE SECTION: ANTREAN VERIFIKASI PENDING
+═══════════════════════════════════════ -->
+<div class="p-6 sm:p-7 rounded-3xl bg-white border border-slate-200/90 shadow-sm">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+        <div>
+            <h3 class="font-outfit text-base font-bold text-slate-900">Antrean Verifikasi Legalitas LPK</h3>
+            <p class="text-xs text-slate-500 mt-0.5">Lembaga yang baru mendaftar dan menunggu pemeriksaan NIB & izin operasional</p>
+        </div>
+        <a href="{{ route('super.verifications') }}" class="text-xs font-bold text-emerald-600 hover:text-emerald-800 transition-colors">
+            Buka Semua Antrean &rarr;
+        </a>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
             <thead>
-                <tr>
-                    <th class="p-3 text-left">Nama LPK</th>
-                    <th class="p-3 text-left">Status</th>
+                <tr class="border-b border-slate-100 text-[11px] uppercase tracking-wider text-slate-400 font-bold">
+                    <th class="py-3 px-3">Nama Lembaga (LPK)</th>
+                    <th class="py-3 px-3">Badan Hukum & NIB</th>
+                    <th class="py-3 px-3">Kontak Admin</th>
+                    <th class="py-3 px-3">Wilayah</th>
+                    <th class="py-3 px-3 text-right">Tindakan</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-slate-50">
                 @forelse($pendingLpks as $lpk)
-                    <tr>
-                        <td class="p-3 font-medium text-gray-700">
-                            {{ $lpk->lpk_name ?? $lpk->name ?? $lpk->nama ?? '-' }}
+                    @php
+                        $adminUser = $lpk->tenant ? $lpk->tenant->users->first() : null;
+                    @endphp
+                    <tr class="hover:bg-slate-50/80 transition-colors">
+                        <td class="py-3.5 px-3">
+                            <div class="font-bold text-slate-900 text-sm">{{ $lpk->name ?? '-' }}</div>
+                            <div class="text-[11px] text-slate-400 mt-0.5">Diajukan: {{ $lpk->created_at->format('d M Y H:i') }}</div>
                         </td>
-                        <td class="p-3">
-                            <span class="status-badge bg-pending">
-                                ● {{ strtoupper($lpk->status_verifikasi ?? 'PENDING') }}
+                        <td class="py-3.5 px-3">
+                            <div class="font-semibold text-slate-800">{{ $lpk->legal_name ?? '-' }}</div>
+                            <div class="text-[11px] text-indigo-600 font-mono mt-0.5">NIB: {{ $lpk->nib ?? '-' }}</div>
+                        </td>
+                        <td class="py-3.5 px-3">
+                            <div class="font-semibold text-slate-800">{{ $adminUser->name ?? '-' }}</div>
+                            <div class="text-[11px] text-slate-500">{{ $adminUser->phone ?? '-' }}</div>
+                        </td>
+                        <td class="py-3.5 px-3">
+                            <span class="inline-flex items-center gap-1 text-slate-600 font-medium">
+                                <i class="fa-solid fa-location-dot text-slate-400 text-[10px]"></i>
+                                {{ $lpk->tenant->city ?? 'Indramayu' }}
                             </span>
+                        </td>
+                        <td class="py-3.5 px-3 text-right">
+                            <a href="{{ route('super.verifications.show', $lpk->tenant_id ?? '') }}"
+                               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition-all">
+                                <span>Tinjau & Verifikasi</span>
+                                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                            </a>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="2" class="p-8 text-center text-gray-400">
-                            ✨ Luar biasa! Semua tugas verifikasi sudah selesai.
+                        <td colspan="5" class="py-10 text-center text-slate-400">
+                            <i class="fa-solid fa-circle-check text-3xl mb-2 text-emerald-400 block"></i>
+                            <span class="font-semibold text-slate-600 block">Semua Permohonan Terverifikasi!</span>
+                            <span class="text-xs text-slate-400">Tidak ada pengajuan LPK yang tertahan di antrean saat ini.</span>
                         </td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
+</div>
 
-    <script>
-        // Line Chart - Warna Soft (Lavender, Mint, Sky Blue)
-        new Chart(document.getElementById('chartLine'), {
+<!-- ═══════════════════════════════════════
+     CHART.JS SCRIPTS
+═══════════════════════════════════════ -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.color = '#64748b';
+
+        // 1. Line Growth Chart
+        const ctxGrowth = document.getElementById('growthChart').getContext('2d');
+        new Chart(ctxGrowth, {
             type: 'line',
             data: {
                 labels: @json($monthlyLabels),
                 datasets: [
                     {
-                        label: 'LPK',
+                        label: 'LPK Baru',
                         data: @json($monthlyLpk),
-                        borderColor: '#818cf8', // Soft Indigo
-                        backgroundColor: '#818cf820',
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
                         fill: true,
-                        tension: 0.4
+                        tension: 0.35,
+                        borderWidth: 2
                     },
                     {
-                        label: 'Users',
-                        data: @json($monthlyUsers),
-                        borderColor: '#2dd4bf', // Soft Teal
-                        backgroundColor: 'transparent',
-                        tension: 0.4
-                    },
-                    {
-                        label: 'Courses',
+                        label: 'Kursus Baru',
                         data: @json($monthlyCourses),
-                        borderColor: '#fbbf24', // Soft Amber
+                        borderColor: '#6366f1',
                         backgroundColor: 'transparent',
-                        tension: 0.4
+                        tension: 0.35,
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Pengguna',
+                        data: @json($monthlyUsers),
+                        borderColor: '#8b5cf6',
+                        backgroundColor: 'transparent',
+                        tension: 0.35,
+                        borderWidth: 2
                     }
                 ]
             },
             options: {
+                responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } } },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#090d16',
+                        titleFont: { size: 12, weight: 'bold' },
+                        bodyFont: { size: 12 },
+                        padding: 10,
+                        cornerRadius: 8
+                    }
+                },
                 scales: {
-                    y: { grid: { display: false } },
-                    x: { grid: { display: false } }
+                    x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+                    y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { precision: 0, font: { size: 11 } } }
                 }
             }
         });
 
-        // Pie Chart - Warna Pastel Calming
-        new Chart(document.getElementById('chartPie'), {
+        // 2. Category Doughnut Chart
+        @php
+            $catNames = [];
+            $catCounts = [];
+            foreach(($categoryDistribution ?? []) as $cat) {
+                $catNames[] = $cat->name;
+                $catCounts[] = $cat->courses_count;
+            }
+            if (empty($catNames)) {
+                $catNames = ['Teknologi', 'Otomotif', 'Bahasa', 'Manajemen', 'Lainnya'];
+                $catCounts = [4, 3, 2, 2, 1];
+            }
+        @endphp
+
+        const ctxCat = document.getElementById('categoryDonutChart').getContext('2d');
+        new Chart(ctxCat, {
             type: 'doughnut',
             data: {
-                labels: ['LPK', 'Courses', 'Users'],
+                labels: @json($catNames),
                 datasets: [{
-                    data: [{{ $totalLpk }}, {{ $totalCourses }}, {{ $totalUsers }}],
-                    backgroundColor: ['#818cf8', '#2dd4bf', '#f472b6'], // Indigo, Teal, Pink Soft
-                    hoverOffset: 10,
-                    borderWidth: 5,
-                    borderColor: '#ffffff'
+                    data: @json($catCounts),
+                    backgroundColor: ['#10b981', '#6366f1', '#f59e0b', '#ec4899', '#06b6d4'],
+                    borderWidth: 0,
+                    hoverOffset: 6
                 }]
             },
             options: {
+                responsive: true,
                 maintainAspectRatio: false,
-                cutout: '75%',
-                plugins: { legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true } } }
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 8,
+                            boxHeight: 8,
+                            usePointStyle: true,
+                            font: { size: 10, weight: '600' },
+                            padding: 10
+                        }
+                    }
+                }
             }
         });
-    </script>
+    });
+</script>
 
 @endsection

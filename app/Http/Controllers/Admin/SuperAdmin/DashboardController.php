@@ -6,27 +6,37 @@ use App\Http\Controllers\Controller;
 use App\Models\Lpk;
 use App\Models\User;
 use App\Models\Course;
+use App\Models\Booking;
+use App\Models\Category;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        // Menghitung total semua data
         $totalLpk = Lpk::count();
+        $verifiedLpk = Lpk::where('status_verifikasi', 'approved')->count();
         $totalCourses = Course::count();
         $totalUsers = User::count();
+        $totalBookings = Booking::count();
 
-        // 🔥 PASTIKAN INI: Menghitung yang benar-benar masih PENDING saja
+        // Antrean verifikasi yang benar-benar masih PENDING
         $pendingVerifications = Lpk::where('status_verifikasi', 'pending')->count();
 
-        // Mengambil 5 LPK terbaru yang statusnya masih PENDING
+        // 5 LPK terbaru yang statusnya masih PENDING dengan relasi tenant
         $pendingLpks = Lpk::where('status_verifikasi', 'pending')
+            ->with(['tenant.users'])
             ->latest()
             ->take(5)
             ->get();
 
-        // Logika Grafik (Tetap sama)
-        $monthlyLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        // Top Kategori Kursus
+        $categoryDistribution = Category::withCount('courses')
+            ->orderBy('courses_count', 'desc')
+            ->take(5)
+            ->get();
+
+        // Tren Bulanan Platform
+        $monthlyLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
         $monthlyLpk = [];
         $monthlyUsers = [];
         $monthlyCourses = [];
@@ -39,10 +49,13 @@ class DashboardController extends Controller
 
         return view('super_admin.dashboard', compact(
             'totalLpk',
+            'verifiedLpk',
             'totalCourses',
             'totalUsers',
+            'totalBookings',
             'pendingVerifications',
             'pendingLpks',
+            'categoryDistribution',
             'monthlyLabels',
             'monthlyLpk',
             'monthlyUsers',

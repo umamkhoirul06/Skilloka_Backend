@@ -10,17 +10,37 @@ return new class extends Migration {
      */
     public function up()
     {
-        Schema::create('bookings', function (Blueprint $table) {
-            $table->uuid('id')->primary(); // Pakai uuid() jika pakai UUID, pakai id() jika integer biasa
-            $table->foreignUuid('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignUuid('course_id')->constrained()->cascadeOnDelete();
-            $table->string('code')->unique(); // Order ID unik untuk Midtrans
-            $table->decimal('amount', 15, 2);
-            $table->string('status')->default('pending'); // pending, confirmed, cancelled, completed
-            $table->string('snap_token')->nullable(); // Token dari Midtrans
-            $table->string('payment_method')->nullable();
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('bookings')) {
+            Schema::create('bookings', function (Blueprint $table) {
+                $table->uuid('id')->primary();
+                $table->foreignUuid('user_id')->constrained()->cascadeOnDelete();
+                $table->foreignUuid('course_id')->constrained()->cascadeOnDelete();
+                $table->string('code')->nullable();
+                $table->decimal('amount', 15, 2)->default(0);
+                $table->string('status')->default('pending');
+                $table->string('snap_token')->nullable();
+                $table->string('payment_method')->nullable();
+                $table->timestamps();
+            });
+        } else {
+            Schema::table('bookings', function (Blueprint $table) {
+                if (!Schema::hasColumn('bookings', 'tenant_id')) {
+                    $table->foreignUuid('tenant_id')->nullable()->constrained('tenants')->nullOnDelete();
+                }
+                if (!Schema::hasColumn('bookings', 'code')) {
+                    $table->string('code')->nullable();
+                }
+                if (!Schema::hasColumn('bookings', 'amount')) {
+                    $table->decimal('amount', 15, 2)->default(0);
+                }
+                if (!Schema::hasColumn('bookings', 'snap_token')) {
+                    $table->string('snap_token')->nullable();
+                }
+                if (!Schema::hasColumn('bookings', 'payment_method')) {
+                    $table->string('payment_method')->nullable();
+                }
+            });
+        }
     }
 
     /**
@@ -29,8 +49,10 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::table('bookings', function (Blueprint $table) {
-            $table->dropForeign(['tenant_id']);
-            $table->dropColumn('tenant_id');
+            if (Schema::hasColumn('bookings', 'tenant_id')) {
+                $table->dropForeign(['tenant_id']);
+                $table->dropColumn('tenant_id');
+            }
         });
     }
 };

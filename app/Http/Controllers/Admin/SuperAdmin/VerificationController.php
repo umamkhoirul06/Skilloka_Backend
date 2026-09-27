@@ -7,6 +7,7 @@ use App\Models\Tenant;
 use App\Models\Lpk;
 use App\Models\LpkVerification;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 // Tambah di bagian use
 use App\Mail\LpkVerified;
@@ -64,22 +65,14 @@ class VerificationController extends Controller
     public function show($id)
     {
         $tenant = Tenant::with([
-
                 'users',
-                'lpk'
-
+                'lpk.verifications'
             ])
-
             ->findOrFail($id);
 
-
-
         return view(
-
             'super_admin.verifications.show',
-
             compact('tenant')
-
         );
     }
 
@@ -206,18 +199,22 @@ class VerificationController extends Controller
 
             DB::commit();
 
+            try {
+                foreach ($users as $user) {
+                    if ($user->email) {
+                        Mail::to($user->email)->send(new LpkVerified(
+                            $user->name,
+                            $lpk->name
+                        ));
+                    }
+                }
+            } catch (\Throwable $mErr) {
+                \Illuminate\Support\Facades\Log::warning('Verification approve email not sent: ' . $mErr->getMessage());
+            }
 
-// Kirim email ke semua user tenant
-foreach ($users as $user) {
-    Mail::to($user->email)->send(new LpkVerified(
-        $user->name,
-        $lpk->name
-    ));
-}
-
-return redirect()
-    ->route('super.tenants')
-    ->with('success', 'LPK berhasil diverifikasi');
+            return redirect()
+                ->route('super.tenants')
+                ->with('success', 'LPK berhasil diverifikasi');
 
 
 
@@ -244,7 +241,7 @@ return redirect()
     |--------------------------------------------------------------------------
     */
 
-    public function reject($id)
+    public function reject(Request $request, $id)
     {
         DB::beginTransaction();
 
@@ -303,60 +300,47 @@ return redirect()
 
             )->update([
 
-                'status' => 'rejected'
-
+                'status' => 'rejected',
+                'notes' => $request->input('reason', 'Dokumen atau data legalitas LPK belum memenuhi ketentuan verifikasi.'),
+                'verified_by' => auth()->id(),
             ]);
-
-
 
             /*
             |--------------------------------------------------------------------------
             | UPDATE TENANT
             |--------------------------------------------------------------------------
             */
-
             $tenant->update([
-
                 'is_active' => false
-
             ]);
-
-
 
             /*
             |--------------------------------------------------------------------------
             | UPDATE USER
             |--------------------------------------------------------------------------
             */
-
-            User::where(
-
-                'tenant_id',
-                $tenant->id
-
-            )->update([
-
+            User::where('tenant_id', $tenant->id)->update([
                 'status' => 'rejected'
-
             ]);
-
-
 
             DB::commit();
 
+            // Kirim email ke semua user tenant jika ada konfigurasi mail
+            try {
+                $users = User::where('tenant_id', $tenant->id)->get();
+                foreach ($users as $user) {
+                    if ($user->email) {
+                        Mail::to($user->email)->send(new LpkRejected($user->name, $lpk->name));
+                    }
+                }
+            } catch (\Throwable $mailErr) {
+                // Log and continue without failing the rejection
+                \Illuminate\Support\Facades\Log::warning('Verification reject email not sent: ' . $mailErr->getMessage());
+            }
 
-// Kirim email ke semua user tenant
-$users = User::where('tenant_id', $tenant->id)->get();
-foreach ($users as $user) {
-    Mail::to($user->email)->send(new LpkRejected(
-        $user->name,
-        $lpk->name
-    ));
-}
-
-return redirect()
-    ->route('super.verifications')
-    ->with('success', 'Pengajuan LPK berhasil ditolak');
+            return redirect()
+                ->route('super.verifications')
+                ->with('success', 'Pengajuan LPK berhasil ditolak.');
             
 
         } catch (\Exception $e) {

@@ -85,37 +85,28 @@ class AdminAuthController extends Controller
         */
 
         if ($user->status !== 'active') {
-
             Auth::logout();
 
-
-
             if ($user->status === 'pending') {
-
-                return back()->withErrors([
-
-                    'email' => 'Akun Anda masih menunggu verifikasi dari Skilloka.'
-
+                return back()->withInput($request->only('email'))->withErrors([
+                    'email' => 'Pendaftaran LPK Anda sedang menunggu peninjauan dan verifikasi dari Super Admin Skilloka (estimasi 1x24 jam kerja).'
                 ]);
             }
-
-
 
             if ($user->status === 'rejected') {
+                $lpk = $user->lpk;
+                $latestVerification = $lpk ? $lpk->verifications()->latest()->first() : null;
+                $reasonText = ($latestVerification && $latestVerification->notes)
+                    ? ' Catatan penolakan: "' . $latestVerification->notes . '"'
+                    : '';
 
-                return back()->withErrors([
-
-                    'email' => 'Pendaftaran LPK Anda ditolak oleh Skilloka.'
-
+                return back()->withInput($request->only('email'))->withErrors([
+                    'email' => 'Pendaftaran LPK Anda belum disetujui.' . $reasonText . ' Silakan hubungi admin support atau perbaiki dokumen Anda.'
                 ]);
             }
 
-
-
-            return back()->withErrors([
-
-                'email' => 'Akun tidak aktif.'
-
+            return back()->withInput($request->only('email'))->withErrors([
+                'email' => 'Akun Anda saat ini tidak aktif. Silakan hubungi Administrator Skilloka.'
             ]);
         }
 
@@ -401,20 +392,16 @@ class AdminAuthController extends Controller
 
 
 
+            $user->lpk_id = $lpk->id;
+            $user->save();
+
             DB::commit();
 
-
-
             return redirect()
-
-                ->route('admin.login')
-
+                ->route('lpk.register.success')
                 ->with(
-
                     'success',
-
-                    'Pendaftaran berhasil! Tim Skilloka akan memverifikasi LPK Anda terlebih dahulu. Silahkan tunggu notifikasi di email anda.'
-
+                    'Pendaftaran berhasil! Tim Skilloka akan memverifikasi LPK Anda terlebih dahulu.'
                 );
 
         } catch (\Exception $e) {

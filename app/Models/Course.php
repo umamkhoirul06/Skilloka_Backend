@@ -38,8 +38,29 @@ class Course extends Model
     {
         return $this->hasMany(Booking::class);
     }
+
+    public function contents()
+    {
+        return $this->hasMany(CourseContent::class)->orderBy('order_index', 'asc');
+    }
+
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
+    public function certificates()
+    {
+        return $this->hasMany(Certificate::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
     public function favorites()
     {
-    return $this->hasMany(Favorite::class);
+        return $this->hasMany(Favorite::class);
     }
 }

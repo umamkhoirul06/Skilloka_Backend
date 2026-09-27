@@ -73,7 +73,9 @@ class User extends Authenticatable
 
     public function lpk()
     {
-        return $this->hasOne(Lpk::class);
+        return $this->belongsTo(Lpk::class, 'lpk_id')->withDefault(function () {
+            return Lpk::where('tenant_id', $this->tenant_id)->first();
+        });
     }
 
     /**
@@ -82,6 +84,21 @@ class User extends Authenticatable
     public function bookings()
     {
         return $this->hasMany(\App\Models\Booking::class);
+    }
+
+    public function educationProfile()
+    {
+        return $this->hasOne(EducationProfile::class);
+    }
+
+    public function certificates()
+    {
+        return $this->hasMany(Certificate::class);
+    }
+
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
     }
 
     /*

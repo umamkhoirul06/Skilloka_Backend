@@ -1,0 +1,163 @@
+/* ==========================================================================
+   Skilloka Modern UI - Shiny Button Component (Conic Gradient & Shimmer)
+   ========================================================================== */
+
+@property --gradient-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@property --gradient-angle-offset {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@property --gradient-percent {
+  syntax: "<percentage>";
+  initial-value: 5%;
+  inherits: false;
+}
+
+@property --gradient-shine {
+  syntax: "<color>";
+  initial-value: white;
+  inherits: false;
+}
+
+/* Base Shiny Button */
+.shiny-btn,
+.shiny-cta {
+  --shiny-cta-bg: #2563eb;
+  --shiny-cta-bg-subtle: #1d4ed8;
+  --shiny-cta-fg: #ffffff;
+  --shiny-cta-highlight: #60a5fa;
+  --shiny-cta-highlight-subtle: #ffffff;
+  --animation: gradient-angle 3s linear infinite;
+  --transition: 400ms cubic-bezier(0.25, 1, 0.5, 1);
+  
+  isolation: isolate;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  outline-offset: 4px;
+  font-weight: 700;
+  border: 1px solid transparent;
+  color: var(--shiny-cta-fg) !important;
+  background: linear-gradient(var(--shiny-cta-bg), var(--shiny-cta-bg)) padding-box,
+    conic-gradient(
+      from calc(var(--gradient-angle, 0deg) - var(--gradient-angle-offset, 0deg)),
+      transparent,
+      var(--shiny-cta-highlight) var(--gradient-percent, 5%),
+      var(--shiny-cta-highlight-subtle, white) calc(var(--gradient-percent, 5%) * 2),
+      var(--shiny-cta-highlight) calc(var(--gradient-percent, 5%) * 3),
+      transparent calc(var(--gradient-percent, 5%) * 4)
+    ) border-box;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3), inset 0 0 0 1px var(--shiny-cta-bg-subtle);
+  transition: var(--transition);
+  transition-property: --gradient-angle-offset, --gradient-percent, box-shadow, transform;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Brand Blue Variant (Default Skilloka) */
+.shiny-btn-brand {
+  --shiny-cta-bg: #2563eb;
+  --shiny-cta-bg-subtle: #1d4ed8;
+  --shiny-cta-fg: #ffffff;
+  --shiny-cta-highlight: #93c5fd;
+  --shiny-cta-highlight-subtle: #ffffff;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35), inset 0 0 0 1px var(--shiny-cta-bg-subtle);
+}
+
+/* Dark Slate Variant */
+.shiny-btn-dark {
+  --shiny-cta-bg: #0f172a;
+  --shiny-cta-bg-subtle: #1e293b;
+  --shiny-cta-fg: #ffffff;
+  --shiny-cta-highlight: #38bdf8;
+  --shiny-cta-highlight-subtle: #ffffff;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.4), inset 0 0 0 1px var(--shiny-cta-bg-subtle);
+}
+
+/* Emerald Variant (Super Admin / Success) */
+.shiny-btn-emerald {
+  --shiny-cta-bg: #059669;
+  --shiny-cta-bg-subtle: #047857;
+  --shiny-cta-fg: #ffffff;
+  --shiny-cta-highlight: #6ee7b7;
+  --shiny-cta-highlight-subtle: #ffffff;
+  box-shadow: 0 4px 16px rgba(5, 150, 105, 0.35), inset 0 0 0 1px var(--shiny-cta-bg-subtle);
+}
+
+/* Inner Shimmer Animation */
+.shiny-btn::after,
+.shiny-cta::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset-inline-start: 50%;
+  inset-block-start: 50%;
+  translate: -50% -50%;
+  width: 130%;
+  aspect-ratio: 1;
+  background: linear-gradient(
+    -50deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  mask-image: radial-gradient(circle at bottom, transparent 35%, black);
+  opacity: 0.6;
+  z-index: 0;
+  animation: shimmer 4s linear infinite;
+}
+
+/* Content layer on top */
+.shiny-btn > *,
+.shiny-cta > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Hover and Focus States */
+.shiny-btn:is(:hover, :focus-visible),
+.shiny-cta:is(:hover, :focus-visible) {
+  --gradient-percent: 22%;
+  --gradient-angle-offset: 95deg;
+  transform: translateY(-2px);
+  animation-play-state: running;
+}
+
+.shiny-btn-brand:is(:hover, :focus-visible) {
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.45);
+}
+
+.shiny-btn-dark:is(:hover, :focus-visible) {
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.55);
+}
+
+.shiny-btn-emerald:is(:hover, :focus-visible) {
+  box-shadow: 0 8px 24px rgba(5, 150, 105, 0.45);
+}
+
+.shiny-btn:active,
+.shiny-cta:active {
+  transform: translateY(1px);
+}
+
+/* Animation Keyframes */
+@keyframes gradient-angle {
+  to {
+    --gradient-angle: 360deg;
+  }
+}
+
+@keyframes shimmer {
+  to {
+    transform: rotate(360deg);
+  }
+}

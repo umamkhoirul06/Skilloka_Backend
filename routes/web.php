@@ -17,6 +17,10 @@ use App\Http\Controllers\Admin\CourseScheduleController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\BannerController; // 🔥 WAJIB INI
+use App\Http\Controllers\Admin\ContentController;
+use App\Http\Controllers\Admin\AttendanceController;
+use App\Http\Controllers\Admin\CertificateController;
+use App\Http\Controllers\Web\PublicController;
 
 use App\Http\Controllers\Admin\SuperAdmin\DashboardController;
 use App\Http\Controllers\Admin\SuperAdmin\TenantController;
@@ -25,6 +29,7 @@ use App\Http\Controllers\Admin\SuperAdmin\UserController;
 use App\Http\Controllers\Admin\SuperAdmin\FinanceController;
 use App\Http\Controllers\Admin\SuperAdmin\LogController;
 use App\Http\Controllers\Admin\SuperAdmin\SettingsController;
+use App\Http\Controllers\Admin\SuperAdmin\CategoryController as SuperCategoryController;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Http\Request;
@@ -74,13 +79,19 @@ Route::post('/admin/reset-password', function (Request $request) {
 
 /*
 |--------------------------------------------------------------------------
-| HOME
+| PUBLIC WEB PAGES (PRD Section 6)
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', function () {
-    return redirect()->route('admin.login');
-});
+Route::get('/', [PublicController::class, 'index'])->name('home');
+Route::get('/kursus', [PublicController::class, 'courses'])->name('public.courses');
+Route::get('/kursus/{id}', [PublicController::class, 'courseDetail'])->name('public.course.detail');
+Route::get('/lpk', [PublicController::class, 'lpks'])->name('public.lpks');
+Route::get('/lpk/{id}', [PublicController::class, 'lpkDetail'])->name('public.lpk.detail');
+Route::get('/untuk-lpk', [PublicController::class, 'forLpk'])->name('public.for_lpk');
+Route::get('/tentang', [PublicController::class, 'about'])->name('public.about');
+Route::get('/daftar-lpk', [AdminAuthController::class, 'showRegister'])->name('lpk.register');
+Route::get('/daftar-lpk/sukses', [PublicController::class, 'registerSuccess'])->name('lpk.register.success');
 
 /*
 |--------------------------------------------------------------------------
@@ -152,6 +163,18 @@ Route::middleware(['auth', 'role:admin_lpk'])
         )->name('payments.status');
 
         Route::resource('course-schedules', CourseScheduleController::class);
+
+        // Content / Materi Kursus
+        Route::resource('contents', ContentController::class);
+
+        // Presensi / Absensi Siswa
+        Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
+        Route::get('/attendance/session', [AttendanceController::class, 'session'])->name('attendance.session');
+        Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
+        Route::get('/attendance/recap/{courseId}', [AttendanceController::class, 'recap'])->name('attendance.recap');
+
+        // Sertifikat Siswa
+        Route::resource('certificates', CertificateController::class);
     });
 
 
@@ -219,5 +242,8 @@ Route::middleware(['auth', 'role:super_admin'])
         Route::post('/settings', [SettingsController::class, 'update'])
             ->name('settings.update');
         Route::get('/finance/report/pdf', [\App\Http\Controllers\Admin\SuperAdmin\FinanceController::class, 'exportPdf'])
-            ->name('super.finance.pdf');
+            ->name('finance.pdf');
+
+        // Kategori Kursus
+        Route::resource('categories', SuperCategoryController::class);
     });

@@ -3,120 +3,114 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Reset Password - Skilloka</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <title>Buat Kata Sandi Baru - Skilloka</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN (Identik dengan Landing Page) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        outfit: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                            950: '#172554',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         * { font-family: 'Inter', sans-serif; }
-        body { background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%); min-height: 100vh; }
-        .glass-card { background: rgba(255,255,255,0.08); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
-        .input-field { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s ease; }
-        .input-field:focus { background: rgba(255,255,255,0.1); border-color: rgba(102,126,234,0.6); box-shadow: 0 0 0 4px rgba(102,126,234,0.15); outline: none; }
-        .btn-gradient { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); transition: all 0.3s ease; }
-        .btn-gradient:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(102,126,234,0.4); }
-        .floating-shapes div { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.4; animation: float 15s infinite ease-in-out; }
-        .shape-1 { width:400px; height:400px; background: linear-gradient(135deg,#667eea,#764ba2); top:-100px; left:-100px; }
-        .shape-2 { width:300px; height:300px; background: linear-gradient(135deg,#f093fb,#f5576c); bottom:-50px; right:-50px; animation-delay:-5s; }
-        @keyframes float { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-20px,20px)} }
+        .font-outfit { font-family: 'Outfit', sans-serif; }
+        .hero-pattern {
+            background-color: #f8fafc;
+            background-image: radial-gradient(#cbd5e1 0.75px, transparent 0.75px);
+            background-size: 24px 24px;
+        }
     </style>
 </head>
-<body class="relative overflow-hidden">
+<body class="hero-pattern min-h-screen flex items-center justify-center p-4 text-slate-800 relative overflow-hidden">
 
-<div class="floating-shapes">
-    <div class="shape-1"></div>
-    <div class="shape-2"></div>
-</div>
+<!-- Glow Orbs -->
+<div class="absolute top-10 left-10 w-96 h-96 bg-brand-400/15 rounded-full blur-3xl pointer-events-none"></div>
+<div class="absolute bottom-10 right-10 w-96 h-96 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none"></div>
 
-<div class="min-h-screen flex items-center justify-center p-4 relative z-10">
-    <div class="w-full max-w-md">
-        <div class="glass-card rounded-2xl p-8 shadow-2xl">
+<div class="bg-white rounded-3xl border border-slate-200/90 shadow-2xl shadow-slate-200/60 p-8 sm:p-10 w-full max-w-md relative z-10">
+    <div class="w-14 h-14 rounded-2xl bg-brand-50 border border-brand-100 text-brand-600 flex items-center justify-center text-xl mx-auto mb-6 shadow-sm shadow-brand-500/20">
+        <i class="fa-solid fa-lock-open"></i>
+    </div>
 
-            {{-- ICON --}}
-            <div class="text-center mb-8">
-                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-teal-600 flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                    </svg>
-                </div>
-                <h2 class="text-2xl font-bold text-white mb-2">Reset Password</h2>
-                <p class="text-gray-400 text-sm">Buat password baru untuk akun kamu.</p>
-            </div>
+    <h2 class="font-outfit text-2xl font-black text-slate-900 text-center tracking-tight">Kata Sandi Baru</h2>
+    <p class="text-xs text-slate-500 text-center mt-2 mb-6">
+        Silakan masukkan kata sandi baru untuk mengamankan kembali akun portal manajemen Anda.
+    </p>
 
-            {{-- ERROR --}}
-            @if($errors->any())
-                <div class="mb-6 p-4 rounded-lg bg-red-500/10 border border-red-500/20">
-                    <div class="flex items-center">
-                        <svg class="w-5 h-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        <span class="text-red-400 text-sm">{{ $errors->first() }}</span>
-                    </div>
-                </div>
-            @endif
-
-            {{-- FORM --}}
-            <form method="POST" action="{{ route('password.update') }}">
-                @csrf
-                <input type="hidden" name="token" value="{{ $token }}">
-
-                <div class="mb-5">
-                    <label class="block text-gray-300 text-sm font-medium mb-2">Email</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"/>
-                            </svg>
-                        </span>
-                        <input type="email" name="email" value="{{ old('email') }}"
-                            class="input-field w-full pl-12 pr-4 py-3.5 rounded-xl text-white placeholder-gray-500"
-                            placeholder="admin@lpk.com" required>
-                    </div>
-                </div>
-
-                <div class="mb-5">
-                    <label class="block text-gray-300 text-sm font-medium mb-2">Password Baru</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                            </svg>
-                        </span>
-                        <input type="password" name="password"
-                            class="input-field w-full pl-12 pr-4 py-3.5 rounded-xl text-white placeholder-gray-500"
-                            placeholder="Minimal 8 karakter" required>
-                    </div>
-                </div>
-
-                <div class="mb-6">
-                    <label class="block text-gray-300 text-sm font-medium mb-2">Konfirmasi Password</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                            </svg>
-                        </span>
-                        <input type="password" name="password_confirmation"
-                            class="input-field w-full pl-12 pr-4 py-3.5 rounded-xl text-white placeholder-gray-500"
-                            placeholder="Ulangi password baru" required>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn-gradient w-full py-3.5 rounded-xl text-white font-semibold shadow-lg">
-                    Reset Password
-                </button>
-            </form>
-
-            <div class="text-center mt-6">
-                <a href="{{ route('admin.login') }}" class="text-purple-400 hover:text-purple-300 text-sm transition-colors">
-                    ← Kembali ke Login
-                </a>
-            </div>
-
+    @if($errors->any())
+        <div class="mb-5 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2">
+            <i class="fa-solid fa-circle-exclamation text-rose-600"></i>
+            <span>{{ $errors->first() }}</span>
         </div>
+    @endif
+
+    <form method="POST" action="{{ route('password.update') }}" class="space-y-4">
+        @csrf
+        <input type="hidden" name="token" value="{{ $token }}">
+
+        <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Email Akun</label>
+            <input type="email" name="email" value="{{ old('email', request()->email) }}" required
+                class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-4 focus:ring-brand-500/10 transition-all font-medium"
+                placeholder="admin@lpk-anda.com">
+        </div>
+
+        <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Kata Sandi Baru (Min. 8 Karakter)</label>
+            <input type="password" name="password" required
+                class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-4 focus:ring-brand-500/10 transition-all font-medium"
+                placeholder="••••••••">
+        </div>
+
+        <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Ulangi Kata Sandi Baru</label>
+            <input type="password" name="password_confirmation" required
+                class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-4 focus:ring-brand-500/10 transition-all font-medium"
+                placeholder="••••••••">
+        </div>
+
+        <div class="pt-2">
+            <button type="submit"
+                class="w-full py-3.5 px-6 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-lg shadow-brand-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer">
+                <span>Simpan Kata Sandi Baru</span>
+                <i class="fa-solid fa-check text-[10px]"></i>
+            </button>
+        </div>
+    </form>
+
+    <div class="mt-6 pt-5 border-t border-slate-100 text-center">
+        <a href="{{ route('admin.login') }}" class="text-xs font-bold text-brand-600 hover:text-brand-800 inline-flex items-center gap-1.5 transition-colors">
+            <i class="fa-solid fa-arrow-left text-[10px]"></i> Kembali ke Halaman Masuk
+        </a>
     </div>
 </div>
 

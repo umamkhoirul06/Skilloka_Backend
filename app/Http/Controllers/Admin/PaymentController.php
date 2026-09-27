@@ -21,6 +21,34 @@ class PaymentController extends Controller
         Config::$is3ds = true;
     }
 
+    // ── 0. List Payments ─────────────────────────────────────────
+    public function index(Request $request)
+    {
+        $tenantId = auth()->user()->tenant_id ?? null;
+        $lpkId = auth()->user()->lpk_id ?? null;
+
+        $payments = Payment::with(['booking.user', 'booking.course'])
+            ->when($tenantId || $lpkId, function ($q) use ($tenantId, $lpkId) {
+                $q->whereHas('booking', function ($bq) use ($tenantId, $lpkId) {
+                    if ($tenantId) {
+                        $bq->where('tenant_id', $tenantId);
+                    } elseif ($lpkId) {
+                        $bq->where('lpk_id', $lpkId);
+                    }
+                });
+            })
+            ->latest()
+            ->paginate(15);
+
+        return view('admin.payments.index', compact('payments'));
+    }
+
+    public function show(Payment $payment)
+    {
+        $payment->load(['booking.user', 'booking.course']);
+        return view('admin.payments.show', compact('payment'));
+    }
+
     // ── 1. Create Transaction (Midtrans) ──────────────────────────
     public function createTransaction(Request $request)
     {

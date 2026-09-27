@@ -7,14 +7,14 @@ use App\Models\User;
 use App\Models\Tenant;
 use App\Models\Lpk;
 use Illuminate\Support\Str;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 use Illuminate\Support\Facades\Gate; // 🔥 INI KUNCI GOD MODE-NYA
 
 class SemuaHalamanBisaDiAksesTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     protected function setUp(): void
     {
@@ -23,16 +23,13 @@ class SemuaHalamanBisaDiAksesTest extends TestCase
         // 1. Reset cache permission bawaan Spatie
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // 2. Jalankan migration untuk database testing
-        $this->artisan('migrate');
-
         // 🔥 3. GOD MODE: Bypass semua pengecekan hak akses (Policy/Gate) bawaan Laravel
         Gate::before(function () {
             return true;
         });
 
         // 🔥 4. Buat SEMUA kemungkinan nama role yang mungkin dipakai temanmu
-        $roles = ['superadmin', 'super-admin', 'Super Admin', 'admin', 'admin-lpk', 'lpk'];
+        $roles = ['superadmin', 'super-admin', 'Super Admin', 'super_admin', 'admin', 'admin-lpk', 'lpk', 'admin_lpk', 'user'];
         foreach ($roles as $r) {
             Role::firstOrCreate(['name' => $r, 'guard_name' => 'web']);
         }
@@ -62,26 +59,30 @@ class SemuaHalamanBisaDiAksesTest extends TestCase
             'tenant_id' => $tenantId,
             'lpk_id' => $lpkId,
             'status' => 'active',
-            'role' => 'admin', // 🔥 Biasanya cuma disebut 'admin' di database
+            'role' => 'admin_lpk',
         ]);
 
         // Berikan semua jubah admin LPK ke user ini
-        $user->assignRole(['admin', 'admin-lpk', 'lpk']);
+        $user->assignRole(['admin', 'admin-lpk', 'lpk', 'admin_lpk']);
 
         return $this->actingAs($user, 'web');
     }
 
     private function superAdmin()
     {
-        $user = User::factory()->create([
-            'email' => 'god@skilloka.com',
-            'email_verified_at' => now(),
-            'status' => 'active',
-            'role' => 'superadmin', // 🔥 Tanpa strip (paling sering dipakai)
-        ]);
+        $user = User::where('email', 'god@skilloka.com')->first();
+
+        if (!$user) {
+            $user = User::factory()->create([
+                'email' => 'god@skilloka.com',
+                'email_verified_at' => now(),
+                'status' => 'active',
+                'role' => 'super_admin',
+            ]);
+        }
 
         // Berikan semua jubah Super Admin ke user ini
-        $user->assignRole(['superadmin', 'super-admin', 'Super Admin']);
+        $user->assignRole(['superadmin', 'super-admin', 'Super Admin', 'super_admin']);
 
         return $this->actingAs($user, 'web');
     }
@@ -91,9 +92,29 @@ class SemuaHalamanBisaDiAksesTest extends TestCase
     | TEST HALAMAN PUBLIC
     |--------------------------------------------------------------------------
     */
-    public function test_home_redirect(): void
+    public function test_home_page(): void
     {
-        $this->get('/')->assertRedirect(route('admin.login'));
+        $this->get('/')->assertOk();
+    }
+
+    public function test_public_courses_catalog(): void
+    {
+        $this->get('/kursus')->assertOk();
+    }
+
+    public function test_public_lpks_directory(): void
+    {
+        $this->get('/lpk')->assertOk();
+    }
+
+    public function test_public_for_lpk(): void
+    {
+        $this->get('/untuk-lpk')->assertOk();
+    }
+
+    public function test_public_about(): void
+    {
+        $this->get('/tentang')->assertOk();
     }
 
     public function test_login_page(): void
@@ -104,6 +125,11 @@ class SemuaHalamanBisaDiAksesTest extends TestCase
     public function test_register_page(): void
     {
         $this->get('/admin/register')->assertOk();
+    }
+
+    public function test_register_success_page(): void
+    {
+        $this->get('/daftar-lpk/sukses')->assertOk();
     }
 
     /*
@@ -136,9 +162,9 @@ class SemuaHalamanBisaDiAksesTest extends TestCase
         $this->admin()->get('/admin/students')->assertOk();
     }
 
-    public function test_students_create(): void
+    public function test_payments_index(): void
     {
-        $this->admin()->get('/admin/students/create')->assertOk();
+        $this->admin()->get('/admin/payments')->assertOk();
     }
 
     public function test_bookings_index(): void
@@ -151,9 +177,29 @@ class SemuaHalamanBisaDiAksesTest extends TestCase
         $this->admin()->get('/admin/course-schedules')->assertOk();
     }
 
-    public function test_course_schedule_create(): void
+    public function test_course_contents_index(): void
     {
-        $this->admin()->get('/admin/course-schedules/create')->assertOk();
+        $this->admin()->get('/admin/contents')->assertOk();
+    }
+
+    public function test_course_contents_create(): void
+    {
+        $this->admin()->get('/admin/contents/create')->assertOk();
+    }
+
+    public function test_attendance_index(): void
+    {
+        $this->admin()->get('/admin/attendance')->assertOk();
+    }
+
+    public function test_certificates_index(): void
+    {
+        $this->admin()->get('/admin/certificates')->assertOk();
+    }
+
+    public function test_certificates_create(): void
+    {
+        $this->admin()->get('/admin/certificates/create')->assertOk();
     }
 
     /*
@@ -164,6 +210,11 @@ class SemuaHalamanBisaDiAksesTest extends TestCase
     public function test_super_dashboard(): void
     {
         $this->superAdmin()->get('/super-admin/dashboard')->assertOk();
+    }
+
+    public function test_super_categories(): void
+    {
+        $this->superAdmin()->get('/super-admin/categories')->assertOk();
     }
 
     public function test_tenants(): void

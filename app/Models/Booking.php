@@ -47,6 +47,26 @@ class Booking extends Model
         return $this->hasOne(Payment::class, 'booking_id');
     }
 
+    public function course()
+    {
+        return $this->belongsTo(Course::class, 'course_id');
+    }
+
+    public function lpk()
+    {
+        return $this->belongsTo(Lpk::class, 'lpk_id');
+    }
+
+    public function certificate()
+    {
+        return $this->hasOne(Certificate::class, 'booking_id');
+    }
+
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class, 'booking_id');
+    }
+
     public function getAmountAttribute()
     {
         return $this->total_price;

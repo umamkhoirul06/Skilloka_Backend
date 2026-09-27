@@ -4,405 +4,261 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Skilloka Admin - Platform manajemen LPK dan pelatihan terbaik di Indonesia">
-    <title>Login - Skilloka Admin</title>
+    <title>Masuk Portal Manajemen - Skilloka</title>
+    <meta name="description" content="Masuk ke portal manajemen resmi Mitra LPK dan Super Admin Skilloka.">
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        outfit: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                            950: '#172554',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ asset('css/shiny-button.css') }}">
+
     <style>
         * {
             font-family: 'Inter', sans-serif;
         }
 
-        body {
-            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
-            min-height: 100vh;
+        .font-outfit {
+            font-family: 'Outfit', sans-serif;
         }
 
-        .glass-card {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .gradient-text {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .input-field {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .input-field:focus {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(102, 126, 234, 0.6);
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
-        }
-
-        .btn-gradient {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-gradient:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-gradient::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .btn-gradient:hover::before {
-            left: 100%;
-        }
-
-        .floating-shapes div {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(60px);
-            opacity: 0.4;
-            animation: float 15s infinite ease-in-out;
-        }
-
-        .floating-shapes .shape-1 {
-            width: 400px;
-            height: 400px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            top: -100px;
-            left: -100px;
-            animation-delay: 0s;
-        }
-
-        .floating-shapes .shape-2 {
-            width: 300px;
-            height: 300px;
-            background: linear-gradient(135deg, #f093fb, #f5576c);
-            bottom: -50px;
-            right: -50px;
-            animation-delay: -5s;
-        }
-
-        .floating-shapes .shape-3 {
-            width: 200px;
-            height: 200px;
-            background: linear-gradient(135deg, #4facfe, #00f2fe);
-            top: 50%;
-            right: 20%;
-            animation-delay: -10s;
-        }
-
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translate(0, 0) rotate(0deg);
-            }
-
-            25% {
-                transform: translate(30px, -30px) rotate(5deg);
-            }
-
-            50% {
-                transform: translate(-20px, 20px) rotate(-5deg);
-            }
-
-            75% {
-                transform: translate(20px, 30px) rotate(3deg);
-            }
-        }
-
-        .feature-icon {
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .slide-up {
-            animation: slideUp 0.6s ease-out forwards;
-            opacity: 0;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .delay-100 {
-            animation-delay: 0.1s;
-        }
-
-        .delay-200 {
-            animation-delay: 0.2s;
-        }
-
-        .delay-300 {
-            animation-delay: 0.3s;
-        }
-
-        .delay-400 {
-            animation-delay: 0.4s;
+        /* Subtle Hero Grid Pattern */
+        .hero-pattern {
+            background-color: #f8fafc;
+            background-image: radial-gradient(#cbd5e1 0.75px, transparent 0.75px);
+            background-size: 24px 24px;
         }
     </style>
+
+    <!-- Shiny Button CSS -->
+    <link rel="stylesheet" href="{{ asset('css/shiny-button.css') }}">
 </head>
 
-<body class="relative overflow-hidden">
-    <!-- Floating Background Shapes -->
-    <div class="floating-shapes">
-        <div class="shape-1"></div>
-        <div class="shape-2"></div>
-        <div class="shape-3"></div>
-    </div>
+<body class="hero-pattern text-slate-800 min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8 antialiased relative overflow-x-hidden">
 
-    <div class="min-h-screen flex items-center justify-center p-4 relative z-10">
-        <div class="w-full max-w-6xl grid lg:grid-cols-2 gap-8 items-center">
+    <!-- Ambient Glowing Orbs -->
+    <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-brand-400/15 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none"></div>
 
-            <!-- Left Side - Branding -->
-            <div class="hidden lg:block text-white p-8 slide-up">
-                <div class="mb-8">
-                    <div class="flex items-center mb-6">
-                        <div
-                            class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mr-4">
-                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
-                                </path>
-                            </svg>
-                        </div>
-                        <span class="text-3xl font-bold gradient-text">Skilloka</span>
+    <!-- Main Card Container -->
+    <div class="w-full max-w-4xl bg-white rounded-3xl border border-slate-200/90 shadow-2xl shadow-slate-200/70 overflow-hidden relative z-10 grid grid-cols-1 lg:grid-cols-12">
+        
+        <!-- ═══════════════════════════════════════
+             LEFT BRAND SHOWCASE (Minimalist & Sleek)
+        ═══════════════════════════════════════ -->
+        <div class="lg:col-span-5 bg-gradient-to-br from-brand-950 via-brand-900 to-indigo-950 text-white p-8 sm:p-10 flex flex-col justify-between relative overflow-hidden">
+            <!-- Glow Accent -->
+            <div class="absolute -top-20 -left-20 w-60 h-60 bg-brand-500/25 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-20 -right-20 w-60 h-60 bg-purple-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+            <!-- Header / Brand Logo -->
+            <div class="relative z-10">
+                <a href="{{ route('home') }}" class="inline-flex items-center gap-3 group">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-500 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-brand-500/30 group-hover:scale-105 transition-transform">
+                        <i class="fa-solid fa-graduation-cap text-base"></i>
                     </div>
-                    <h1 class="text-4xl font-bold mb-4 leading-tight">
-                        Platform Manajemen <br>
-                        <span class="gradient-text">LPK Terbaik</span> di Indonesia
+                    <div>
+                        <span class="font-outfit text-xl font-black tracking-tight text-white">SKILLOKA</span>
+                        <span class="block text-[10px] font-bold tracking-widest text-brand-300 uppercase">LPK Center</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Compact, Clean Showcase (Tidak Rame) -->
+            <div class="relative z-10 my-8 space-y-6">
+                <!-- Tagline Ringkas -->
+                <div>
+                    <h1 class="font-outfit text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">
+                        Pusat Operasional Pelatihan Vokasi.
                     </h1>
-                    <p class="text-gray-400 text-lg leading-relaxed">
-                        Kelola pelatihan, siswa, dan sertifikasi dengan mudah dalam satu dashboard yang powerful.
+                    <p class="text-xs text-brand-200/90 mt-2 leading-relaxed">
+                        Kelola kurikulum, siswa, presensi, dan sertifikasi resmi LPK se-Kabupaten Indramayu.
                     </p>
                 </div>
 
-                <!-- Features -->
-                <div class="space-y-4">
-                    <div class="flex items-center slide-up delay-100">
-                        <div class="feature-icon w-12 h-12 rounded-lg flex items-center justify-center mr-4">
-                            <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
-                                </path>
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold text-white">Keamanan Terjamin</h3>
-                            <p class="text-gray-400 text-sm">Data terenkripsi end-to-end</p>
-                        </div>
+                <!-- Minimalist Glass Card -->
+                <div class="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xs space-y-3">
+                    <div class="flex items-center gap-2.5 text-xs text-brand-100 font-medium">
+                        <i class="fa-solid fa-shield-halved text-emerald-400"></i>
+                        <span>Legalitas Izin Resmi NIB OSS</span>
                     </div>
-
-                    <div class="flex items-center slide-up delay-200">
-                        <div class="feature-icon w-12 h-12 rounded-lg flex items-center justify-center mr-4">
-                            <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold text-white">Super Cepat</h3>
-                            <p class="text-gray-400 text-sm">Performa tinggi & responsif</p>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center slide-up delay-300">
-                        <div class="feature-icon w-12 h-12 rounded-lg flex items-center justify-center mr-4">
-                            <svg class="w-6 h-6 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
-                                </path>
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold text-white">Multi-Tenant</h3>
-                            <p class="text-gray-400 text-sm">Kelola banyak LPK sekaligus</p>
-                        </div>
+                    <div class="flex items-center gap-2.5 text-xs text-brand-100 font-medium">
+                        <i class="fa-solid fa-qrcode text-brand-400"></i>
+                        <span>Sertifikat Digital Ber-QR Code</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Right Side - Login Form -->
-            <div class="w-full max-w-md mx-auto slide-up delay-100">
-                <div class="glass-card rounded-2xl p-8 shadow-2xl">
-                    <!-- Mobile Logo -->
-                    <div class="lg:hidden flex items-center justify-center mb-8">
-                        <div
-                            class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mr-3">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
-                                </path>
-                            </svg>
-                        </div>
-                        <span class="text-2xl font-bold gradient-text">Skilloka</span>
-                    </div>
-
-                    <div class="text-center mb-8">
-                        <h2 class="text-2xl font-bold text-white mb-2">Selamat Datang! 👋</h2>
-                        <p class="text-gray-400">
-    Login untuk Super Admin & Admin LPK
-</p>
-                    </div>
-
-                    @if(session('success'))
-                        <div class="mb-6 p-4 rounded-lg bg-green-500/10 border border-green-500/20">
-                            <div class="flex items-center">
-                                <svg class="w-5 h-5 text-green-400 mr-2" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span class="text-green-400 text-sm">{{ session('success') }}</span>
-                            </div>
-                        </div>
-                    @endif
-
-                    @if($errors->any())
-                        <div class="mb-6 p-4 rounded-lg bg-red-500/10 border border-red-500/20">
-                            <div class="flex items-center">
-                                <svg class="w-5 h-5 text-red-400 mr-2" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                <span class="text-red-400 text-sm">{{ $errors->first() }}</span>
-                            </div>
-                        </div>
-                    @endif
-
-                    <form method="POST" action="{{ route('admin.login.submit') }}">
-                        @csrf
-
-                        <div class="mb-5">
-                            <label class="block text-gray-300 text-sm font-medium mb-2" for="email">
-                                Email Address
-                            </label>
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207">
-                                        </path>
-                                    </svg>
-                                </span>
-                                <input
-                                    class="input-field w-full pl-12 pr-4 py-3.5 rounded-xl text-white placeholder-gray-500 focus:outline-none"
-                                    id="email" type="email" name="email" value="{{ old('email') }}"
-                                    placeholder="admin@example.com" required autofocus>
-                            </div>
-                        </div>
-
-                        <div class="mb-6">
-                            <label class="block text-gray-300 text-sm font-medium mb-2" for="password">
-                                Password
-                            </label>
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
-                                        </path>
-                                    </svg>
-                                </span>
-                                <input
-                                    class="input-field w-full pl-12 pr-4 py-3.5 rounded-xl text-white placeholder-gray-500 focus:outline-none"
-                                    id="password" type="password" name="password" placeholder="••••••••" required>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center justify-between mb-6">
-                            <label class="flex items-center cursor-pointer">
-                                <input type="checkbox" name="remember"
-                                    class="w-4 h-4 rounded border-gray-600 bg-gray-700 text-purple-600 focus:ring-purple-500 focus:ring-offset-0">
-                                <span class="ml-2 text-sm text-gray-400">Ingat saya</span>
-                            </label>
-                            <a href="{{ route('password.request') }}"
-   class="text-sm text-purple-400 hover:text-purple-300 transition-colors">
-    Lupa Password?
-</a>
-                        </div>
-
-                        <button type="submit"
-                            class="btn-gradient w-full py-3.5 rounded-xl text-white font-semibold shadow-lg">
-                            Masuk ke Dashboard
-                        </button>
-                    </form>
-
-
-<a href="https://wa.me/62895405193300"
-   target="_blank"
-   class="text-sm text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-1">
-
-    <i class="fab fa-whatsapp"></i>
-
-    Hubungi Super Admin
-    
-
-</a>
-                    <div class="mt-8 pt-6 border-t border-gray-700/50">
-
-    <p class="text-center text-gray-500 text-sm mb-2">
-
-        Registrasi hanya untuk Admin LPK
-
-    </p>
-
-    <div class="text-center">
-
-        <a href="{{ route('admin.register') }}"
-            class="text-purple-400 hover:text-purple-300 font-medium text-sm">
-
-            Daftar Sebagai Admin LPK
-
-        </a>
-
-    </div>
-
-    <p class="text-center text-gray-600 text-xs mt-4">
-
-        Super Admin dibuat langsung oleh sistem.
-
-    </p>
-
-</div>
+            <!-- Bottom Footnote -->
+            <div class="relative z-10 pt-4 border-t border-white/10 flex items-center justify-between text-xs text-brand-200/70">
+                <span>&copy; {{ date('Y') }} Skilloka</span>
+                <span class="flex items-center gap-1 text-emerald-300">
+                    <i class="fa-solid fa-location-dot text-[10px]"></i> Indramayu
+                </span>
+            </div>
         </div>
+
+        <!-- ═══════════════════════════════════════
+             RIGHT LOGIN FORM (Clean, Modern SaaS)
+        ═══════════════════════════════════════ -->
+        <div class="lg:col-span-7 p-8 sm:p-10 lg:p-12 flex flex-col justify-center bg-white">
+            <div class="max-w-sm w-full mx-auto">
+                
+                <!-- Title Header -->
+                <div class="mb-7">
+                    <h2 class="font-outfit text-2xl font-bold text-slate-900 tracking-tight">Selamat Datang</h2>
+                    <p class="text-xs text-slate-500 mt-1">Silakan masukkan akun Anda untuk mengakses portal manajemen.</p>
+                </div>
+
+                <!-- Flash Alerts -->
+                @if(session('success'))
+                    <div class="mb-5 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-start gap-2.5 text-emerald-900 text-xs">
+                        <i class="fa-solid fa-circle-check text-emerald-600 text-sm mt-0.5"></i>
+                        <span class="font-medium leading-relaxed">{{ session('success') }}</span>
+                    </div>
+                @endif
+
+                @if($errors->any())
+                    <div class="mb-5 p-3.5 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-2.5 text-rose-900 text-xs">
+                        <i class="fa-solid fa-circle-exclamation text-rose-600 text-sm mt-0.5"></i>
+                        <span class="font-medium leading-relaxed">{{ $errors->first() }}</span>
+                    </div>
+                @endif
+
+                <!-- Login Form -->
+                <form method="POST" action="{{ route('admin.login.submit') }}" class="space-y-4">
+                    @csrf
+
+                    <!-- Email Field -->
+                    <div>
+                        <label for="email" class="block text-xs font-bold text-slate-700 mb-1">
+                            Alamat Email
+                        </label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                <i class="fa-regular fa-envelope text-xs"></i>
+                            </span>
+                            <input type="email" id="email" name="email" value="{{ old('email') }}" required autofocus
+                                class="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-3 focus:ring-brand-500/10 transition font-medium"
+                                placeholder="nama@email.com">
+                        </div>
+                    </div>
+
+                    <!-- Password Field -->
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label for="password" class="block text-xs font-bold text-slate-700">
+                                Kata Sandi
+                            </label>
+                            <a href="{{ route('password.request') }}" class="text-[11px] font-semibold text-brand-600 hover:text-brand-800 transition-colors">
+                                Lupa sandi?
+                            </a>
+                        </div>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                <i class="fa-solid fa-lock text-xs"></i>
+                            </span>
+                            <input type="password" id="password" name="password" required
+                                class="w-full pl-9 pr-10 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-3 focus:ring-brand-500/10 transition font-medium"
+                                placeholder="••••••••">
+                            <button type="button" onclick="togglePasswordVisibility()"
+                                class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition cursor-pointer">
+                                <i id="eyeIcon" class="fa-regular fa-eye text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Remember Me Option -->
+                    <div class="flex items-center justify-between pt-0.5">
+                        <label class="flex items-center gap-2 cursor-pointer select-none">
+                            <input type="checkbox" name="remember" class="w-3.5 h-3.5 rounded text-brand-600 border-slate-300 focus:ring-brand-500 cursor-pointer">
+                            <span class="text-xs text-slate-600">Ingat saya</span>
+                        </label>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="pt-1.5">
+                        <button type="submit"
+                            class="shiny-btn shiny-btn-brand w-full py-3 px-5 rounded-xl text-white font-bold text-xs shadow-md shadow-brand-500/20 flex items-center justify-center gap-2 cursor-pointer">
+                            <span>Masuk ke Dashboard</span>
+                            <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Divider & Register Link -->
+                <div class="mt-6 pt-5 border-t border-slate-100 text-center">
+                    <p class="text-xs text-slate-500">
+                        Belum mendaftarkan Lembaga Anda?
+                    </p>
+                    <a href="{{ route('lpk.register') }}"
+                        class="inline-flex items-center gap-1.5 text-xs font-bold text-brand-600 hover:text-brand-800 mt-1 transition">
+                        <span>Daftar Sebagai Mitra LPK Baru</span>
+                        <i class="fa-solid fa-arrow-right-long text-[10px]"></i>
+                    </a>
+                </div>
+
+                <div class="mt-4 text-center">
+                    <a href="{{ route('home') }}" class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 hover:text-slate-700 transition">
+                        <i class="fa-solid fa-chevron-left text-[9px]"></i>
+                        <span>Kembali ke Beranda Publik</span>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
     </div>
 
-    <!-- Footer -->
-    <div class="absolute bottom-4 left-0 right-0 text-center">
-        <p class="text-gray-600 text-sm">
-            © 2026 Skilloka. All rights reserved.
-        </p>
-    </div>
+    <!-- Toggle Password Visibility JS -->
+    <script>
+        function togglePasswordVisibility() {
+            const pwdInput = document.getElementById('password');
+            const eyeIcon = document.getElementById('eyeIcon');
+            if (pwdInput.type === 'password') {
+                pwdInput.type = 'text';
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            } else {
+                pwdInput.type = 'password';
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            }
+        }
+    </script>
 </body>
 
 </html>

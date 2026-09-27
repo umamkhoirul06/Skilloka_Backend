@@ -10,4 +10,9 @@ class Category extends Model
     use HasUuids;
 
     protected $guarded = ['id'];
+
+    public function courses()
+    {
+        return $this->hasMany(Course::class);
+    }
 }
