@@ -7,6 +7,13 @@
     <title>Pendaftaran Mitra Lembaga Pelatihan Kerja (LPK) - Skilloka</title>
     <meta name="description" content="Formulir resmi pendaftaran kemitraan Lembaga Pelatihan Kerja (LPK) di Kabupaten Indramayu.">
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
+    <link rel="alternate icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -100,14 +107,8 @@
         
         <!-- Header & Branding Matching Landing Page -->
         <div class="text-center mb-8">
-            <a href="{{ route('home') }}" class="inline-flex items-center gap-2.5 group">
-                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-brand-500/25 group-hover:scale-105 transition-transform">
-                    <i class="fa-solid fa-graduation-cap text-lg"></i>
-                </div>
-                <div>
-                    <span class="font-outfit text-2xl font-black text-slate-900 tracking-tight">SKILLOKA</span>
-                    <span class="block text-[10px] font-bold text-brand-600 tracking-wider uppercase">Portal Kemitraan LPK</span>
-                </div>
+            <a href="{{ route('home') }}" class="inline-flex items-center group transition-transform hover:scale-[1.02]">
+                <x-skilloka-logo class="h-11" textColor="text-slate-900" textSize="text-3xl" :withSubtitle="true" subtitle="Portal Kemitraan LPK" subtitleColor="text-brand-600" />
             </a>
             
             <div class="mt-4 inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-brand-50 text-brand-700 border border-brand-200">

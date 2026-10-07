@@ -31,44 +31,58 @@
     @if($lpks->count() > 0)
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach($lpks as $lpk)
-                <div class="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-lg transition duration-300 flex flex-col justify-between">
+                @php
+                    $colorSets = [
+                        ['gradient' => 'from-brand-500 to-brand-700', 'accent' => 'bg-gradient-to-r from-brand-400 to-brand-600'],
+                        ['gradient' => 'from-indigo-500 to-indigo-800', 'accent' => 'bg-gradient-to-r from-indigo-400 to-indigo-600'],
+                        ['gradient' => 'from-purple-500 to-purple-800', 'accent' => 'bg-gradient-to-r from-purple-400 to-purple-600'],
+                        ['gradient' => 'from-emerald-500 to-teal-700', 'accent' => 'bg-gradient-to-r from-emerald-400 to-emerald-600'],
+                    ];
+                    $color = $colorSets[$loop->index % 4];
+                @endphp
+                <div class="lpk-card bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-xl hover:border-slate-300 flex flex-col justify-between relative overflow-hidden">
+                    <div class="lpk-accent {{ $color['accent'] }}"></div>
                     <div>
                         <div class="flex items-start justify-between gap-3 mb-4">
-                            <div class="w-12 h-12 rounded-xl bg-slate-900 text-white font-bold flex items-center justify-center text-lg shadow">
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-tr {{ $color['gradient'] }} text-white font-bold flex items-center justify-center text-lg shadow-md">
                                 {{ strtoupper(substr($lpk->name, 0, 1)) }}
                             </div>
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold badge-verified">
-                                <i class="fa-solid fa-circle-check text-[10px]"></i>
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold badge-verified shadow-sm">
+                                <i class="fa-solid fa-circle-check text-emerald-500"></i>
                                 Terverifikasi
                             </span>
                         </div>
 
-                        <h3 class="font-outfit text-lg font-bold text-slate-900 mb-1">{{ $lpk->name }}</h3>
+                        <h3 class="font-outfit text-lg font-bold text-slate-900 mb-1.5">{{ $lpk->name }}</h3>
                         <p class="text-xs text-slate-500 line-clamp-3 mb-4 leading-relaxed">
                             {{ $lpk->description ?? 'Lembaga Pelatihan Kerja terdaftar resmi yang menyediakan berbagai program pelatihan kejuruan vokasi berstandar kerja.' }}
                         </p>
 
-                        <div class="space-y-1.5 text-xs text-slate-500 pt-2 border-t border-slate-100">
-                            <div class="flex items-center gap-2">
-                                <i class="fa-solid fa-location-dot text-slate-400 w-4"></i>
+                        <div class="space-y-2 text-xs text-slate-500 pt-3 border-t border-slate-100">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-6 h-6 rounded-md bg-slate-100 flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-solid fa-location-dot text-slate-400 text-[10px]"></i>
+                                </div>
                                 <span class="truncate">{{ $lpk->address ?? 'Kabupaten Indramayu' }}</span>
                             </div>
                             @if($lpk->nib)
-                                <div class="flex items-center gap-2">
-                                    <i class="fa-solid fa-file-contract text-slate-400 w-4"></i>
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-6 h-6 rounded-md bg-slate-100 flex items-center justify-center flex-shrink-0">
+                                        <i class="fa-solid fa-file-contract text-slate-400 text-[10px]"></i>
+                                    </div>
                                     <span>NIB: {{ $lpk->nib }}</span>
                                 </div>
                             @endif
                         </div>
                     </div>
 
-                    <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
-                        <span class="text-xs font-semibold text-brand-600 bg-brand-50 px-2.5 py-1 rounded-lg">
+                    <div class="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
+                        <span class="text-xs font-semibold text-brand-600 bg-brand-50 px-2.5 py-1.5 rounded-lg">
                             {{ $lpk->courses_count }} Kursus
                         </span>
-                        <a href="{{ route('public.lpk.detail', $lpk->id) }}" class="text-xs font-bold text-slate-700 hover:text-brand-600 flex items-center gap-1">
+                        <a href="{{ route('public.lpk.detail', $lpk->id) }}" class="text-xs font-bold text-slate-600 hover:text-white hover:bg-slate-800 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5">
                             <span>Lihat Profil & Kursus</span>
-                            <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                            <i class="fa-solid fa-arrow-right text-[10px]"></i>
                         </a>
                     </div>
                 </div>

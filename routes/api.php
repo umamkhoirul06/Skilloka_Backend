@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\V1\BannerController;
 use App\Http\Controllers\Api\FavoriteController;
 // Perbaikan: Impor PaymentController yang benar
 use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\V1\ChatbotController;
 
 // ==========================================
 // 1. PUBLIC ROUTES (Tanpa Token / Bebas Akses)
@@ -35,6 +36,10 @@ Route::get('/categories', [CategoryController::class, 'index']);
 
 // 🔥 FIX: Midtrans Webhook (Sesuai dengan nama method di Controller)
 Route::post('/payment/webhook', [PaymentController::class, 'webhook']);
+
+// 🤖 Chatbot AI Endpoint (PRD Section 11 & Section 12)
+Route::post('/chatbot/messages', [ChatbotController::class, 'sendMessage']);
+Route::post('/chatbot/message', [ChatbotController::class, 'sendMessage']);
 
 
 // ==========================================

@@ -7,6 +7,13 @@
     <title>Masuk Portal Manajemen - Skilloka</title>
     <meta name="description" content="Masuk ke portal manajemen resmi Mitra LPK dan Super Admin Skilloka.">
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
+    <link rel="alternate icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -86,14 +93,8 @@
 
             <!-- Header / Brand Logo -->
             <div class="relative z-10">
-                <a href="{{ route('home') }}" class="inline-flex items-center gap-3 group">
-                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-500 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-brand-500/30 group-hover:scale-105 transition-transform">
-                        <i class="fa-solid fa-graduation-cap text-base"></i>
-                    </div>
-                    <div>
-                        <span class="font-outfit text-xl font-black tracking-tight text-white">SKILLOKA</span>
-                        <span class="block text-[10px] font-bold tracking-widest text-brand-300 uppercase">LPK Center</span>
-                    </div>
+                <a href="{{ route('home') }}" class="inline-flex items-center group transition-transform hover:scale-[1.02]">
+                    <x-skilloka-logo class="h-10" :isDark="true" textColor="text-white" textSize="text-2xl" :withSubtitle="true" subtitle="LPK Center" subtitleColor="text-brand-200" />
                 </a>
             </div>
 

@@ -6,6 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'Super Admin') - Skilloka Platform Control</title>
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
+    <link rel="alternate icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -145,14 +152,8 @@
     <aside id="mainSidebar" class="sidebar">
         <!-- Logo Header -->
         <div class="p-5 border-b border-slate-800 flex items-center justify-between">
-            <a href="{{ route('super.dashboard') }}" class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-md shadow-emerald-500/30">
-                    <i class="fa-solid fa-crown text-base"></i>
-                </div>
-                <div>
-                    <span class="font-outfit text-lg font-bold text-white tracking-tight">SKILLOKA</span>
-                    <span class="block text-[10px] font-semibold text-emerald-400 uppercase tracking-wider">Super Administrator</span>
-                </div>
+            <a href="{{ route('super.dashboard') }}" class="group transition-transform hover:scale-[1.02]">
+                <x-skilloka-logo class="h-9" :isDark="true" textColor="text-white" textSize="text-xl" :withSubtitle="true" subtitle="Super Administrator" subtitleColor="text-emerald-400" />
             </a>
             <button onclick="toggleSidebar()" class="lg:hidden text-slate-400 hover:text-white p-1">
                 <i class="fa-solid fa-xmark text-lg"></i>

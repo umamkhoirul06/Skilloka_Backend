@@ -83,18 +83,21 @@
             @if($courses->count() > 0)
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach($courses as $course)
-                        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
+                        <div class="card-interactive bg-white rounded-2xl border border-slate-200 overflow-hidden hover:border-brand-300 hover:shadow-xl transition-all duration-300 flex flex-col justify-between group relative">
+                            <!-- Top Accent Line -->
+                            <div class="h-1 w-full bg-gradient-to-r from-brand-500 to-indigo-600 opacity-70 group-hover:opacity-100 transition-opacity"></div>
+                            
                             <div>
                                 <div class="p-5 pb-3">
                                     <div class="flex items-center justify-between mb-3">
-                                        <span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-brand-50 text-brand-700">
+                                        <span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-brand-50 text-brand-700 border border-brand-100/60">
                                             {{ $course->category->name ?? 'Kejuruan' }}
                                         </span>
-                                        <span class="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                                        <span class="text-[11px] font-semibold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200/50">
                                             {{ $course->level }}
                                         </span>
                                     </div>
-                                    <h3 class="font-outfit text-base font-bold text-slate-900 group-hover:text-brand-600 transition line-clamp-2">
+                                    <h3 class="font-outfit text-base font-bold text-slate-900 group-hover:text-brand-600 transition-colors line-clamp-2">
                                         {{ $course->title }}
                                     </h3>
                                     <p class="text-xs text-slate-500 mt-2 line-clamp-2 leading-relaxed">
@@ -102,33 +105,43 @@
                                     </p>
                                 </div>
 
-                                <div class="px-5 py-3 border-t border-slate-100 text-xs text-slate-600 space-y-1.5 bg-slate-50/50">
-                                    <div class="flex items-center gap-2">
-                                        <i class="fa-solid fa-building text-slate-400 w-4"></i>
+                                <div class="px-5 py-3 border-t border-slate-100 text-xs text-slate-600 space-y-2 bg-slate-50/50">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-6 h-6 rounded-md bg-white border border-slate-200/80 text-slate-400 flex items-center justify-center flex-shrink-0 text-[10px]">
+                                            <i class="fa-solid fa-building"></i>
+                                        </div>
                                         <span class="font-medium text-slate-800 truncate">{{ $course->lpk->name ?? 'Mitra LPK' }}</span>
                                     </div>
-                                    <div class="flex items-center gap-2">
-                                        <i class="fa-solid fa-clock text-slate-400 w-4"></i>
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-6 h-6 rounded-md bg-white border border-slate-200/80 text-slate-400 flex items-center justify-center flex-shrink-0 text-[10px]">
+                                            <i class="fa-solid fa-clock"></i>
+                                        </div>
                                         <span>Durasi: {{ $course->duration_hours }} Jam Pelatihan</span>
                                     </div>
                                     @if($course->cert_type)
-                                        <div class="flex items-center gap-2">
-                                            <i class="fa-solid fa-certificate text-emerald-500 w-4"></i>
-                                            <span>{{ $course->cert_type }}</span>
+                                        <div class="flex items-center gap-2.5">
+                                            <div class="w-6 h-6 rounded-md bg-emerald-50 border border-emerald-200/70 text-emerald-600 flex items-center justify-center flex-shrink-0 text-[10px]">
+                                                <i class="fa-solid fa-certificate"></i>
+                                            </div>
+                                            <span class="font-medium text-emerald-700">{{ $course->cert_type }}</span>
                                         </div>
                                     @endif
                                 </div>
                             </div>
 
-                            <div class="p-5 border-t border-slate-100 flex items-center justify-between bg-white">
+                            <div class="p-4 sm:p-5 border-t border-slate-100 flex items-center justify-between bg-gradient-to-b from-white to-slate-50/80">
                                 <div>
-                                    <span class="text-[10px] uppercase font-semibold text-slate-400 block">Biaya</span>
-                                    <span class="font-outfit text-base font-extrabold text-slate-900">
-                                        Rp {{ number_format($course->price, 0, ',', '.') }}
-                                    </span>
+                                    <span class="text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-0.5">Biaya Pelatihan</span>
+                                    <div class="flex items-baseline gap-1">
+                                        <span class="font-outfit text-xs font-extrabold text-brand-600">Rp</span>
+                                        <span class="font-outfit text-lg sm:text-xl font-black text-slate-900 tracking-tight group-hover:text-brand-600 transition-colors">
+                                            {{ number_format($course->price, 0, ',', '.') }}
+                                        </span>
+                                    </div>
                                 </div>
-                                <a href="{{ route('public.course.detail', $course->id) }}" class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-white bg-slate-900 hover:bg-brand-600 transition shadow">
-                                    Lihat Detail
+                                <a href="{{ route('public.course.detail', $course->id) }}" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-slate-900 group-hover:bg-brand-600 group-hover:shadow-md group-hover:shadow-brand-500/25 transition-all duration-200">
+                                    <span>Lihat Detail</span>
+                                    <i class="fa-solid fa-arrow-right text-[10px] transition-transform duration-200 group-hover:translate-x-0.5"></i>
                                 </a>
                             </div>
                         </div>

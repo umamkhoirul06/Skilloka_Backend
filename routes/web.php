@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\ContentController;
 use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\CertificateController;
 use App\Http\Controllers\Web\PublicController;
+use App\Http\Controllers\Web\ChatbotController;
 
 use App\Http\Controllers\Admin\SuperAdmin\DashboardController;
 use App\Http\Controllers\Admin\SuperAdmin\TenantController;
@@ -92,6 +93,7 @@ Route::get('/untuk-lpk', [PublicController::class, 'forLpk'])->name('public.for_
 Route::get('/tentang', [PublicController::class, 'about'])->name('public.about');
 Route::get('/daftar-lpk', [AdminAuthController::class, 'showRegister'])->name('lpk.register');
 Route::get('/daftar-lpk/sukses', [PublicController::class, 'registerSuccess'])->name('lpk.register.success');
+Route::post('/chatbot/message', [ChatbotController::class, 'sendMessage'])->name('chatbot.message');
 
 /*
 |--------------------------------------------------------------------------

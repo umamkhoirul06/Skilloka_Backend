@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+    <rect width="100" height="100" rx="22" fill="#0F172A"/>
+    <!-- Sudut Toga & Garis Atas Huruf S (White) -->
+    <path d="M50 14L80 28L50 42L20 28L50 14Z" fill="#FFFFFF"/>
+    <!-- Badan Utama Huruf S -->
+    <path d="M33 38C25 44 23 53 27 63C31 72 40 78 50 82C62 86 73 84 79 76C83 70 81 62 75 56C69 50 58 46 48 42L37 38" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Aksen Panah Upskilling / Pintu Peluang (Vibrant Gold) -->
+    <path d="M38 78C48 74 60 64 68 50L78 40M78 40H62M78 40V56" stroke="#F59E0B" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
