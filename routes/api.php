@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 
 // Imports Namespace Controller
 use App\Http\Controllers\Api\V1\AuthController;
@@ -12,9 +13,9 @@ use App\Http\Controllers\Api\V1\LpkController;
 use App\Http\Controllers\Api\V1\BookingController;
 use App\Http\Controllers\Api\V1\BannerController;
 use App\Http\Controllers\Api\FavoriteController;
-// Perbaikan: Impor PaymentController yang benar
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\V1\ChatbotController;
+use App\Http\Controllers\Admin\ProfileController;
 
 // ==========================================
 // 1. PUBLIC ROUTES (Tanpa Token / Bebas Akses)
@@ -34,13 +35,36 @@ Route::get('/lpks/{id}', [LpkController::class, 'show']);
 Route::get('/locations', [LocationController::class, 'index']);
 Route::get('/categories', [CategoryController::class, 'index']);
 
-// 🔥 FIX: Midtrans Webhook (Sesuai dengan nama method di Controller)
+// Midtrans Webhook
 Route::post('/payment/webhook', [PaymentController::class, 'webhook']);
 
-// 🤖 Chatbot AI Endpoint (PRD Section 11 & Section 12)
+// Chatbot AI Endpoint
 Route::post('/chatbot/messages', [ChatbotController::class, 'sendMessage']);
 Route::post('/chatbot/message', [ChatbotController::class, 'sendMessage']);
 
+// ==========================================
+// 1.5. MEDIA / STORAGE
+// ==========================================
+Route::get('/media/{path}', function ($path) {
+    if (!Storage::disk('public')->exists($path)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'File tidak ditemukan.',
+        ], 404);
+    }
+
+    $mimeType = Storage::disk('public')->mimeType($path);
+    $file = Storage::disk('public')->get($path);
+
+    return response($file, 200)
+        ->header('Content-Type', $mimeType)
+        ->header('Access-Control-Allow-Origin', '*')
+        ->header('Access-Control-Allow-Methods', 'GET, OPTIONS')
+        ->header(
+            'Access-Control-Allow-Headers',
+            'Origin, Content-Type, Accept, Authorization'
+        );
+})->where('path', '.*');
 
 // ==========================================
 // 2. PROTECTED ROUTES (Wajib Punya Token)
@@ -48,6 +72,7 @@ Route::post('/chatbot/message', [ChatbotController::class, 'sendMessage']);
 Route::middleware('auth:sanctum')->group(function () {
 
     // Rute Profil & Autentikasi
+    Route::get('/profile', [ProfileController::class, 'apiShow']);
     Route::get('/auth/me', [AuthController::class, 'me']);
     Route::get('/user/profile', [AuthController::class, 'me']);
     Route::put('/user/profile', [AuthController::class, 'updateProfile']);
@@ -62,10 +87,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/bookings', [BookingController::class, 'store']);
     Route::get('/bookings/{id}', [BookingController::class, 'show']);
     Route::patch('/bookings/{id}/cancel', [BookingController::class, 'cancel']);
-    
 
-    // 🔥 PAYMENT TRANSACTION
+    // Payment Transaction
     Route::post('/payment/create-transaction', [PaymentController::class, 'createTransaction']);
+    Route::post('/payment/confirm-dummy', [PaymentController::class, 'confirmDummy']);
 
     // Favorites
     Route::get('/favorites', [FavoriteController::class, 'index']);

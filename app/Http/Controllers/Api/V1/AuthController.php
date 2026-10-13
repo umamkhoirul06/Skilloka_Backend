@@ -206,53 +206,99 @@ class AuthController extends BaseController
     }
 
     // ─── Update Profil ────────────────────────────────────────────────────────
-    public function updateProfile(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:255',
-            'address' => 'nullable|string|max:500',
-            'gender' => 'nullable|in:male,female',
-            'birth_date' => 'nullable|date',
-        ]);
+public function updateProfile(Request $request)
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'phone' => 'nullable|string|max:20',
+        'email' => 'nullable|email|max:255',
+        'address' => 'nullable|string|max:500',
+        'gender' => 'nullable|in:male,female',
+        'birth_date' => 'nullable|date',
 
-        $user = $request->user();
+        'avatar_type' => 'sometimes|required|in:photo,dummy',
+        'avatar_id' => 'nullable|required_if:avatar_type,dummy|string|in:character_01,character_02,character_03,character_04,character_05,character_06,character_07,character_08,character_09,character_10',
+        'frame_id' => 'sometimes|required|in:none,soft,glow,sparkle,gradient',
+    ]);
 
-        $user->update(array_filter([
-            'name' => $request->name,
-            'email' => $request->email,
-            'address' => $request->address,
-            'gender' => $request->gender,
-            'birth_date' => $request->birth_date,
-            'phone' => $request->phone ?: $user->phone,
-        ], fn($v) => $v !== null));
+    $user = $request->user();
 
-        return $this->success(
-            new UserResource($user->fresh()),
-            'Profil berhasil diperbarui.'
-        );
+    $data = [];
+
+    if ($request->has('name')) {
+        $data['name'] = $request->name;
     }
 
-    // ─── Upload Foto Profil ───────────────────────────────────────────────────
-    public function updatePhoto(Request $request)
-    {
-        $request->validate([
-            'photo' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
-        ]);
-
-        $user = $request->user();
-
-        if ($user->photo && Storage::disk('public')->exists($user->photo)) {
-            Storage::disk('public')->delete($user->photo);
+    foreach (['email', 'address', 'gender', 'birth_date'] as $field) {
+        if ($request->exists($field)) {
+            $data[$field] = $request->input($field);
         }
-
-        $path = $request->file('photo')->store('users/photos', 'public');
-        $user->update(['photo' => $path]);
-
-        return $this->success([
-            'photo_url' => url('storage/' . $path),
-            'photo' => $path,
-        ], 'Foto profil berhasil diperbarui.');
     }
+
+    if ($request->filled('phone')) {
+        $data['phone'] = $request->phone;
+    }
+
+    if ($request->has('avatar_type')) {
+        $data['avatar_type'] = $request->avatar_type;
+
+        if ($request->avatar_type === 'dummy') {
+            $data['avatar_id'] = $request->avatar_id;
+        } else {
+            $data['avatar_id'] = null;
+        }
+    } elseif ($request->has('avatar_id')) {
+        $data['avatar_id'] = $request->avatar_id;
+    }
+
+    if ($request->has('frame_id')) {
+        $data['frame_id'] = $request->frame_id;
+    }
+
+    $user->update($data);
+
+    return $this->success(
+        new UserResource($user->fresh()),
+        'Profil berhasil diperbarui.'
+    );
+}
+// ─── Update Foto Profil ──────────────────────────────────────
+public function updatePhoto(Request $request)
+{
+    $request->validate([
+        'photo' => 'required|image|mimes:jpg,jpeg,png,webp|max:5120',
+    ]);
+
+    $user = $request->user();
+
+    if (!$user) {
+        return $this->error('Pengguna belum terautentikasi.', 401);
+    }
+
+    $oldPhoto = $user->photo;
+
+    $path = $request->file('photo')->store(
+        'users/photos',
+        'public'
+    );
+
+    if (!$path) {
+        return $this->error('Gagal menyimpan foto profil.', 500);
+    }
+
+    $user->photo = $path;
+    $user->avatar_type = 'photo';
+    $user->avatar_id = null;
+    $user->save();
+
+    // Hapus foto lama setelah foto baru berhasil disimpan.
+    if ($oldPhoto && $oldPhoto !== $path) {
+        Storage::disk('public')->delete($oldPhoto);
+    }
+
+    return $this->success(
+        new UserResource($user->fresh()),
+        'Foto profil berhasil diperbarui.'
+    );
+}
 }

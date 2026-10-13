@@ -122,10 +122,11 @@ class BookingController extends Controller
                     QrCode::format('png')->size(300)->generate($qrData)
                 );
 
-                $booking->update([
-                    'status'      => 'Selesai',
-                    'qr_code_url' => $qrPath,
-                ]);
+
+$booking->update([
+    'status'      => 'confirmed',
+    'qr_code_url' => $qrPath,
+]);
 
                 $coursePrice = optional(optional($booking->schedule)->course)->price ?? 0;
 

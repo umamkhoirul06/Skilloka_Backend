@@ -18,21 +18,24 @@ class UserResource extends JsonResource
             'address' => $this->address,
             'gender' => $this->gender,
 
-            // FIX 1: Memastikan tidak error meskipun birth_date di DB berbentuk string
             'birth_date' => $this->birth_date
                 ? Carbon::parse($this->birth_date)->format('Y-m-d')
                 : null,
 
-            // FIX 2: Memaksa Laravel mengirim Absolute URL (https://skilloka.my.id/...) 
-            // agar Image.network di Flutter tidak nge-blank.
             'photo_url' => $this->photo
                 ? url('storage/' . $this->photo)
                 : null,
 
+            // Preferensi avatar dan frame
+            'avatar_type' => $this->avatar_type ?? 'photo',
+            'avatar_id' => $this->avatar_id,
+            'frame_id' => $this->frame_id ?? 'none',
+
             'active_bookings_count' => $this->bookings()
                 ->where('status', 'active')
                 ->count(),
-            'certificates_count' => 0, // Sesuaikan kalau sudah ada tabel certificates
+
+            'certificates_count' => 0,
             'roles' => $this->getRoleNames(),
             'created_at' => $this->created_at?->toISOString(),
         ];

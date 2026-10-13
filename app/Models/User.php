@@ -27,21 +27,24 @@ class User extends Authenticatable
     protected $keyType = 'string';
 
     // 🔥 FIX 1: Menambahkan kolom yang dibutuhkan aplikasi Mobile agar bisa di-save
-    protected $fillable = [
-        'tenant_id',
-        'name',
-        'email',
-        'phone',
-        'password',
-        'photo',       // Ditambahkan untuk fitur Update Foto Profil Mobile
-        'avatar',      // Tetap dibiarkan jika Web Admin memakainya
-        'address',     // Ditambahkan untuk fitur Update Profil
-        'gender',      // Ditambahkan untuk fitur Update Profil
-        'birth_date',  // Ditambahkan untuk fitur Update Profil
-        'location_id',
-        'fcm_token',
-        'status',      // pending / active / rejected
-    ];
+protected $fillable = [
+    'tenant_id',
+    'name',
+    'email',
+    'phone',
+    'password',
+    'photo',
+    'avatar',
+    'avatar_type',
+    'avatar_id',
+    'frame_id',
+    'address',
+    'gender',
+    'birth_date',
+    'location_id',
+    'fcm_token',
+    'status',
+];
 
     protected $hidden = [
         'password',

@@ -68,7 +68,7 @@ class BookingController extends BaseController
                 'tenant_id' => $schedule->course->tenant_id,
                 'total_price' => $schedule->course->price, // Kolom pengganti amount
                 'schedule_id' => $schedule->id,
-                'status' => 'Menunggu', // Sesuai default value di database kamu
+                'status' => 'Menunggu Pembayaran', // Sesuai default value di database kamu
             ]);
 
             DB::commit();

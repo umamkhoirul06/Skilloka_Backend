@@ -6,14 +6,15 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Lpk;
+use App\Models\Booking;
+use App\Models\Certificate;
 use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
-
     /*
     |--------------------------------------------------------------------------
-    | PROFILE PAGE
+    | PROFILE PAGE (WEB ADMIN)
     |--------------------------------------------------------------------------
     */
 
@@ -52,7 +53,7 @@ class ProfileController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | UPDATE PROFILE
+    | UPDATE PROFILE (WEB ADMIN)
     |--------------------------------------------------------------------------
     */
 
@@ -187,4 +188,71 @@ class ProfileController extends Controller
         return back()->with('success', 'Profil Pengguna dan LPK berhasil diperbarui!');
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | API ENDPOINTS (UNTUK FLUTTER MOBILE APP)
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * GET /api/profile
+     * Mengembalikan data profil user, galeri LPK, dan statistik kursus/sertifikat
+     */
+    public function apiShow(Request $request)
+{
+    $user = $request->user();
+
+    $lpk = Lpk::where('tenant_id', $user->tenant_id)->first();
+
+    $activeBookingsCount = Booking::where('user_id', $user->id)
+        ->whereIn('status', ['active', 'approved', 'paid'])
+        ->count();
+
+    $certificatesCount = Certificate::where('user_id', $user->id)->count();
+
+    $lpkImages = [];
+
+    if ($lpk && !empty($lpk->images)) {
+        $rawImages = is_array($lpk->images)
+            ? $lpk->images
+            : json_decode($lpk->images, true);
+
+        if (is_array($rawImages)) {
+            $lpkImages = array_values($rawImages);
+        }
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Data profil berhasil diambil',
+        'data' => [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'phone' => $user->phone ?? '',
+            // Preferensi avatar pengguna
+'avatar_type' => $user->avatar_type ?? 'photo',
+'avatar_id' => $user->avatar_id,
+'frame_id' => $user->frame_id ?? 'none',
+
+            // FOTO PROFIL USER
+            // Foto disimpan di kolom users.photo
+            'photo_url' => $user->photo
+                ? url('storage/' . $user->photo)
+                : null,
+
+            'active_bookings_count' => $activeBookingsCount,
+            'certificates_count' => $certificatesCount,
+
+            'lpk' => $lpk
+                ? [
+                    'id' => $lpk->id,
+                    'name' => $lpk->name ?? $lpk->legal_name,
+                    'logo' => $lpk->logo,
+                    'images' => $lpkImages,
+                ]
+                : null,
+        ],
+    ], 200);
+}
 }

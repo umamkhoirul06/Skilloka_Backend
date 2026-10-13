@@ -8,22 +8,29 @@ use App\Models\User;
 use App\Models\Booking;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-
 class StudentController extends Controller
 {
     /**
      * LIST STUDENT
+     * Hanya menampilkan siswa yang memiliki booking
+     * dengan pembayaran berstatus success pada LPK terkait.
      */
     public function index()
     {
         $tenantId = Auth::user()->tenant_id;
 
         $students = User::whereHas('bookings', function ($q) use ($tenantId) {
-            $q->where('tenant_id', $tenantId);
+            $q->where('tenant_id', $tenantId)
+                ->whereHas('payment', function ($paymentQuery) {
+                    $paymentQuery->where('status', 'success');
+                });
         })
             ->withCount([
                 'bookings' => function ($q) use ($tenantId) {
-                    $q->where('tenant_id', $tenantId);
+                    $q->where('tenant_id', $tenantId)
+                        ->whereHas('payment', function ($paymentQuery) {
+                            $paymentQuery->where('status', 'success');
+                        });
                 }
             ])
             ->latest()
@@ -34,19 +41,33 @@ class StudentController extends Controller
 
     /**
      * DETAIL STUDENT
+     * Hanya dapat diakses jika siswa memiliki booking
+     * yang sudah dibayar pada LPK terkait.
      */
     public function show(User $student)
     {
         $tenantId = Auth::user()->tenant_id;
 
-        // Security Check: Pastikan user ini terdaftar di LPK ini
-        if (!$student->bookings()->where('tenant_id', $tenantId)->exists()) {
-            return redirect()->route('admin.students.index')->with('error', 'Siswa tidak ditemukan.');
+        $hasPaidBooking = $student->bookings()
+            ->where('tenant_id', $tenantId)
+            ->whereHas('payment', function ($q) {
+                $q->where('status', 'success');
+            })
+            ->exists();
+
+        if (!$hasPaidBooking) {
+            return redirect()
+                ->route('admin.students.index')
+                ->with('error', 'Siswa tidak ditemukan.');
         }
 
         $student->load([
             'bookings' => function ($q) use ($tenantId) {
-                $q->where('tenant_id', $tenantId)->latest();
+                $q->where('tenant_id', $tenantId)
+                    ->whereHas('payment', function ($paymentQuery) {
+                        $paymentQuery->where('status', 'success');
+                    })
+                    ->latest();
             }
         ]);
 
@@ -65,7 +86,10 @@ class StudentController extends Controller
         ]);
 
         if ($request->filled('password')) {
-            $request->validate(['password' => 'required|string|min:8|confirmed']);
+            $request->validate([
+                'password' => 'required|string|min:8|confirmed',
+            ]);
+
             $validated['password'] = Hash::make($request->password);
         }
 
@@ -73,12 +97,11 @@ class StudentController extends Controller
 
         return redirect()
             ->route('admin.students.show', $student)
-            ->with('success', 'Data siswa berhasil diperbarui');
+            ->with('success', 'Data siswa berhasil diperbarui.');
     }
 
     /**
-     * 🔥 FITUR BARU: UPDATE STATUS BELAJAR
-     * Dipanggil via form/dropdown di blade
+     * UPDATE STATUS BELAJAR
      */
     public function updateStatusBelajar(Request $request, $bookingId)
     {
@@ -88,11 +111,19 @@ class StudentController extends Controller
 
         $booking = Booking::where('id', $bookingId)
             ->where('tenant_id', Auth::user()->tenant_id)
+            ->whereHas('payment', function ($q) {
+                $q->where('status', 'success');
+            })
             ->firstOrFail();
 
-        $booking->update(['status_belajar' => $request->status_belajar]);
+        $booking->update([
+            'status_belajar' => $request->status_belajar,
+        ]);
 
-        return back()->with('success', 'Status belajar siswa berhasil diperbarui!');
+        return back()->with(
+            'success',
+            'Status belajar siswa berhasil diperbarui!'
+        );
     }
 
     /**
@@ -100,11 +131,12 @@ class StudentController extends Controller
      */
     public function destroy(User $student)
     {
-        // Pastikan admin hanya bisa menghapus jika user tsb tidak memiliki booking aktif
+        // Menghapus akun siswa tetap mengikuti mekanisme SoftDeletes
+        // yang sudah digunakan pada model User.
         $student->delete();
 
         return redirect()
             ->route('admin.students.index')
-            ->with('success', 'Data siswa berhasil dihapus');
+            ->with('success', 'Data siswa berhasil dihapus.');
     }
 }
