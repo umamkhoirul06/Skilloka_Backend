@@ -95,12 +95,12 @@
                     <img src="{{ asset('assets/images/chatbot-3d-transparent.png') }}" alt="Loka" class="w-full h-full object-contain">
                 </div>
                 <div class="max-w-[82%] bg-white p-3.5 rounded-2xl rounded-tl-sm border border-slate-200/80 shadow-xs text-slate-800 text-xs sm:text-[13px] leading-relaxed">
-                    <p class="font-medium text-slate-900 mb-1">Halo! Selamat datang di Skilloka 👋</p>
+                    <p class="font-medium text-slate-900 mb-1">Halo! Saya Loka, Konsultan Karir & Teman Curhat 👋</p>
                     <p class="text-slate-600">
-                        Saya <strong>Loka</strong>, asisten cerdas yang siap menjawab pertanyaan seputar katalog kursus, sertifikasi BNSP, pendaftaran LPK, maupun panduan booking.
+                        Didukung <strong>Google Gemini AI</strong>, saya siap mendampingi Anda: mulai dari rekomendasi kursus kejuruan, persiapan kerja, sertifikasi BNSP, hingga teman curhat saat merasa bingung menentukan langkah karir.
                     </p>
                     <p class="text-slate-600 mt-2">
-                        Silakan pilih pertanyaan cepat di bawah atau ketik langsung pertanyaan Anda ya! 😊
+                        Silakan pilih topik di bawah atau ketik langsung pertanyaan Anda dengan bebas ya! 😊
                     </p>
                 </div>
             </div>
@@ -109,20 +109,20 @@
             <div id="chatQuickChips" class="pt-1 pb-1 space-y-1.5">
                 <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-1">Pertanyaan Populer:</p>
                 <div class="flex flex-wrap gap-1.5">
-                    <button onclick="sendQuickPrompt('Apa itu Skilloka dan bagaimana cara kerjanya?')" class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-brand-50 border border-slate-200 hover:border-brand-300 text-slate-700 hover:text-brand-700 text-xs font-medium transition text-left shadow-2xs">
-                        🎓 Apa itu Skilloka?
+                    <button onclick="sendQuickPrompt('Curhat: Bingung mau mulai dari mana, saya belum kerja')" class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-brand-50 border border-slate-200 hover:border-brand-300 text-slate-700 hover:text-brand-700 text-xs font-medium transition text-left shadow-2xs">
+                        💬 Curhat: Bingung Mulai Karir
                     </button>
-                    <button onclick="sendQuickPrompt('Kursus apa saja yang tersedia di Indramayu?')" class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-brand-50 border border-slate-200 hover:border-brand-300 text-slate-700 hover:text-brand-700 text-xs font-medium transition text-left shadow-2xs">
-                        🔍 Rekomendasi Kursus Aktif
+                    <button onclick="sendQuickPrompt('Kursus apa saja yang cocok untuk pemula di Indramayu?')" class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-brand-50 border border-slate-200 hover:border-brand-300 text-slate-700 hover:text-brand-700 text-xs font-medium transition text-left shadow-2xs">
+                        🔍 Rekomendasi Kursus Pemula
                     </button>
-                    <button onclick="sendQuickPrompt('Bagaimana cara LPK mendaftar menjadi mitra?')" class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-brand-50 border border-slate-200 hover:border-brand-300 text-slate-700 hover:text-brand-700 text-xs font-medium transition text-left shadow-2xs">
-                        🏢 Cara LPK Jadi Mitra
+                    <button onclick="sendQuickPrompt('Bagaimana prospek kerja teknik las dan otomotif?')" class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-brand-50 border border-slate-200 hover:border-brand-300 text-slate-700 hover:text-brand-700 text-xs font-medium transition text-left shadow-2xs">
+                        ⚙️ Prospek Teknik & Otomotif
                     </button>
                     <button onclick="sendQuickPrompt('Apakah kursus di Skilloka bersertifikat BNSP?')" class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-brand-50 border border-slate-200 hover:border-brand-300 text-slate-700 hover:text-brand-700 text-xs font-medium transition text-left shadow-2xs">
                         📜 Sertifikasi BNSP
                     </button>
-                    <button onclick="sendQuickPrompt('Metode pembayaran apa saja yang bisa digunakan?')" class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-brand-50 border border-slate-200 hover:border-brand-300 text-slate-700 hover:text-brand-700 text-xs font-medium transition text-left shadow-2xs">
-                        💳 Cara Bayar (Midtrans)
+                    <button onclick="sendQuickPrompt('Bagaimana cara mendaftar dan membayar kursus?')" class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-brand-50 border border-slate-200 hover:border-brand-300 text-slate-700 hover:text-brand-700 text-xs font-medium transition text-left shadow-2xs">
+                        💳 Cara Daftar & Bayar
                     </button>
                 </div>
             </div>
@@ -351,7 +351,7 @@
                 chatHistory.push({ sender: 'bot', text: data.reply });
                 saveHistory();
                 if (chatSourceBadge) {
-                    chatSourceBadge.textContent = data.source === 'gemini' ? 'Gemini 1.5' : 'Smart Engine';
+                    chatSourceBadge.textContent = data.source === 'gemini' ? 'Gemini 3.5 AI' : 'Smart Engine';
                 }
             } else {
                 appendMessageToUI('bot', 'Maaf, Loka sedang mengalami kendala jaringan sejenak. Silakan coba lagi ya.');

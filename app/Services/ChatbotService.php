@@ -18,14 +18,14 @@ class ChatbotService
         $cleanMessage = trim(strip_tags($userMessage));
         if (empty($cleanMessage)) {
             return [
-                'reply' => 'Halo! Ada yang bisa Loka bantu mengenai program pelatihan, kursus, atau pendaftaran LPK di Skilloka? 😊',
+                'reply' => 'Halo! Saya Loka, Konsultan Karir & Teman Curhat resmi Skilloka. Ada yang bisa Loka bantu mengenai program pelatihan, kursus, perencanaan karir, atau mau curhat seputar pekerjaan?',
                 'source' => 'system'
             ];
         }
 
         // Limit length
-        if (mb_strlen($cleanMessage) > 600) {
-            $cleanMessage = mb_substr($cleanMessage, 0, 600);
+        if (mb_strlen($cleanMessage) > 1000) {
+            $cleanMessage = mb_substr($cleanMessage, 0, 1000);
         }
 
         // 2. Fetch live data for context
@@ -34,7 +34,7 @@ class ChatbotService
 
         // 3. Check for Google Gemini API Key
         $apiKey = config('services.gemini.api_key') ?: env('GEMINI_API_KEY');
-        $model = config('services.gemini.model') ?: env('GEMINI_MODEL', 'gemini-1.5-flash');
+        $model = config('services.gemini.model') ?: env('GEMINI_MODEL', 'gemini-3.5-flash-lite');
 
         if (!empty($apiKey)) {
             try {
@@ -62,41 +62,34 @@ class ChatbotService
     /**
      * Call Google Gemini REST API
      */
-    protected function callGeminiApi(string $message, array $history, string $courseContext, string $lpkContext, string $apiKey, string $model): ?string
+    protected function callGeminiApi(string $message, array $history, string $courseContext, string $lpkContext, string $apiKey, string $primaryModel): ?string
     {
-        $systemInstruction = "Kamu adalah 'Loka', Asisten Virtual Cerdas resmi untuk platform Skilloka (https://skilloka.my.id).
-Skilloka adalah platform digital terdepan di Kabupaten Indramayu yang mempertemukan calon peserta pelatihan kerja dengan Lembaga Pelatihan Kerja (LPK) terverifikasi resmi.
+        $systemInstruction = "Kamu adalah 'Loka', teman ngobrol & konsultan karir vokasi dari Skilloka (https://skilloka.my.id).
 
-Karakter & Gaya Komunikasi:
-- Ramah, antusias, solutif, santun, dan memotivasi generasi muda siap kerja.
-- Gunakan Bahasa Indonesia yang luwes, jelas, dan profesional.
-- Jawab secara ringkas, informatif, dan terstruktur (gunakan bullet points jika mendaftar kursus/langkah).
-- Jangan membuat informasi palsu. Jika ditanya hal di luar pelatihan, LPK, karir, atau Skilloka, arahkan kembali dengan sopan ke topik Skilloka.
+ATURAN GAYA JAWABAN (WAJIB DIPATUHI - NATURAL, RINGKAS & HEMAT TOKEN):
+1. Bahasa Alami & Manusiawi:
+   - Bicara santai, ramah, dan bersahabat seperti kakak mentor atau teman ngobrol.
+   - DILARANG menggunakan kata klise AI robotik (misal: 'Tentu saja!', 'Pertama-tama peluk jauh untukmu', 'Tarik napas dalam-dalam', 'Sebagai asisten AI...', dll). Jangan berlebihan atau terdengar dibuat-buat.
+2. Singkat, Padat & To The Point (Maksimal 2-3 Paragraf Singkat):
+   - JANGAN bertele-tele atau membuat karangan esai panjang.
+   - Langsung masuk ke inti jawaban atau solusi praktis.
+   - Tulis secara ringkas dan enak dibaca di layar HP/widget chat tanpa bikin lelah scrolling.
+3. Fokus Solusi:
+   - Jika curhat/bingung: Dengarkan singkat, tenangkan secara wajar tanpa drama, lalu beri 1-2 opsi langkah nyata hari ini.
+   - Jika tanya kursus/karir: Sebutkan opsi bidang LPK Skilloka yang cocok (Teknik/Las/Otomotif, Komputer/Desain, Bahasa Asing SSW ke Jepang, atau Bisnis/Hospitality) serta keunggulan sertifikasi resmi BNSP.
+4. Akhiri dengan 1 Pertanyaan Singkat:
+   - Selipkan 1 pertanyaan santai yang relevan di akhir agar obrolan mengalir natural.
 
-Informasi Resmi Platform Skilloka:
-- Wilayah Operasional Utama: Kabupaten Indramayu & sekitarnya, Jawa Barat.
-- Kantor Layanan: Kabupaten Indramayu, Jawa Barat. Email: info@skilloka.my.id, WhatsApp/CS: 0895-4051-93300.
-- Sertifikasi: Standar BNSP (Badan Nasional Sertifikasi Profesi) & kurikulum sesuai standar industri.
-- Metode Booking & Pembayaran: Booking online melalui platform, pembayaran aman via Midtrans (Virtual Account Bank, QRIS, GoPay, ShopeePay, dll).
-- Untuk Mitra LPK: LPK dapat mendaftar melalui menu 'Gabung Sebagai Mitra LPK' di URL: /daftar-lpk. Diperlukan verifikasi izin legalitas (NIB/VIN LPK).
-- Halaman Publik:
-  * Katalog Kursus: /kursus
-  * Direktori LPK: /lpk
-  * Pendaftaran Mitra LPK: /daftar-lpk
-  * Tentang Kami: /tentang
-
-Data Real-Time Kursus Aktif di Skilloka Indramayu:
+Data Kursus Aktif di Skilloka:
 {$courseContext}
 
-Data Real-Time LPK Mitra Terdaftar:
-{$lpkContext}
-
-Tugasmu adalah menjawab pertanyaan pengguna dengan akurat berdasarkan fakta di atas. Berikan saran kursus yang relevan jika ditanya kejuruan atau minat tertentu.";
+Data LPK Mitra Resmi:
+{$lpkContext}";
 
         $contents = [];
 
-        // Attach recent conversation history (max 4 turns)
-        $trimmedHistory = array_slice($history, -4);
+        // Attach recent conversation history (max 6 turns)
+        $trimmedHistory = array_slice($history, -6);
         foreach ($trimmedHistory as $item) {
             $role = ($item['sender'] ?? 'user') === 'user' ? 'user' : 'model';
             $text = trim($item['text'] ?? '');
@@ -114,8 +107,6 @@ Tugasmu adalah menjawab pertanyaan pengguna dengan akurat berdasarkan fakta di a
             'parts' => [['text' => $message]]
         ];
 
-        $endpoint = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}";
-
         $payload = [
             'contents' => $contents,
             'systemInstruction' => [
@@ -124,157 +115,122 @@ Tugasmu adalah menjawab pertanyaan pengguna dengan akurat berdasarkan fakta di a
                 ]
             ],
             'generationConfig' => [
-                'temperature' => 0.6,
+                'temperature' => 0.7,
                 'topK' => 40,
-                'topP' => 0.95,
-                'maxOutputTokens' => 700,
+                'topP' => 0.90,
+                'maxOutputTokens' => 350,
             ]
         ];
 
-        $response = Http::withHeaders([
-            'Content-Type' => 'application/json',
-        ])->timeout(12)->post($endpoint, $payload);
+        // Models to try in priority order
+        $modelsToTry = array_unique([$primaryModel, 'gemini-3.5-flash-lite', 'gemini-3.5-flash', 'gemini-3.8-flash']);
 
-        if ($response->successful()) {
-            $json = $response->json();
-            $candidates = $json['candidates'] ?? [];
-            if (!empty($candidates[0]['content']['parts'][0]['text'])) {
-                return trim($candidates[0]['content']['parts'][0]['text']);
+        foreach ($modelsToTry as $m) {
+            try {
+                $endpoint = "https://generativelanguage.googleapis.com/v1beta/models/{$m}:generateContent?key={$apiKey}";
+                $response = Http::withHeaders([
+                    'Content-Type' => 'application/json',
+                ])->timeout(12)->post($endpoint, $payload);
+
+                if ($response->successful()) {
+                    $json = $response->json();
+                    $candidates = $json['candidates'] ?? [];
+                    if (!empty($candidates[0]['content']['parts'][0]['text'])) {
+                        return trim($candidates[0]['content']['parts'][0]['text']);
+                    }
+                } else {
+                    Log::warning("Gemini model {$m} returned HTTP {$response->status()}: " . $response->body());
+                }
+            } catch (\Throwable $e) {
+                Log::warning("Gemini model {$m} exception: " . $e->getMessage());
             }
         }
 
-        Log::warning('Gemini API returned error: ' . $response->body());
         return null;
     }
 
     /**
-     * Smart Rule-Based Engine tailored for Skilloka PRD v2.0
+     * Smart Contextual Fallback Engine (Ringkas, Alami & Solutif)
      */
-    protected function smartContextualReply(string $msg, string $courseContext, string $lpkContext): string
+    protected function smartContextualReply(string $message, string $courseContext, string $lpkContext): string
     {
-        $q = mb_strtolower($msg);
+        $q = mb_strtolower($message);
 
-        // 1. Salam & Sapaan
-        if (preg_match('/\b(halo|hai|hi|hello|selamat|assalamu|pagi|siang|sore|malam)\b/u', $q)) {
-            return "Halo! 👋 Saya **Loka**, Asisten AI resmi Skilloka.\n\nSaya bisa membantu Anda mencari kursus keahlian bersertifikat, informasi Lembaga Pelatihan Kerja (LPK) di Indramayu, proses pendaftaran, hingga panduan bermitra bagi pengelola LPK.\n\nAda yang ingin Anda tanyakan hari ini?";
+        // 1. Curhat, Overthinking, Minder, Bingung Masa Depan
+        if (preg_match('/(curhat|bingung|minder|takut|stres|nganggur|capek|overthinking|putus asa|gagal|belum kerja|tidak punya skill|ga punya skill)/u', $q)) {
+            return "Wajar banget ngerasa bingung atau cemas, kamu nggak sendirian kok. Kuncinya jangan mikir terlalu jauh dulu ya.
+
+"
+                . "Coba mulai dari langkah kecil: fokus asah 1 skill praktis di LPK Skilloka (misal komputer, las, atau desain grafis). Pelatihan singkat plus sertifikat resmi BNSP sudah cukup banget buat modal awal melamar kerja.
+
+"
+                . "Kira-kira apa hal yang bikin kamu paling ragu sekarang? Cerita aja santai, Loka siap dengerin.";
         }
 
-        // 2. Apa itu Skilloka?
-        if (str_contains($q, 'apa itu skilloka') || str_contains($q, 'tentang skilloka') || str_contains($q, 'platform apa')) {
-            return "**Skilloka** adalah platform ekosistem digital pelatihan kerja resmi di Kabupaten Indramayu yang mempertemukan pencari keahlian dengan Lembaga Pelatihan Kerja (LPK) terverifikasi.\n\nMelalui Skilloka, Anda dapat:\n- 🎯 Menemukan kursus bersertifikat standar industri (BNSP).\n- 📅 Memilih jadwal pelatihan yang fleksibel.\n- 💳 Melakukan booking & pembayaran praktis via Midtrans.\n- 📈 Mengakses absensi digital, modul pelatihan, dan e-sertifikat.\n\nJelajahi kursus kami di menu [Katalog Kursus](/kursus)!";
+        // 2. Konsultasi Karir & Switch Career
+        if (preg_match('/(karir|karier|prospek|gaji|switch|jurusan|arah karir|rekomendasi kerja)/u', $q)) {
+            return "Untuk peluang kerja cepat, ada 3 bidang unggulan di LPK Skilloka:
+
+"
+                . "1. **Teknik & Manufaktur**: Pengelasan (welding) dan otomotif selalu dicari kawasan industri.
+"
+                . "2. **Komputer & Digital**: Admin kantor, Excel, atau desain grafis fleksibel untuk berbagai perusahaan.
+"
+                . "3. **Bahasa Asing (Jepang/Korea)**: Program magang SSW ke luar negeri dengan gaji menarik.
+
+"
+                . "Kamu sendiri lebih tertarik ke bidang teknik, kantor, atau mau coba ke luar negeri?";
         }
 
-        // 3. Rekomendasi / Tanya Kursus Umum
-        if (str_contains($q, 'kursus apa') || str_contains($q, 'daftar kursus') || str_contains($q, 'program pelatihan') || str_contains($q, 'rekomendasi kursus') || str_contains($q, 'ada kursus apa')) {
-            return "Saat ini di Skilloka Indramayu tersedia beberapa program kejuruan unggulan siap kerja:\n\n"
-                . "1. 💻 **Web Programming & Fullstack Modern** (Techno Skill Center) - Rp 1.500.000\n"
-                . "2. 🎨 **Desain Grafis Komersial & Branding UMKM** (Techno Skill Center) - Rp 850.000\n"
-                . "3. 🇯🇵 **Bahasa Jepang Vokasi & Tokutei Ginou** (Global English House) - Rp 2.500.000\n"
-                . "4. 🚢 **Bahasa Inggris Kapal Pesiar & Hospitality** (Global English House) - Rp 2.000.000\n"
-                . "5. 🔧 **Teknisi Otomotif & Servis Injeksi** (LPK Merah Putih) - Rp 1.250.000\n"
-                . "6. ⚙️ **Operator Mesin Bubut & CNC Presisi** (LPK Merah Putih) - Rp 1.800.000\n\n"
-                . "👉 Anda dapat melihat rincian silabus dan jadwal lengkap di [Lihat Seluruh Kursus](/kursus).";
+        // 3. Sapaan Ramah
+        if (preg_match('/(halo|hai|pagi|siang|sore|malam|assalamualaikum|tes|test|loka)/u', $q)) {
+            return "Halo! Ada yang bisa Loka bantu seputar info kursus LPK, sertifikasi BNSP, atau mau diskusi arah karir santai?";
         }
 
-        // 3. Untuk LPK / Cara Bergabung Jadi Mitra
-        if (str_contains($q, 'mitra') || (str_contains($q, 'lpk') && (str_contains($q, 'daftar') || str_contains($q, 'gabung') || str_contains($q, 'kerjasama') || str_contains($q, 'registrasi')))) {
-            return "Untuk pengelola LPK di Kabupaten Indramayu, Anda dapat mendaftarkan lembaga Anda dengan mudah:\n\n"
-                . "1. Kunjungi halaman [Daftar Sebagai Mitra LPK](/daftar-lpk).\n"
-                . "2. Isi profil lembaga, kontak PIC, dan lampirkan legalitas (NIB / VIN / Izin LPK).\n"
-                . "3. Tim Skilloka & Dinas terkait akan memverifikasi data LPK Anda.\n"
-                . "4. Setelah disetujui, Anda mendapatkan akses ke **Dashboard Admin LPK** untuk mengelola program kursus, jadwal, siswa, dan absensi digital.\n\n"
-                . "Pelajari manfaat lengkapnya di halaman [Untuk Mitra LPK](/untuk-lpk).";
+        // 4. Tanya Kursus / Katalog Pelatihan
+        if (preg_match('/(kursus|pelatihan|kelas|katalog|program|training|belajar)/u', $q)) {
+            return "Di Skilloka ada banyak program pelatihan kejuruan langsung praktik: teknik mesin, las, komputer & desain, bahasa Jepang kerja, perhotelan, sampai tata boga.
+
+"
+                . "Lengkap dengan bengkel praktik dan sertifikat kelulusan. Kamu lagi cari kursus di bidang apa nih?";
         }
 
-        // 4. Rekomendasi / Tanya Kursus Umum
-        if (str_contains($q, 'kursus apa') || str_contains($q, 'daftar kursus') || str_contains($q, 'program pelatihan') || str_contains($q, 'rekomendasi kursus') || str_contains($q, 'ada kursus apa')) {
-            return "Saat ini di Skilloka Indramayu tersedia beberapa program kejuruan unggulan siap kerja:\n\n"
-                . "1. 💻 **Web Programming & Fullstack Modern** (Techno Skill Center) - Rp 1.500.000\n"
-                . "2. 🎨 **Desain Grafis Komersial & Branding UMKM** (Techno Skill Center) - Rp 850.000\n"
-                . "3. 🇯🇵 **Bahasa Jepang Vokasi & Tokutei Ginou** (Global English House) - Rp 2.500.000\n"
-                . "4. 🚢 **Bahasa Inggris Kapal Pesiar & Hospitality** (Global English House) - Rp 2.000.000\n"
-                . "5. 🔧 **Teknisi Otomotif & Servis Injeksi** (LPK Merah Putih) - Rp 1.250.000\n"
-                . "6. ⚙️ **Operator Mesin Bubut & CNC Presisi** (LPK Merah Putih) - Rp 1.800.000\n\n"
-                . "👉 Anda dapat melihat rincian silabus dan jadwal lengkap di [Lihat Seluruh Kursus](/kursus).";
+        // 5. Cara Daftar / Booking
+        if (str_contains($q, 'cara daftar') || str_contains($q, 'cara booking') || str_contains($q, 'cara ikut') || str_contains($q, 'daftar kursus')) {
+            return "Daftarnya praktis banget:
+
+"
+                . "1. Buka katalog kursus di Skilloka dan pilih yang kamu mau.
+"
+                . "2. Klik **Daftar Sekarang** dan lengkapi data diri.
+"
+                . "3. Selesaikan pembayaran via Transfer Bank atau QRIS.
+
+"
+                . "Bukti pendaftaran resmi langsung masuk ke akunmu. Ada kendala pas daftar?";
         }
 
-        // 5. Tanya Kursus IT / Komputer / Desain / Web
-        if (preg_match('/\b(it|komputer|coding|program|programming|web|desain|grafis)\b/u', $q)) {
-            return "Untuk bidang **Teknologi & Digital**, kami menyediakan kursus unggulan dari **Techno Skill Center Indramayu**:\n\n"
-                . "• **Web Programming & Fullstack Modern**: Mempelajari pengembangan aplikasi web siap industri (Laravel/Node/React) - Rp 1.500.000.\n"
-                . "• **Desain Grafis Komersial & Branding UMKM**: Menguasai Adobe Photoshop, Illustrator, & canva branding bisnis - Rp 850.000.\n\n"
-                . "Kedua program ini didampingi instruktur praktisi dan portofolio nyata. Cek selengkapnya di [Katalog Kursus](/kursus).";
+        // 6. Pembayaran & Biaya
+        if (preg_match('/(bayar|pembayaran|biaya|harga|transfer|qris|midtrans)/u', $q)) {
+            return "Pembayaran di Skilloka otomatis & aman via Midtrans. Bisa pakai QRIS (BCA, GoPay, OVO, Dana) atau Transfer Virtual Account bank.
+
+"
+                . "Semua transaksi terverifikasi instan dalam hitungan detik tanpa perlu upload struk manual.";
         }
 
-        // 6. Tanya Otomotif / Mesin / CNC / Welder
-        if (preg_match('/\b(otomotif|motor|mobil|mesin|bubut|cnc|welder|las)\b/u', $q)) {
-            return "Untuk bidang **Teknik Otomotif & Manufaktur**, Anda dapat mendaftar di **LPK Merah Putih Indramayu**:\n\n"
-                . "• **Teknisi Otomotif & Servis Injeksi**: Praktik diagnosis mesin injeksi, tune-up, dan kelistrikan modern - Rp 1.250.000.\n"
-                . "• **Operator Mesin Bubut & CNC Presisi**: Pengoperasian mesin bubut konvensional & CNC standar pabrikasi - Rp 1.800.000.\n\n"
-                . "Fasilitas bengkel lengkap dan sertifikasi standar industri. Informasi pendaftaran di [Katalog Kursus](/kursus).";
+        // 7. Sertifikasi BNSP
+        if (preg_match('/(sertifikat|bnsp|ijazah|kelulusan|lisensi)/u', $q)) {
+            return "Sertifikat BNSP adalah bukti kompetensi resmi berstandar nasional (logo Garuda) yang diakui perusahaan.
+
+"
+                . "Di Skilloka, setelah selesai pelatihan di LPK, kamu akan dibimbing langsung sampai siap ikut uji kompetensi BNSP. Ada bidang sertifikasi tertentu yang lagi kamu minati?";
         }
 
-        // 7. Tanya Bahasa Asing (Jepang / Inggris / Luar Negeri / Kapal Pesiar)
-        if (preg_match('/\b(bahasa|jepang|inggris|tokutei|magang|kapal pesiar|hospitality)\b/u', $q)) {
-            return "Untuk persiapan kerja di luar negeri & industri perhotelan, kami memiliki program intensif dari **Global English House Indramayu**:\n\n"
-                . "• **Bahasa Jepang Vokasi & Tokutei Ginou**: Persiapan kerja formal ke Jepang (JLPT N4/JFT Basic) - Rp 2.500.000.\n"
-                . "• **Bahasa Inggris Kapal Pesiar & Hospitality**: Pelatihan percakapan, interview kapal pesiar & hotel internasional - Rp 2.000.000.\n\n"
-                . "Lihat jadwal pembukaan kelas terbaru di [Halaman Kursus](/kursus)!";
-        }
+        // 8. Default Answer
+        return "Pertanyaan menarik! Di Skilloka kamu bisa cari pelatihan vokasi resmi yang kurikulumnya langsung praktek kerja dan bersertifikat BNSP.
 
-        // 8. Cara Daftar Kursus / Booking
-        if (str_contains($q, 'cara daftar') || str_contains($q, 'cara booking') || str_contains($q, 'cara ikut') || str_contains($q, 'cara pesan') || str_contains($q, 'bagaimana daftar')) {
-            return "Berikut langkah mudah mendaftar kursus di Skilloka:\n\n"
-                . "1. Buka menu [Cari Kursus](/kursus) di Skilloka.\n"
-                . "2. Pilih program pelatihan yang Anda minati untuk melihat silabus & jadwal.\n"
-                . "3. Klik tombol **Pilih Jadwal & Daftar**.\n"
-                . "4. Lakukan pembayaran aman menggunakan metode Midtrans (Transfer Bank, QRIS, e-Wallet).\n"
-                . "5. Setelah pembayaran terverifikasi, Anda resmi terdaftar dan bisa mengakses materi serta jadwal pelatihan!";
-        }
-
-        // 9. Cara Pembayaran & Biaya
-        if (preg_match('/\b(bayar|pembayaran|biaya|harga|transfer|qris|midtrans|rekening)\b/u', $q)) {
-            return "Metode pembayaran di Skilloka sangat aman dan terintegrasi melalui payment gateway **Midtrans**:\n\n"
-                . "• **QRIS**: BCA, Gopay, OVO, Dana, LinkAja, ShopeePay.\n"
-                . "• **Virtual Account (VA)**: BCA, Mandiri, BNI, BRI, Permata.\n"
-                . "• **Indomaret / Alfamart** (Gerai Ritel).\n\n"
-                . "Semua pembayaran otomatis diverifikasi dalam hitungan detik tanpa perlu upload struk manual.";
-        }
-
-        // 10. Sertifikat BNSP / Kelulusan
-        if (preg_match('/\b(sertifikat|bnsp|ijazah|kelulusan|lisensi)\b/u', $q)) {
-            return "Pelatihan di Skilloka mengacu pada standar **BNSP (Badan Nasional Sertifikasi Profesi)** dan SKKNI (Standar Kompetensi Kerja Nasional Indonesia).\n\nSetelah menyelesaikan jam pelatihan dan dinyatakan kompeten, peserta akan memperoleh:\n- 📜 **Sertifikat Pelatihan Resmi dari LPK** terakreditasi.\n- 🎖️ Fasilitas uji kompetensi sertifikasi profesi BNSP (sesuai skema tiap LPK).\n- 💼 Rekomendasi ke jaringan mitra industri penerima tenaga kerja.";
-        }
-
-        // 11. Lokasi / Kantor / Kontak CS
-        if (str_contains($q, 'lokasi') || str_contains($q, 'alamat') || str_contains($q, 'kantor') || str_contains($q, 'kontak') || str_contains($q, 'wa') || str_contains($q, 'telepon') || str_contains($q, 'hubungi')) {
-            return "📍 **Wilayah Layanan Skilloka**:\n"
-                . "Kabupaten Indramayu dan sekitarnya, Jawa Barat, Indonesia.\n\n"
-                . "📞 **Kontak Bantuan & Customer Service**:\n"
-                . "• WhatsApp: **0895-4051-93300**\n"
-                . "• Email: **info@skilloka.my.id**\n"
-                . "• Jam Operasional: Senin - Sabtu (08.00 - 17.00 WIB)\n\n"
-                . "Tim kami siap melayani pertanyaan seputar pendaftaran peserta maupun kemitraan lembaga.";
-        }
-
-        // 12. Daftar LPK yang Terdaftar
-        if (str_contains($q, 'daftar lpk') || str_contains($q, 'lembaga mana saja') || str_contains($q, 'lpk yang ada')) {
-            return "Beberapa LPK terverifikasi di Skilloka saat ini antara lain:\n\n"
-                . "• **Techno Skill Center Indramayu** (Jl. Mayor Dasuki No. 88, Jatibarang)\n"
-                . "• **Global English House Indramayu** (Jl. Jend. Ahmad Yani No. 12, Haurgeulis)\n"
-                . "• **LPK Merah Putih Indramayu** (Jl. Jend. Sudirman No. 45, Karanganyar)\n"
-                . "• **LPK Genki Mirai** (Kecamatan Lohbener, Indramayu)\n\n"
-                . "Lihat profil lengkap dan portofolio LPK di [Direktori Lembaga LPK](/lpk).";
-        }
-
-        // 13. Default Helpful Answer
-        return "Pertanyaan yang bagus! Skilloka adalah portal pencarian dan booking kursus pelatihan kerja bersertifikat (standar BNSP) di Indramayu.\n\n"
-            . "Anda bisa menanyakan seputar:\n"
-            . "• 🔍 Rekomendasi kursus (IT, Otomotif, Bahasa Asing, Mesin CNC, Desain)\n"
-            . "• 💳 Cara daftar dan pembayaran kursus\n"
-            . "• 📜 Sertifikasi kompetensi BNSP\n"
-            . "• 🏢 Cara mendaftar menjadi mitra LPK di Indramayu\n\n"
-            . "Ada yang spesifik ingin Anda ketahui lebih detail? 😊";
+"
+            . "Biar lebih pas, kamu lagi cari info kursus di bidang apa nih?";
     }
 
     /**
@@ -285,7 +241,7 @@ Tugasmu adalah menjawab pertanyaan pengguna dengan akurat berdasarkan fakta di a
         try {
             $courses = Course::with('lpk', 'category')->take(10)->get();
             if ($courses->isEmpty()) {
-                return "Belum ada kursus aktif.";
+                return 'Belum ada kursus aktif.';
             }
 
             $list = [];
@@ -295,7 +251,8 @@ Tugasmu adalah menjawab pertanyaan pengguna dengan akurat berdasarkan fakta di a
                 $price = number_format($c->price ?? 0, 0, ',', '.');
                 $list[] = "- {$c->title} (Kategori: {$cat}, LPK: {$lpk}, Biaya: Rp {$price})";
             }
-            return implode("\n", $list);
+            return implode("
+", $list);
         } catch (\Throwable $e) {
             return "- Web Programming (Techno Skill Center) - Rp 1.500.000\n- Desain Grafis (Techno Skill Center) - Rp 850.000\n- Bahasa Jepang Tokutei Ginou (Global English House) - Rp 2.500.000\n- Teknisi Otomotif Injeksi (LPK Merah Putih) - Rp 1.250.000";
         }
@@ -309,7 +266,7 @@ Tugasmu adalah menjawab pertanyaan pengguna dengan akurat berdasarkan fakta di a
         try {
             $lpks = Lpk::where('status', 'active')->take(10)->get();
             if ($lpks->isEmpty()) {
-                return "Belum ada LPK terdaftar.";
+                return 'Belum ada LPK terdaftar.';
             }
 
             $list = [];
