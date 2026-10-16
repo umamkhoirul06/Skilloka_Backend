@@ -46,7 +46,7 @@
         <!-- Platform Revenue (5% Fee) -->
         <div class="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-xs">
             <div class="flex items-center justify-between">
-                <span class="text-[11px] font-bold uppercase tracking-wider text-brand-600">Pendapatan Platform (5%)</span>
+                <span class="text-[11px] font-bold uppercase tracking-wider text-brand-600">Pendapatan Platform ({{ $platformFeeRate }}%)</span>
                 <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs">
                     <i class="fa-solid fa-sack-dollar"></i>
                 </div>
@@ -60,7 +60,7 @@
         <!-- LPK Payout Pool (95%) -->
         <div class="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-xs">
             <div class="flex items-center justify-between">
-                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Hak Pembayaran LPK (95%)</span>
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Hak Pembayaran LPK ({{ 100 - $platformFeeRate }}%)</span>
                 <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs">
                     <i class="fa-solid fa-building-columns"></i>
                 </div>
@@ -107,7 +107,7 @@
                         <span class="w-2.5 h-2.5 rounded-full bg-brand-500"></span> Transaksi Bruto
                     </span>
                     <span class="flex items-center gap-1.5 text-emerald-600 font-medium">
-                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Fee Platform (5%)
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Fee Platform ({{ $platformFeeRate }}%)
                     </span>
                 </div>
             </div>
@@ -219,7 +219,7 @@
                 <tbody class="divide-y divide-slate-100">
                     @forelse($payments as $payment)
                         @php
-                            $fee = round($payment->amount * 0.05);
+                            $fee = round($payment->amount * ($platformFeeRate / 100));
                         @endphp
                         <tr class="hover:bg-slate-50/60 transition">
                             <!-- Ref ID -->
@@ -268,7 +268,7 @@
                                     Rp {{ number_format($payment->amount, 0, ',', '.') }}
                                 </div>
                                 <div class="text-[10px] text-emerald-600 font-medium mt-0.5">
-                                    Fee (5%): Rp {{ number_format($fee, 0, ',', '.') }}
+                                    Fee ({{ $platformFeeRate }}%): Rp {{ number_format($fee, 0, ',', '.') }}
                                 </div>
                             </td>
 
@@ -348,7 +348,7 @@
                         pointRadius: 4,
                     },
                     {
-                        label: 'Fee Platform (5%)',
+                        label: 'Fee Platform ({{ $platformFeeRate }}%)',
                         data: @json($chartFees),
                         borderColor: '#059669',
                         backgroundColor: 'rgba(5, 150, 105, 0.08)',

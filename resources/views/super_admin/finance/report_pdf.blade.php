@@ -34,11 +34,11 @@
                 <div class="summary-value">Rp {{ number_format($totalGrossVolume, 0, ',', '.') }}</div>
             </td>
             <td>
-                <div class="summary-title">Platform Fee (5%)</div>
+                <div class="summary-title">Platform Fee ({{ $platformFeeRate }}%)</div>
                 <div class="summary-value" style="color: #2563eb;">Rp {{ number_format($platformFeeTotal, 0, ',', '.') }}</div>
             </td>
             <td>
-                <div class="summary-title">Hak Mitra LPK (95%)</div>
+                <div class="summary-title">Hak Mitra LPK ({{ 100 - $platformFeeRate }}%)</div>
                 <div class="summary-value" style="color: #059669;">Rp {{ number_format($lpkPayoutTotal, 0, ',', '.') }}</div>
             </td>
         </tr>

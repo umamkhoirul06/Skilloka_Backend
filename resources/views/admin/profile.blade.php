@@ -12,10 +12,24 @@
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
 
             {{-- Header Section --}}
-            <div class="mb-8">
-                <h1 class="text-2xl font-bold text-gray-900">Pengaturan Profil</h1>
-                <p class="text-sm text-gray-500 mt-1">Kelola data pribadi dan foto profil Anda di sini.</p>
-            </div>
+        
+<div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">Profil LPK</h1>
+        <p class="text-sm text-gray-500 mt-1">
+            Lihat informasi akun dan lembaga pelatihan Anda.
+        </p>
+    </div>
+
+    <button
+        type="button"
+        id="editProfileBtn"
+        onclick="toggleProfileEdit(true)"
+        class="px-6 py-3 rounded-xl text-sm font-bold text-white shadow-sm hover:opacity-90"
+        style="background-color: #0f172a;">
+        Edit Profil
+    </button>
+</div>
 
             {{-- Success Notification --}}
             @if(session('success'))
@@ -49,8 +63,147 @@
                 </div>
             @endif
 
+            
+{{-- MODE LIHAT PROFIL --}}
+<div id="profileView" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8 mb-6">
+
+    @php
+        $rawFacilitiesView = $lpk->facilities ?? [];
+        $facilitiesView = is_string($rawFacilitiesView)
+            ? (json_decode($rawFacilitiesView, true) ?: [])
+            : (is_array($rawFacilitiesView) ? $rawFacilitiesView : []);
+
+        $rawImagesView = $lpk->images ?? [];
+        $imagesView = is_string($rawImagesView)
+            ? (json_decode($rawImagesView, true) ?: [])
+            : (is_array($rawImagesView) ? $rawImagesView : []);
+
+        $rawContactView = $lpk->contact_info ?? '';
+        $contactView = is_string($rawContactView)
+            ? (json_decode($rawContactView, true) ?: $rawContactView)
+            : $rawContactView;
+    @endphp
+
+    <div class="flex flex-col sm:flex-row items-center gap-5 pb-6 border-b border-gray-100">
+        <img
+            src="{{ $lpk->logo ? asset('storage/' . $lpk->logo) : 'https://ui-avatars.com/api/?name=' . urlencode($lpk->name ?? 'LPK') }}"
+            alt="Logo LPK"
+            class="w-28 h-28 rounded-full object-cover border-4 border-gray-100">
+
+        <div class="text-center sm:text-left">
+            <h2 class="text-2xl font-bold text-gray-900">
+                {{ $lpk->name ?? 'Nama LPK belum tersedia' }}
+            </h2>
+            <p class="text-gray-500 mt-1">
+                {{ $lpk->legal_name ?: 'Nama legal belum diisi' }}
+            </p>
+            <span class="inline-block mt-3 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold">
+                Profil Lembaga
+            </span>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 py-6">
+        <div>
+            <p class="text-sm text-gray-500">Nama Lengkap Admin</p>
+            <p class="font-semibold text-gray-900 mt-1">{{ $user->name ?: '-' }}</p>
+        </div>
+
+        <div>
+            <p class="text-sm text-gray-500">Email Admin</p>
+            <p class="font-semibold text-gray-900 mt-1">{{ $user->email ?: '-' }}</p>
+        </div>
+
+        <div>
+            <p class="text-sm text-gray-500">Telepon Pribadi Admin</p>
+            <p class="font-semibold text-gray-900 mt-1">{{ $user->phone ?: '-' }}</p>
+        </div>
+
+        <div>
+            <p class="text-sm text-gray-500">Nama Legal LPK / Perusahaan</p>
+            <p class="font-semibold text-gray-900 mt-1">{{ $lpk->legal_name ?: '-' }}</p>
+        </div>
+
+        <div>
+            <p class="text-sm text-gray-500">Telepon LPK</p>
+            <p class="font-semibold text-gray-900 mt-1">{{ $lpk->phone ?: '-' }}</p>
+        </div>
+
+        <div>
+            <p class="text-sm text-gray-500">WhatsApp LPK</p>
+            <p class="font-semibold text-gray-900 mt-1">{{ $lpk->wa_number ?: '-' }}</p>
+        </div>
+    </div>
+
+    <div class="border-t border-gray-100 pt-6">
+        <h3 class="font-bold text-gray-900 mb-3">Fasilitas LPK</h3>
+
+        @if(count($facilitiesView))
+            <div class="flex flex-wrap gap-2">
+                @foreach($facilitiesView as $facility)
+                    <span class="px-3 py-2 rounded-full bg-gray-100 text-gray-700 text-sm">
+                        {{ $facility }}
+                    </span>
+                @endforeach
+            </div>
+        @else
+            <p class="text-sm text-gray-500">Belum ada fasilitas yang ditambahkan.</p>
+        @endif
+    </div>
+
+    <div class="border-t border-gray-100 pt-6 mt-6">
+        <h3 class="font-bold text-gray-900 mb-3">Galeri Foto LPK</h3>
+
+        @if(count($imagesView))
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                @foreach($imagesView as $img)
+                    <img
+                        src="{{ asset('storage/' . $img) }}"
+                        alt="Foto galeri LPK"
+                        class="w-full h-32 object-cover rounded-xl border border-gray-200">
+                @endforeach
+            </div>
+        @else
+            <p class="text-sm text-gray-500">Belum ada foto galeri.</p>
+        @endif
+    </div>
+
+    <div class="border-t border-gray-100 pt-6 mt-6">
+        <h3 class="font-bold text-gray-900 mb-2">Kontak LPK Publik Tambahan</h3>
+
+        
+@if(is_array($contactView) && count($contactView))
+    <div class="space-y-2">
+        @foreach($contactView as $key => $value)
+            @if(is_array($value))
+                @foreach($value as $contactKey => $contactValue)
+                    <p class="text-sm text-gray-700">
+                        <span class="font-semibold">
+                            {{ is_string($contactKey) ? ucfirst($contactKey) : 'Kontak' }}:
+                        </span>
+                        {{ is_scalar($contactValue) ? $contactValue : json_encode($contactValue) }}
+                    </p>
+                @endforeach
+            @else
+                <p class="text-sm text-gray-700">
+                    <span class="font-semibold">
+                        {{ is_numeric($key) ? 'Kontak' : ucfirst($key) }}:
+                    </span>
+                    {{ is_scalar($value) ? $value : json_encode($value) }}
+                </p>
+            @endif
+        @endforeach
+    </div>
+@elseif(is_string($contactView) && trim($contactView) !== '')
+    <p class="text-sm text-gray-700 whitespace-pre-line">{{ $contactView }}</p>
+@else
+    <p class="text-sm text-gray-500">Belum ada kontak tambahan.</p>
+@endif
+    </div>
+</div>
             {{-- Main Card --}}
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div id="profileEdit" class="hidden bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
 
                 <form action="{{ route('admin.profile.update') }}" method="POST" enctype="multipart/form-data">
                     @csrf
@@ -261,10 +414,12 @@
 
                     {{-- Footer Actions --}}
                     <div class="bg-gray-50 px-8 py-5 border-t border-gray-200 flex justify-end gap-3">
-                        <a href="{{ route('admin.dashboard') }}"
-                            class="px-6 py-2.5 rounded-xl border border-gray-300 text-sm font-bold text-gray-700 bg-white hover:bg-gray-100 transition-colors">
-                            Batal
-                        </a>
+                        <button
+                        type="button"
+                        onclick="toggleProfileEdit(false)"
+                        class="px-6 py-2.5 rounded-xl border border-gray-300 text-sm font-bold text-gray-700 bg-white hover:bg-gray-100">
+                        Batal Edit
+                        </button>
                         <button type="submit" style="background-color: #0f172a; color: white;"
                             class="px-8 py-2.5 rounded-xl text-sm font-bold shadow-md hover:opacity-90 transition-all">
                             Simpan Perubahan
@@ -302,96 +457,38 @@
     </div>
 
     {{-- Script Integrasi Cropper.js --}}
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const logoInput = document.getElementById('logoInput');
-            const logoPreview = document.getElementById('logoPreview');
-            const croppedLogoInput = document.getElementById('croppedLogoInput');
-            const cropperModal = document.getElementById('cropperModal');
-            const imageToCrop = document.getElementById('imageToCrop');
-            const closeCropperBtn = document.getElementById('closeCropper');
-            const cancelCropBtn = document.getElementById('cancelCrop');
-            const applyCropBtn = document.getElementById('applyCrop');
+<script>
+    function toggleProfileEdit(showEdit) {
+        const profileView = document.getElementById('profileView');
+        const profileEdit = document.getElementById('profileEdit');
+        const editButton = document.getElementById('editProfileBtn');
 
-            let cropper = null;
+        if (showEdit) {
+            profileView.classList.add('hidden');
+            profileEdit.classList.remove('hidden');
 
-            function openModal() {
-                cropperModal.classList.remove('hidden');
+            if (editButton) {
+                editButton.classList.add('hidden');
             }
 
-            function closeModal() {
-                cropperModal.classList.add('hidden');
-                if (cropper) {
-                    cropper.destroy();
-                    cropper = null;
-                }
-                logoInput.value = '';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            profileEdit.classList.add('hidden');
+            profileView.classList.remove('hidden');
+
+            if (editButton) {
+                editButton.classList.remove('hidden');
             }
 
-            closeCropperBtn.addEventListener('click', closeModal);
-            cancelCropBtn.addEventListener('click', closeModal);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
 
-            logoInput.addEventListener('change', function (e) {
-                const file = e.target.files[0];
-                if (file) {
-                    if (!file.type.match('image.*')) {
-                        alert('Hanya file gambar yang diperbolehkan.');
-                        this.value = '';
-                        return;
-                    }
-
-                    // Cek ukuran max 5MB di frontend
-                    if (file.size > 5242880) {
-                        alert('Ukuran gambar maksimal 5MB.');
-                        this.value = '';
-                        return;
-                    }
-
-                    const reader = new FileReader();
-                    reader.onload = function (event) {
-                        imageToCrop.src = event.target.result;
-                        openModal();
-
-                        setTimeout(() => {
-                            cropper = new Cropper(imageToCrop, {
-                                aspectRatio: 1, // Memaksa rasio 1:1
-                                viewMode: 1,
-                                dragMode: 'move',
-                                autoCropArea: 1,
-                                restore: false,
-                                guides: true,
-                                center: true,
-                                highlight: false,
-                                cropBoxMovable: true,
-                                cropBoxResizable: true,
-                                toggleDragModeOnDblclick: false,
-                            });
-                        }, 100);
-                    }
-                    reader.readAsDataURL(file);
-                }
-            });
-
-            applyCropBtn.addEventListener('click', function () {
-                if (!cropper) return;
-
-                const canvas = cropper.getCroppedCanvas({
-                    width: 500,
-                    height: 500,
-                });
-
-                // Convert to Base64
-                const base64Image = canvas.toDataURL('image/jpeg', 0.9);
-
-                // Tampilkan di preview bulat
-                logoPreview.src = base64Image;
-
-                // Simpan Base64 ke input hidden
-                croppedLogoInput.value = base64Image;
-
-                closeModal();
-            });
-        });
-    </script>
-
+    document.addEventListener('DOMContentLoaded', function () {
+        // Jika validasi gagal, buka kembali form agar data bisa diperbaiki.
+        @if($errors->any())
+            toggleProfileEdit(true);
+        @endif
+    });
+</script>
 @endsection

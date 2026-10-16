@@ -159,22 +159,49 @@ class ProfileController extends Controller
             }
 
             // Handle Base64 from Cropper or standard file upload
-            $base64Input = $request->filled('cropped_logo') ? $request->cropped_logo : (is_string($request->logo) ? $request->logo : null);
+            
+            // Simpan logo hasil crop atau upload file biasa
+            $base64Input = $request->filled('cropped_logo')
+                ? $request->cropped_logo
+                : null;
 
-            if ($base64Input && strpos($base64Input, 'data:image') === 0) {
-                $image_parts = explode(";base64,", $base64Input);
-                if (count($image_parts) == 2) {
-                    $image_base64 = base64_decode($image_parts[1]);
-                    $fileName = 'lpks/' . uniqid() . '.png';
-                    Storage::disk('public')->put($fileName, $image_base64);
-                    $lpk->logo = $fileName;
+            if ($base64Input && str_starts_with($base64Input, 'data:image/')) {
+                if (!preg_match(
+                    '/^data:image\/(jpeg|jpg|png);base64,/',
+                    $base64Input,
+                    $matches
+                )) {
+                    return back()
+                        ->withErrors(['logo' => 'Format logo tidak valid.'])
+                        ->withInput();
                 }
-            }
-            // Fallback to normal upload
-            elseif ($request->hasFile('logo')) {
+
+                $imageData = substr(
+                    $base64Input,
+                    strpos($base64Input, ',') + 1
+                );
+
+                $imageContents = base64_decode($imageData, true);
+
+                if ($imageContents === false || strlen($imageContents) > 5 * 1024 * 1024) {
+                    return back()
+                        ->withErrors(['logo' => 'Logo tidak valid atau melebihi 5MB.'])
+                        ->withInput();
+                }
+
+                $extension = $matches[1] === 'jpeg' ? 'jpg' : $matches[1];
+                $fileName = 'lpks/' . uniqid('logo_', true) . '.' . $extension;
+
+                if (!Storage::disk('public')->put($fileName, $imageContents)) {
+                    return back()
+                        ->withErrors(['logo' => 'Logo gagal disimpan.'])
+                        ->withInput();
+                }
+
+                $lpk->logo = $fileName;
+            } elseif ($request->hasFile('logo')) {
                 $lpk->logo = $request->file('logo')->store('lpks', 'public');
             }
-
             $lpk->save();
         }
 

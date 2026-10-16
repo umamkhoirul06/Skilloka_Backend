@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\SuperAdmin;
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use App\Models\Tenant;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -17,7 +18,7 @@ class FinanceController extends Controller
         $tenantFilter = $request->query('tenant_id');
         $search = $request->query('search');
 
-        // Query Utama Pembayaran
+        // Query utama pembayaran
         $query = Payment::with([
             'user',
             'tenant.lpk',
@@ -40,7 +41,7 @@ class FinanceController extends Controller
                   ->orWhere('method', 'like', "%{$search}%")
                   ->orWhereHas('user', function ($uq) use ($search) {
                       $uq->where('name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%");
+                         ->orWhere('email', 'like', "%{$search}%");
                   })
                   ->orWhereHas('booking.course', function ($cq) use ($search) {
                       $cq->where('title', 'like', "%{$search}%");
@@ -50,10 +51,19 @@ class FinanceController extends Controller
 
         $payments = $query->latest()->paginate(12)->withQueryString();
 
-        // Metrik Keuangan Global
-        $totalGrossVolume = Payment::where('status', 'success')->sum('amount');
-        $platformFeeRate = 0.05; // Komisi 5% platform
-        $platformFeeTotal = round($totalGrossVolume * $platformFeeRate);
+        // Ambil persentase fee dari pengaturan platform
+        $setting = Setting::first();
+        $platformFeeRate = (float) ($setting?->platform_fee ?? 10);
+        $platformFeeMultiplier = $platformFeeRate / 100;
+
+        // Metrik keuangan global
+        $totalGrossVolume = Payment::where('status', 'success')
+            ->sum('amount');
+
+        $platformFeeTotal = round(
+            $totalGrossVolume * $platformFeeMultiplier
+        );
+
         $lpkPayoutTotal = $totalGrossVolume - $platformFeeTotal;
 
         $stats = [
@@ -62,20 +72,27 @@ class FinanceController extends Controller
             'lpk_payout' => $lpkPayoutTotal,
             'success_count' => Payment::where('status', 'success')->count(),
             'pending_count' => Payment::where('status', 'pending')->count(),
-            'failed_count' => Payment::whereIn('status', ['failed', 'expired', 'cancel'])->count(),
+            'failed_count' => Payment::whereIn(
+                'status',
+                ['failed', 'expired', 'cancel']
+            )->count(),
             'total_transactions' => Payment::count(),
         ];
 
-        // Daftar Tenant untuk dropdown filter
-        $tenants = Tenant::with('lpk')->orderBy('name')->get();
+        // Daftar tenant untuk dropdown filter
+        $tenants = Tenant::with('lpk')
+            ->orderBy('name')
+            ->get();
 
-        // Data Chart 6 Bulan Terakhir
+        // Data grafik enam bulan terakhir
         $chartMonths = [];
         $chartRevenues = [];
         $chartFees = [];
+
         for ($i = 5; $i >= 0; $i--) {
             $month = Carbon::now()->subMonths($i);
             $monthLabel = $month->translatedFormat('M Y');
+
             $monthlyGross = Payment::where('status', 'success')
                 ->whereYear('created_at', $month->year)
                 ->whereMonth('created_at', $month->month)
@@ -83,14 +100,21 @@ class FinanceController extends Controller
 
             $chartMonths[] = $monthLabel;
             $chartRevenues[] = (int) $monthlyGross;
-            $chartFees[] = (int) round($monthlyGross * 0.05);
+            $chartFees[] = (int) round(
+                $monthlyGross * $platformFeeMultiplier
+            );
         }
 
-        // Distribusi Metode Pembayaran
+        // Distribusi metode pembayaran
         $paymentMethodsCount = [
             'QRIS' => Payment::where('method', 'qris')->count(),
-            'Virtual Account' => Payment::where('method', 'bank_transfer')->count(),
-            'E-Wallet' => Payment::where('method', 'gopay')->orWhere('method', 'ewallet')->count(),
+            'Virtual Account' => Payment::where(
+                'method',
+                'bank_transfer'
+            )->count(),
+            'E-Wallet' => Payment::where('method', 'gopay')
+                ->orWhere('method', 'ewallet')
+                ->count(),
         ];
 
         return view('super_admin.finance.index', compact(
@@ -103,31 +127,52 @@ class FinanceController extends Controller
             'chartMonths',
             'chartRevenues',
             'chartFees',
-            'paymentMethodsCount'
+            'paymentMethodsCount',
+            'platformFeeRate'
         ));
     }
 
     /**
-     * Ekspor Laporan Keuangan ke PDF
+     * Ekspor laporan keuangan ke PDF
      */
     public function exportPdf(Request $request)
     {
-        $payments = Payment::with(['user', 'tenant.lpk', 'booking.course'])
+        $payments = Payment::with([
+            'user',
+            'tenant.lpk',
+            'booking.course'
+        ])
             ->where('status', 'success')
             ->latest()
             ->get();
 
+        // Gunakan persentase yang sama dengan pengaturan platform
+        $setting = Setting::first();
+        $platformFeeRate = (float) ($setting?->platform_fee ?? 10);
+        $platformFeeMultiplier = $platformFeeRate / 100;
+
         $totalGrossVolume = $payments->sum('amount');
-        $platformFeeTotal = round($totalGrossVolume * 0.05);
+
+        $platformFeeTotal = round(
+            $totalGrossVolume * $platformFeeMultiplier
+        );
+
         $lpkPayoutTotal = $totalGrossVolume - $platformFeeTotal;
 
-        $pdf = Pdf::loadView('super_admin.finance.report_pdf', compact(
-            'payments',
-            'totalGrossVolume',
-            'platformFeeTotal',
-            'lpkPayoutTotal'
-        ))->setPaper('a4', 'portrait');
+        $pdf = Pdf::loadView(
+            'super_admin.finance.report_pdf',
+            compact(
+                'payments',
+                'totalGrossVolume',
+                'platformFeeTotal',
+                'lpkPayoutTotal',
+                'platformFeeRate'
+            )
+        )->setPaper('a4', 'portrait');
 
-        return $pdf->download('laporan-keuangan-skilloka-' . now()->format('Y-m-d') . '.pdf');
+        return $pdf->download(
+            'laporan-keuangan-skilloka-' .
+            now()->format('Y-m-d') . '.pdf'
+        );
     }
 }
