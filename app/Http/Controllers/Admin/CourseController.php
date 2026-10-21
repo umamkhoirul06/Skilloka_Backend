@@ -106,8 +106,8 @@ class CourseController extends Controller
         Course::create($validated);
 
         return redirect()
-            ->route('admin.courses.create')
-            ->with('success', 'Course berhasil dibuat');
+            ->route('admin.courses.index')
+            ->with('success', 'Program pelatihan baru berhasil ditambahkan.');
     }
 
     /**

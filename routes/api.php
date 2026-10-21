@@ -35,6 +35,9 @@ Route::get('/lpks/{id}', [LpkController::class, 'show']);
 Route::get('/locations', [LocationController::class, 'index']);
 Route::get('/categories', [CategoryController::class, 'index']);
 
+// Rute Banners (Public)
+Route::get('/banners', [BannerController::class, 'index']);
+
 // Midtrans Webhook
 Route::post('/payment/webhook', [PaymentController::class, 'webhook']);
 
@@ -79,8 +82,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/user/profile/photo', [AuthController::class, 'updatePhoto']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
 
-    // Rute Banners
-    Route::get('/banners', [BannerController::class, 'index']);
 
     // Rute Bookings
     Route::get('/bookings', [BookingController::class, 'index']);

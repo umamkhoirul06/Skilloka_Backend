@@ -18,7 +18,18 @@ class CourseController extends BaseController
 
         // Filter & Search Opsional
         $courses = $query->with(['lpk', 'category'])
-            ->when($request->category, fn($q) => $q->whereHas('category', fn($sq) => $sq->where('slug', $request->category)))
+            ->when($request->category, function ($q) use ($request) {
+                $cat = trim($request->category);
+                $isUuid = \Illuminate\Support\Str::isUuid($cat);
+                if ($isUuid) {
+                    $q->where('category_id', $cat);
+                } else {
+                    $q->whereHas('category', function ($sq) use ($cat) {
+                        $sq->where('slug', $cat)
+                           ->orWhere('name', 'like', "%{$cat}%");
+                    });
+                }
+            })
             ->when($request->search, fn($q) => $q->where('title', 'like', "%{$request->search}%"))
             ->latest()
             ->paginate(15);

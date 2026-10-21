@@ -25,6 +25,22 @@ class LpkController extends BaseController
             $query->where('location_id', $request->location_id);
         }
 
+        if ($request->filled('category')) {
+            $cat = trim($request->category);
+            $isUuid = \Illuminate\Support\Str::isUuid($cat);
+            $query->whereHas('courses', function ($cq) use ($cat, $isUuid) {
+                $cq->where('is_active', true);
+                if ($isUuid) {
+                    $cq->where('category_id', $cat);
+                } else {
+                    $cq->whereHas('category', function ($sq) use ($cat) {
+                        $sq->where('slug', $cat)
+                           ->orWhere('name', 'like', "%{$cat}%");
+                    });
+                }
+            });
+        }
+
         if ($request->has('verified')) {
             $query->where('is_verified', $request->boolean('verified'));
         } else {

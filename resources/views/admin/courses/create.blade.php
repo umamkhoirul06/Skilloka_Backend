@@ -1,398 +1,283 @@
-{{-- resources/views/admin/courses/create.blade.php --}}
-
 @extends('layouts.admin')
 
-@section('title','Manage Courses')
+@section('title', 'Tambah Program Kursus')
 
 @section('content')
+<div class="max-w-4xl mx-auto space-y-6">
+    {{-- Header Navigation & Title --}}
+    <div class="flex items-center gap-3">
+        <a href="{{ route('admin.courses.index') }}" 
+           class="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition shadow-sm">
+            <i class="fa-solid fa-arrow-left text-xs"></i>
+        </a>
+        <div>
+            <h1 class="text-xl font-bold font-outfit text-gray-900">Tambah Program Kursus Baru</h1>
+            <p class="text-xs text-gray-500">Lengkapi kurikulum, rincian biaya, dan fasilitas pelatihan kejuruan LPK Anda.</p>
+        </div>
+    </div>
 
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
-
-    {{-- FORM TAMBAH --}}
-    <div class="bg-white/80 backdrop-blur-md p-6 rounded-xl border border-gray-200 shadow-sm">
-
-        <h2 class="text-gray-900" style="font-size:18px;font-weight:600;margin-bottom:20px">
-            Tambah Course
-        </h2>
-
-        {{-- ERROR VALIDATION --}}
-        @if ($errors->any())
-
-            <div style="
-                background:#fee2e2;
-                color:#991b1b;
-                padding:12px;
-                border-radius:8px;
-                margin-bottom:16px
-            ">
-
-                <ul style="margin:0;padding-left:18px">
-
-                    @foreach ($errors->all() as $error)
-
-                        <li>{{ $error }}</li>
-
-                    @endforeach
-
-                </ul>
-
+    {{-- Error Banner --}}
+    @if($errors->any())
+        <div class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs">
+            <div class="font-semibold mb-1 flex items-center gap-2">
+                <i class="fa-solid fa-circle-exclamation text-red-600"></i>
+                <span>Terdapat kesalahan pada input:</span>
             </div>
+            <ul class="list-disc pl-5 space-y-1">
+                @foreach($errors->all() as $err)
+                    <li>{{ $err }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
-        @endif
-
-
-        {{-- SUCCESS --}}
-        @if(session('success'))
-
-            <div style="
-                background:#dcfce7;
-                color:#166534;
-                padding:12px;
-                border-radius:8px;
-                margin-bottom:16px
-            ">
-
-                {{ session('success') }}
-
+    {{-- Success Banner --}}
+    @if(session('success'))
+        <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i>
+                <span class="font-medium">{{ session('success') }}</span>
             </div>
+            <button onclick="this.parentElement.remove()" class="text-emerald-600 hover:text-emerald-800 font-bold text-sm">&times;</button>
+        </div>
+    @endif
 
-        @endif
-
-
-        {{-- FORM --}}
-        <form method="POST"
-              action="{{ route('admin.courses.store') }}"
-              enctype="multipart/form-data">
-
+    {{-- Form Card --}}
+    <div class="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200 shadow-sm">
+        <form action="{{ route('admin.courses.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
             @csrf
 
+            {{-- 1. INFORMASI DASAR --}}
+            <div class="space-y-4">
+                <div class="border-b border-gray-100 pb-2">
+                    <h2 class="text-sm font-bold text-gray-900 flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs font-bold">1</span>
+                        Informasi Utama Pelatihan
+                    </h2>
+                </div>
 
-            {{-- TITLE --}}
-            <div style="margin-bottom:16px">
-                <label class="block text-sm font-medium text-gray-800 mb-1">Title</label>
-                <input type="text"
-                       name="title"
-                       value="{{ old('title') }}"
-                       class="bg-white text-gray-900 placeholder-gray-400 border-gray-300 w-full p-2.5 rounded-lg border"
-                       required>
-            </div>
-
-
-            {{-- DESCRIPTION --}}
-            <div style="margin-bottom:16px">
-                <label class="block text-sm font-medium text-gray-800 mb-1">Description</label>
-                <textarea name="description"
-                          rows="4"
-                          class="bg-white text-gray-900 placeholder-gray-400 border-gray-300 w-full p-2.5 rounded-lg border">{{ old('description') }}</textarea>
-            </div>
-
-
-            {{-- SYLLABUS --}}
-            <div style="margin-bottom:16px">
-                <label class="block text-sm font-medium text-gray-800 mb-1">Syllabus</label>
-                <textarea name="syllabus"
-                          rows="4"
-                          class="bg-white text-gray-900 placeholder-gray-400 border-gray-300 w-full p-2.5 rounded-lg border">{{ old('syllabus') }}</textarea>
-            </div>
-
-
-            {{-- PRICE --}}
-            <div style="margin-bottom:16px">
-                <label class="block text-sm font-medium text-gray-800 mb-1">Price</label>
-                <input type="number"
-                       name="price"
-                       value="{{ old('price') }}"
-                       class="bg-white text-gray-900 placeholder-gray-400 border-gray-300 w-full p-2.5 rounded-lg border"
-                       required>
-            </div>
-
-
-            {{-- DURATION --}}
-            <div style="margin-bottom:16px">
-                <label class="block text-sm font-medium text-gray-800 mb-1">Duration Hours</label>
-                <input type="number"
-                       name="duration_hours"
-                       value="{{ old('duration_hours') }}"
-                       class="bg-white text-gray-900 placeholder-gray-400 border-gray-300 w-full p-2.5 rounded-lg border"
-                       required>
-            </div>
-
-
-            {{-- CATEGORY --}}
-            <div style="margin-bottom:16px">
-                <label class="block text-sm font-medium text-gray-800 mb-1">Category</label>
-                <select name="category_id"
-                        class="bg-white text-gray-900 border-gray-300 w-full p-2.5 rounded-lg border"
-                        required>
-
-                    <option value="">
-                        -- Pilih Category --
-                    </option>
-
-                    @foreach($categories ?? [] as $category)
-
-                        <option value="{{ $category->id }}"
-                            {{ old('category_id') == $category->id ? 'selected' : '' }}>
-
-                            {{ $category->name }}
-
-                        </option>
-
-                    @endforeach
-
-                </select>
-
-            </div>
-
-
-            {{-- LEVEL --}}
-            <div style="margin-bottom:16px">
-                <label class="block text-sm font-medium text-gray-800 mb-1">Level</label>
-                <select name="level"
-                        class="bg-white text-gray-900 border-gray-300 w-full p-2.5 rounded-lg border">
-
-                    <option value="beginner">Beginner</option>
-
-                    <option value="intermediate">Intermediate</option>
-
-                    <option value="advanced">Advanced</option>
-
-                </select>
-
-            </div>
-
-
-            {{-- CERT TYPE --}}
-            <div style="margin-bottom:16px">
-                <label class="block text-sm font-medium text-gray-800 mb-1">Certificate Type</label>
-                <input type="text"
-                       name="cert_type"
-                       value="{{ old('cert_type') }}"
-                       class="bg-white text-gray-900 placeholder-gray-400 border-gray-300 w-full p-2.5 rounded-lg border">
-            </div>
-
-
-            {{-- MAX PARTICIPANTS --}}
-            <div style="margin-bottom:20px">
-                <label class="block text-sm font-medium text-gray-800 mb-1">Max Participants</label>
-                <input type="number"
-                       name="max_participants"
-                       value="{{ old('max_participants') }}"
-                       class="bg-white text-gray-900 placeholder-gray-400 border-gray-300 w-full p-2.5 rounded-lg border">
-            </div>
-
-            {{-- IMAGE UPLOAD --}}
-            <div style="margin-bottom:16px">
-                <label class="block text-sm font-medium text-gray-800 mb-1">Course Images (Opsional, bisa pilih banyak)</label>
-                <input type="file"
-                       name="images[]"
-                       multiple
-                       accept="image/*"
-                       class="bg-white text-gray-900 border-gray-300 w-full p-2.5 rounded-lg border">
-                <small style="color:gray;">Maksimal 5MB per gambar (JPG, JPEG, PNG)</small>
-            </div>
-
-            {{-- FACILITIES --}}
-            <div style="margin-bottom:20px">
-                <label class="block text-sm font-medium text-gray-900 mb-3">Facilities</label>
-                
-                @php
-                    $availableFacilities = ['Ruang Ber-AC', 'Modul Belajar', 'WiFi', 'Sertifikat', 'Makan Siang'];
-                @endphp
-                
-                <div style="display:flex; gap:16px; flex-wrap:wrap;">
-                    @foreach($availableFacilities as $facility)
-                    <label style="display:flex; align-items:center; gap:6px;" class="text-sm text-gray-800">
-                        <input type="checkbox" name="facilities[]" value="{{ $facility }}">
-                        {{ $facility }}
+                {{-- Title --}}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Judul Kursus / Program <span class="text-red-500">*</span>
                     </label>
-                    @endforeach
+                    <input type="text" 
+                           name="title" 
+                           value="{{ old('title') }}" 
+                           required 
+                           placeholder="Contoh: Teknisi Otomotif & Servis Injeksi Motor Modern" 
+                           class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-xs text-gray-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white transition">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {{-- Category --}}
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                            Kategori Kejuruan <span class="text-red-500">*</span>
+                        </label>
+                        <select name="category_id" 
+                                required 
+                                class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-xs text-gray-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white transition">
+                            <option value="">-- Pilih Kategori --</option>
+                            @foreach($categories as $cat)
+                                <option value="{{ $cat->id }}" {{ old('category_id') == $cat->id ? 'selected' : '' }}>
+                                    {{ $cat->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- Level --}}
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                            Tingkat Kesulitan / Level <span class="text-red-500">*</span>
+                        </label>
+                        <select name="level" 
+                                required 
+                                class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-xs text-gray-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white transition">
+                            <option value="beginner" {{ old('level', 'beginner') == 'beginner' ? 'selected' : '' }}>Pemula (Beginner)</option>
+                            <option value="intermediate" {{ old('level') == 'intermediate' ? 'selected' : '' }}>Menengah (Intermediate)</option>
+                            <option value="advanced" {{ old('level') == 'advanced' ? 'selected' : '' }}>Mahir (Advanced)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {{-- Certificate Type --}}
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                            Jenis Sertifikat Kelulusan
+                        </label>
+                        <input type="text" 
+                               name="cert_type" 
+                               value="{{ old('cert_type', 'Sertifikat Kompetensi BNSP & Disnaker') }}" 
+                               placeholder="Contoh: BNSP / Disnaker / Sertifikat LPK Resmi" 
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-xs text-gray-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white transition">
+                    </div>
+
+                    {{-- Max Participants --}}
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                            Kapasitas Maksimal Siswa (Kuota)
+                        </label>
+                        <input type="number" 
+                               name="max_participants" 
+                               value="{{ old('max_participants', 20) }}" 
+                               min="1"
+                               placeholder="Contoh: 20" 
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-xs text-gray-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white transition">
+                    </div>
                 </div>
             </div>
 
+            {{-- 2. BIAYA & DURASI --}}
+            <div class="space-y-4 pt-4 border-t border-gray-100">
+                <div class="border-b border-gray-100 pb-2">
+                    <h2 class="text-sm font-bold text-gray-900 flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs font-bold">2</span>
+                        Biaya & Waktu Pelatihan
+                    </h2>
+                </div>
 
-            {{-- BUTTON --}}
-            <button type="submit"
-                    style="
-                        background:#7c3aed;
-                        color:white;
-                        padding:10px 16px;
-                        border:none;
-                        border-radius:6px;
-                        cursor:pointer
-                    ">
-
-                Simpan
-
-            </button>
-
-        </form>
-
-    </div>
-
-
-
-    {{-- LIST COURSE --}}
-    <div class="bg-white/80 backdrop-blur-md p-6 rounded-xl border border-gray-200 shadow-sm">
-
-        <h2 class="text-gray-900" style="font-size:18px;font-weight:600;margin-bottom:20px">
-            Daftar Course
-        </h2>
-
-
-        <table style="
-            width:100%;
-            border-collapse:collapse
-        ">
-
-            <thead style="background:#f3f4f6">
-
-                <tr>
-
-                    <th class="text-gray-800 bg-gray-50" style="
-                        padding:10px;
-                        border:1px solid #e5e7eb
-                    ">
-                        Title
-                    </th>
-
-                    <th class="text-gray-800 bg-gray-50" style="
-                        padding:10px;
-                        border:1px solid #e5e7eb
-                    ">
-                        Category
-                    </th>
-
-                    <th class="text-gray-800 bg-gray-50" style="
-                        padding:10px;
-                        border:1px solid #e5e7eb
-                    ">
-                        Price
-                    </th>
-
-                    <th class="text-gray-800 bg-gray-50" style="
-                        padding:10px;
-                        border:1px solid #e5e7eb
-                    ">
-                        Action
-                    </th>
-
-                </tr>
-
-            </thead>
-
-
-            <tbody>
-
-            {{-- FIX ERROR UNDEFINED VARIABLE --}}
-            @forelse($courses ?? [] as $course)
-
-                <tr>
-
-                    <td class="text-gray-800 bg-white" style="
-                        padding:10px;
-                        border:1px solid #e5e7eb
-                    ">
-                        {{ $course->title }}
-                    </td>
-
-
-                    <td class="text-gray-800 bg-white" style="
-                        padding:10px;
-                        border:1px solid #e5e7eb
-                    ">
-                        {{ $course->category->name ?? '-' }}
-                    </td>
-
-
-                    <td class="text-gray-800 bg-white" style="
-                        padding:10px;
-                        border:1px solid #e5e7eb
-                    ">
-                        Rp {{ number_format($course->price,0,',','.') }}
-                    </td>
-
-
-                    <td class="text-gray-800 bg-white" style="
-                        padding:10px;
-                        border:1px solid #e5e7eb
-                    ">
-
-                        <div style="
-                            display:flex;
-                            gap:8px
-                        ">
-
-                            {{-- EDIT --}}
-                            <a href="{{ route('admin.courses.edit',$course->id) }}"
-                               style="
-                                    background:#f59e0b;
-                                    color:white;
-                                    padding:6px 10px;
-                                    border-radius:6px;
-                                    text-decoration:none;
-                                    font-size:13px
-                               ">
-
-                                Edit
-
-                            </a>
-
-
-                            {{-- DELETE --}}
-                            <form action="{{ route('admin.courses.destroy',$course->id) }}"
-                                  method="POST"
-                                  onsubmit="return confirm('Hapus course ini?')">
-
-                                @csrf
-                                @method('DELETE')
-
-                                <button type="submit"
-                                        style="
-                                            background:#dc2626;
-                                            color:white;
-                                            padding:6px 10px;
-                                            border:none;
-                                            border-radius:6px;
-                                            cursor:pointer
-                                        ">
-
-                                    Hapus
-
-                                </button>
-
-                            </form>
-
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {{-- Price --}}
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                            Biaya Pelatihan (Rp) <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3.5 top-2.5 text-xs font-bold text-gray-400">Rp</span>
+                            <input type="number" 
+                                   name="price" 
+                                   value="{{ old('price', 0) }}" 
+                                   required 
+                                   min="0"
+                                   placeholder="0 untuk gratis / beasiswa" 
+                                   class="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold text-gray-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white transition">
                         </div>
+                        <p class="text-[11px] text-gray-400 mt-1">Isi 0 jika program ini adalah pelatihan subsidi pemerintah / gratis.</p>
+                    </div>
 
-                    </td>
+                    {{-- Duration Hours --}}
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                            Total Jam Pelatihan (Jam) <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <input type="number" 
+                                   name="duration_hours" 
+                                   value="{{ old('duration_hours', 40) }}" 
+                                   required 
+                                   min="1"
+                                   placeholder="Contoh: 80" 
+                                   class="w-full pr-12 pl-3.5 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold text-gray-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white transition">
+                            <span class="absolute right-3.5 top-2.5 text-xs text-gray-400 font-medium">Jam</span>
+                        </div>
+                        <p class="text-[11px] text-gray-400 mt-1">Estimasi akumulasi waktu pembelajaran & praktek bengkel.</p>
+                    </div>
+                </div>
+            </div>
 
-                </tr>
+            {{-- 3. DESKRIPSI & SILABUS --}}
+            <div class="space-y-4 pt-4 border-t border-gray-100">
+                <div class="border-b border-gray-100 pb-2">
+                    <h2 class="text-sm font-bold text-gray-900 flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs font-bold">3</span>
+                        Deskripsi & Silabus Kurikulum
+                    </h2>
+                </div>
 
-            @empty
+                {{-- Description --}}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Ringkasan / Deskripsi Kursus
+                    </label>
+                    <textarea name="description" 
+                              rows="3" 
+                              placeholder="Jelaskan tujuan pelatihan, prospek kerja lulusan, dan gambaran umum program..." 
+                              class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-xs text-gray-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white transition">{{ old('description') }}</textarea>
+                </div>
 
-                <tr>
+                {{-- Syllabus --}}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Silabus Materi / Pokok Pembahasan
+                    </label>
+                    <textarea name="syllabus" 
+                              rows="3" 
+                              placeholder="Tuliskan daftar bab, materi kejuruan, atau standar unit kompetensi SKKNI yang dipelajari..." 
+                              class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-xs text-gray-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white transition">{{ old('syllabus') }}</textarea>
+                </div>
+            </div>
 
-                    <td colspan="4"
-                        style="
-                            padding:20px;
-                            text-align:center
-                        ">
+            {{-- 4. FASILITAS & FOTO --}}
+            <div class="space-y-4 pt-4 border-t border-gray-100">
+                <div class="border-b border-gray-100 pb-2">
+                    <h2 class="text-sm font-bold text-gray-900 flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs font-bold">4</span>
+                        Fasilitas & Dokumentasi Foto
+                    </h2>
+                </div>
 
-                        Belum ada course
+                {{-- Facilities --}}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-2">
+                        Fasilitas Pelatihan Tersedia
+                    </label>
+                    @php
+                        $availableFacilities = [
+                            'Ruang Ber-AC', 
+                            'Bengkel / Lab Praktek', 
+                            'Modul Belajar Cetak & Digital', 
+                            'Akses Wi-Fi Cepat', 
+                            'Sertifikat Resmi Kelulusan', 
+                            'Makan Siang & Snack',
+                            'Penyaluran Kerja Magang',
+                            'Perlengkapan APD & K3'
+                        ];
+                        $oldFacilities = old('facilities', ['Modul Belajar Cetak & Digital', 'Sertifikat Resmi Kelulusan']);
+                    @endphp
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                        @foreach($availableFacilities as $fac)
+                            <label class="flex items-center gap-2 p-2.5 rounded-xl border border-gray-200 hover:bg-gray-50 cursor-pointer text-xs font-medium text-gray-700 select-none transition">
+                                <input type="checkbox" 
+                                       name="facilities[]" 
+                                       value="{{ $fac }}" 
+                                       {{ in_array($fac, (array)$oldFacilities) ? 'checked' : '' }} 
+                                       class="rounded border-gray-300 text-indigo-600 focus:ring-0">
+                                <span>{{ $fac }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
 
-                    </td>
+                {{-- Images --}}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Foto Pelatihan / Dokumentasi (Bisa pilih lebih dari satu)
+                    </label>
+                    <input type="file" 
+                           name="images[]" 
+                           multiple 
+                           accept="image/jpeg,image/png,image/jpg" 
+                           class="w-full text-xs text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition border border-gray-200 rounded-xl bg-gray-50/50 p-1.5">
+                    <p class="text-[11px] text-gray-400 mt-1">Format: JPG, JPEG, PNG (Maks. 5MB per gambar). Foto akan ditampilkan di aplikasi mobile & katalog web.</p>
+                </div>
+            </div>
 
-                </tr>
-
-            @endforelse
-
-            </tbody>
-
-        </table>
-
+            {{-- FOOTER ACTION BUTTONS --}}
+            <div class="flex items-center justify-end gap-3 pt-6 border-t border-gray-100">
+                <a href="{{ route('admin.courses.index') }}" 
+                   class="px-5 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold text-gray-600 hover:bg-gray-50 transition">
+                    Batal
+                </a>
+                <button type="submit" 
+                        class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-sm shadow-indigo-600/20 transition flex items-center gap-2">
+                    <i class="fa-solid fa-floppy-disk text-xs"></i>
+                    <span>Simpan Program Kursus</span>
+                </button>
+            </div>
+        </form>
     </div>
-
 </div>
-
 @endsection
