@@ -28,7 +28,7 @@ class CertificateController extends Controller
 
         // Queue of eligible students who don't have a certificate yet
         $eligibleBookings = Booking::whereIn('course_id', $courseIds)
-            ->whereIn('status', ['paid', 'confirmed', 'ongoing', 'completed'])
+            ->whereIn('status', ['paid', 'confirmed', 'ongoing', 'completed', 'Selesai'])
             ->whereDoesntHave('certificate')
             ->with(['course', 'user'])
             ->latest()
@@ -90,7 +90,7 @@ class CertificateController extends Controller
         // Update booking learning status to 'selesai' / 'completed'
         $booking->update([
             'status_belajar' => 'selesai',
-            'status'         => 'completed',
+            'status'         => 'Selesai',
         ]);
 
         return redirect()

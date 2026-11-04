@@ -1,33 +1,82 @@
 version: '3.8'
 
 services:
-
   app:
-    build: .
+    image: ghcr.io/umamkhoirul06/skilloka_backend:latest
+    container_name: skilloka_app
+    restart: unless-stopped
     ports:
       - "8080:80"
+    env_file:
+      - .env
     environment:
-      - APP_ENV=local
-      - APP_KEY=${APP_KEY}
-      - DB_CONNECTION=pgsql
+      - APP_ENV=production
+      - APP_URL=https://skilloka.my.id
       - DB_HOST=db
-      - DB_PORT=5432
-      - DB_DATABASE=${DB_DATABASE}
-      - DB_USERNAME=${DB_USERNAME}
-      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_HOST=redis
+      - MEILISEARCH_HOST=http://meilisearch:7700
+    volumes:
+      - app_storage:/var/www/html/storage/app
+      - app_logs:/var/www/html/storage/logs
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - internal
+      - proxy_network
 
   db:
-    image: postgres:15
+    image: postgres:15-alpine
+    container_name: skilloka_db
+    restart: unless-stopped
     environment:
       POSTGRES_DB: ${DB_DATABASE}
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - internal
+
+  redis:
+    image: redis:7-alpine
+    container_name: skilloka_redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - internal
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.6
+    container_name: skilloka_meilisearch
+    restart: unless-stopped
+    environment:
+      MEILI_MASTER_KEY: ${MEILISEARCH_KEY}
+      MEILI_ENV: production
+    volumes:
+      - meilisearch_data:/meili_data
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge
+  proxy_network:
+    external: true
+    name: proxy_network
 
 volumes:
   db_data:
+  redis_data:
+  meilisearch_data:
+  app_storage:
+  app_logs:

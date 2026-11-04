@@ -27,14 +27,19 @@ class PaymentController extends Controller
     /**
      * Membuat transaksi Midtrans untuk booking milik pengguna login.
      */
-    public function createTransaction(Request $request)
+    public function createTransaction(Request $request, $id = null)
     {
-        $validated = $request->validate([
-            'order_id' => ['required', 'string', 'exists:bookings,id'],
-        ]);
+        $targetId = $id ?? $request->input('order_id') ?? $request->input('booking_id');
+
+        if (!$targetId) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Parameter order_id atau booking_id wajib diisi.',
+            ], 422);
+        }
 
         $booking = Booking::with('schedule')
-            ->where('id', $validated['order_id'])
+            ->where('id', $targetId)
             ->where('user_id', $request->user()->id)
             ->firstOrFail();
 
@@ -77,9 +82,15 @@ class PaymentController extends Controller
                 'snap_token' => $snapToken,
             ]);
 
+            $isProd = (bool) env('MIDTRANS_IS_PRODUCTION', false);
+            $redirectUrl = $isProd
+                ? "https://app.midtrans.com/snap/v2/vtweb/{$snapToken}"
+                : "https://app.sandbox.midtrans.com/snap/v2/vtweb/{$snapToken}";
+
             return response()->json([
                 'status' => 'success',
                 'snap_token' => $snapToken,
+                'redirect_url' => $redirectUrl,
                 'order_id' => $orderId,
                 'amount' => (float) $booking->total_price,
             ]);
@@ -91,7 +102,7 @@ class PaymentController extends Controller
 
             return response()->json([
                 'status' => 'error',
-                'message' => 'Transaksi belum dapat dibuat.',
+                'message' => 'Transaksi belum dapat dibuat: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -102,6 +113,14 @@ class PaymentController extends Controller
      */
     public function confirmDummy(Request $request)
     {
+        // 🔒 Keamanan: Cegah bypass pembayaran di server production
+        if (app()->isProduction()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Fitur pembayaran dummy dinonaktifkan di environment production.',
+            ], 403);
+        }
+
         $validated = $request->validate([
             'booking_id' => ['required', 'string', 'exists:bookings,id'],
             'method' => ['required', 'in:transfer_bank,qris,e_wallet'],

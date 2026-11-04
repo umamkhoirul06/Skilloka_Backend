@@ -208,7 +208,7 @@
 
                         <p class="font-semibold text-gray-800 mt-1">
 
-                            {{ $payment->booking->schedule->course->title ?? '-' }}
+                            {{ $payment->booking?->course?->title ?? $payment->booking?->schedule?->course?->title ?? '-' }}
 
                         </p>
 

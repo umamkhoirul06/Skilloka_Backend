@@ -94,7 +94,7 @@
                     <td>{{ $i + 1 }}</td>
                     <td>{{ $booking->code }}</td>
                     <td>{{ $booking->user->name ?? '-' }}</td>
-                    <td>{{ $booking->schedule->course->title ?? '-' }}</td>
+                    <td>{{ $booking->course->title ?? $booking->schedule?->course?->title ?? '-' }}</td>
                     <td>Rp {{ number_format($booking->amount, 0, ',', '.') }}</td>
                     <td>
                         {{-- 🔥 FIX: Mapping status manual ke CSS class --}}

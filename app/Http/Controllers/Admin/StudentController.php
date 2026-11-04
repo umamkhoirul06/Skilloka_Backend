@@ -40,11 +40,9 @@ class StudentController extends Controller
     }
 
     /**
-     * DETAIL STUDENT
-     * Hanya dapat diakses jika siswa memiliki booking
-     * yang sudah dibayar pada LPK terkait.
+     * Verifikasi hak akses multi-tenancy terhadap siswa
      */
-    public function show(User $student)
+    private function verifyStudentAccess(User $student): void
     {
         $tenantId = Auth::user()->tenant_id;
 
@@ -56,10 +54,20 @@ class StudentController extends Controller
             ->exists();
 
         if (!$hasPaidBooking) {
-            return redirect()
-                ->route('admin.students.index')
-                ->with('error', 'Siswa tidak ditemukan.');
+            abort(403, 'Siswa tidak ditemukan atau Anda tidak memiliki akses ke data siswa ini.');
         }
+    }
+
+    /**
+     * DETAIL STUDENT
+     * Hanya dapat diakses jika siswa memiliki booking
+     * yang sudah dibayar pada LPK terkait.
+     */
+    public function show(User $student)
+    {
+        $this->verifyStudentAccess($student);
+
+        $tenantId = Auth::user()->tenant_id;
 
         $student->load([
             'bookings' => function ($q) use ($tenantId) {
@@ -75,10 +83,22 @@ class StudentController extends Controller
     }
 
     /**
+     * FORM EDIT STUDENT
+     */
+    public function edit(User $student)
+    {
+        $this->verifyStudentAccess($student);
+
+        return view('admin.students.edit', compact('student'));
+    }
+
+    /**
      * UPDATE STUDENT
      */
     public function update(Request $request, User $student)
     {
+        $this->verifyStudentAccess($student);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $student->id,
@@ -131,6 +151,8 @@ class StudentController extends Controller
      */
     public function destroy(User $student)
     {
+        $this->verifyStudentAccess($student);
+
         // Menghapus akun siswa tetap mengikuti mekanisme SoftDeletes
         // yang sudah digunakan pada model User.
         $student->delete();

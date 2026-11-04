@@ -254,7 +254,7 @@
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <a href="{{ route('public.courses') }}?level=Pemula" class="card-interactive group p-6 rounded-2xl border border-slate-200 bg-gradient-to-b from-white to-slate-50/50 hover:border-brand-400 hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+            <a href="{{ route('public.courses', ['jenjang' => 'sma']) }}" class="card-interactive group p-6 rounded-2xl border border-slate-200 bg-gradient-to-b from-white to-slate-50/50 hover:border-brand-400 hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
                 <div>
                     <span class="inline-block px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 text-brand-700 border border-blue-100 mb-4">Lulusan SMA</span>
                     <h4 class="font-outfit text-lg font-bold text-slate-900 group-hover:text-brand-600 transition mb-2">Persiapan Kerja & Bisnis</h4>
@@ -266,7 +266,7 @@
                 </div>
             </a>
 
-            <a href="{{ route('public.courses') }}?level=Menengah" class="card-interactive group p-6 rounded-2xl border border-slate-200 bg-gradient-to-b from-white to-slate-50/50 hover:border-indigo-400 hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+            <a href="{{ route('public.courses', ['jenjang' => 'smk']) }}" class="card-interactive group p-6 rounded-2xl border border-slate-200 bg-gradient-to-b from-white to-slate-50/50 hover:border-indigo-400 hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
                 <div>
                     <span class="inline-block px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100 mb-4">Lulusan SMK</span>
                     <h4 class="font-outfit text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition mb-2">Peningkatan Kejuruan Teknik</h4>
@@ -278,7 +278,7 @@
                 </div>
             </a>
 
-            <a href="{{ route('public.courses') }}?level=Mahir" class="card-interactive group p-6 rounded-2xl border border-slate-200 bg-gradient-to-b from-white to-slate-50/50 hover:border-purple-400 hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+            <a href="{{ route('public.courses', ['jenjang' => 'sarjana']) }}" class="card-interactive group p-6 rounded-2xl border border-slate-200 bg-gradient-to-b from-white to-slate-50/50 hover:border-purple-400 hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
                 <div>
                     <span class="inline-block px-2.5 py-1 rounded-lg text-xs font-bold bg-purple-50 text-purple-700 border border-purple-100 mb-4">Mahasiswa / Sarjana</span>
                     <h4 class="font-outfit text-lg font-bold text-slate-900 group-hover:text-purple-600 transition mb-2">Kompetensi Digital & Manajerial</h4>
@@ -290,7 +290,7 @@
                 </div>
             </a>
 
-            <a href="{{ route('public.courses') }}" class="card-interactive group p-6 rounded-2xl border border-slate-200 bg-gradient-to-b from-white to-slate-50/50 hover:border-emerald-400 hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+            <a href="{{ route('public.courses', ['jenjang' => 'umum']) }}" class="card-interactive group p-6 rounded-2xl border border-slate-200 bg-gradient-to-b from-white to-slate-50/50 hover:border-emerald-400 hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
                 <div>
                     <span class="inline-block px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100 mb-4">Masyarakat Umum</span>
                     <h4 class="font-outfit text-lg font-bold text-slate-900 group-hover:text-emerald-600 transition mb-2">Wirausaha & Keterampilan</h4>

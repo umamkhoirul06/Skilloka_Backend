@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\LocationController;
 use App\Http\Controllers\Api\V1\LpkController;
 use App\Http\Controllers\Api\V1\BookingController;
+use App\Http\Controllers\Api\V1\MyCourseController;
 use App\Http\Controllers\Api\V1\BannerController;
 use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\Api\PaymentController;
@@ -20,10 +21,10 @@ use App\Http\Controllers\Admin\ProfileController;
 // ==========================================
 // 1. PUBLIC ROUTES (Tanpa Token / Bebas Akses)
 // ==========================================
-Route::post('/auth/register', [AuthController::class, 'register']);
-Route::post('/auth/login', [AuthController::class, 'login']);
-Route::post('/auth/request-otp', [AuthController::class, 'requestOtp']);
-Route::post('/auth/verify-otp', [AuthController::class, 'verifyOtp']);
+Route::post('/auth/register', [AuthController::class, 'register'])->middleware('throttle:10,1');
+Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
+Route::post('/auth/request-otp', [AuthController::class, 'requestOtp'])->middleware('throttle:5,1');
+Route::post('/auth/verify-otp', [AuthController::class, 'verifyOtp'])->middleware('throttle:10,1');
 
 // Rute Kursus & LPK
 Route::get('/courses', [CourseController::class, 'index']);
@@ -41,9 +42,9 @@ Route::get('/banners', [BannerController::class, 'index']);
 // Midtrans Webhook
 Route::post('/payment/webhook', [PaymentController::class, 'webhook']);
 
-// Chatbot AI Endpoint
-Route::post('/chatbot/messages', [ChatbotController::class, 'sendMessage']);
-Route::post('/chatbot/message', [ChatbotController::class, 'sendMessage']);
+// Chatbot AI Endpoint (Dilindungi Throttle agar kuota API aman)
+Route::post('/chatbot/messages', [ChatbotController::class, 'sendMessage'])->middleware('throttle:20,1');
+Route::post('/chatbot/message', [ChatbotController::class, 'sendMessage'])->middleware('throttle:20,1');
 
 // ==========================================
 // 1.5. MEDIA / STORAGE
@@ -84,12 +85,20 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     // Rute Bookings
+    Route::get('/user/bookings', [BookingController::class, 'index']);
+    // Rute My Courses / Pembelajaran (PRD 8.8 & SPEC Section E)
+    Route::get('/my-courses', [MyCourseController::class, 'index']);
+    Route::get('/my-courses/{courseId}/content', [MyCourseController::class, 'content']);
+    Route::get('/my-courses/{courseId}/attendance', [MyCourseController::class, 'attendance']);
+    Route::get('/my-courses/{courseId}/certificate', [MyCourseController::class, 'certificate']);
+
     Route::get('/bookings', [BookingController::class, 'index']);
     Route::post('/bookings', [BookingController::class, 'store']);
     Route::get('/bookings/{id}', [BookingController::class, 'show']);
     Route::patch('/bookings/{id}/cancel', [BookingController::class, 'cancel']);
 
     // Payment Transaction
+    Route::post('/bookings/{id}/payment', [PaymentController::class, 'createTransaction']);
     Route::post('/payment/create-transaction', [PaymentController::class, 'createTransaction']);
     Route::post('/payment/confirm-dummy', [PaymentController::class, 'confirmDummy']);
 

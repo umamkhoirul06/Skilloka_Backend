@@ -19,7 +19,7 @@ class BookingController extends Controller
     {
         $user = Auth::user();
 
-        $query = Booking::with(['user', 'schedule.course', 'payment'])
+        $query = Booking::with(['user', 'schedule.course', 'course', 'payment'])
             ->when(!$user->hasRole('super_admin'), function ($q) use ($user) {
                 $q->where('tenant_id', $user->tenant_id);
             });
@@ -128,7 +128,7 @@ $booking->update([
     'qr_code_url' => $qrPath,
 ]);
 
-                $coursePrice = optional(optional($booking->schedule)->course)->price ?? 0;
+                $coursePrice = $booking->course?->price ?? $booking->schedule?->course?->price ?? $booking->total_price ?? $booking->amount ?? 0;
 
                 Payment::updateOrCreate(
                     ['booking_id' => $booking->id],
@@ -161,7 +161,7 @@ $booking->update([
             abort(403);
         }
 
-        $booking->load(['user', 'schedule.course', 'payment']);
+        $booking->load(['user', 'schedule.course', 'course', 'payment']);
         return view('admin.bookings.show', compact('booking'));
     }
 

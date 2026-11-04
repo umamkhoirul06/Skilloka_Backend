@@ -51,7 +51,7 @@ Route::post('/admin/forgot-password', function (Request $request) {
     return $status === Password::RESET_LINK_SENT
         ? back()->with('success', 'Link reset password telah dikirim ke email Anda!')
         : back()->withErrors(['email' => __($status)]);
-})->name('password.email');
+})->middleware('throttle:3,1')->name('password.email');
 
 // Form reset password
 Route::get('/admin/reset-password/{token}', function (string $token) {
@@ -76,7 +76,7 @@ Route::post('/admin/reset-password', function (Request $request) {
     return $status === Password::PASSWORD_RESET
         ? redirect()->route('admin.login')->with('success', 'Password berhasil direset!')
         : back()->withErrors(['email' => __($status)]);
-})->name('password.update');
+})->middleware('throttle:5,1')->name('password.update');
 
 /*
 |--------------------------------------------------------------------------
@@ -109,7 +109,9 @@ Route::post('/admin/login', [AdminAuthController::class, 'login'])
 
 Route::get('/admin/register', [AdminAuthController::class, 'showRegister'])->name('admin.register');
 
-Route::post('/admin/register', [AdminAuthController::class, 'register'])->name('admin.register.submit');
+Route::post('/admin/register', [AdminAuthController::class, 'register'])
+    ->middleware('throttle:5,1')
+    ->name('admin.register.submit');
 
 Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
 
@@ -177,14 +179,13 @@ Route::middleware(['auth', 'role:admin_lpk'])
 
         // Sertifikat Siswa
         Route::resource('certificates', CertificateController::class);
+
+        // Update Status Belajar Siswa
+        Route::patch('/students/booking/{bookingId}/status', [
+            StudentController::class,
+            'updateStatusBelajar'
+        ])->name('students.updateStatusBelajar');
     });
-
-
-
-Route::patch('/students/booking/{bookingId}/status', [
-    App\Http\Controllers\Admin\StudentController::class,
-    'updateStatusBelajar'
-])->name('admin.students.updateStatusBelajar');
 /*
 |--------------------------------------------------------------------------
 | SUPER ADMIN AREA

@@ -198,7 +198,7 @@
                         <td>{{ $payment->created_at->format('d M Y') }}</td>
                         <td>{{ $payment->user->name ?? '-' }}</td>
                         <td>{{ $payment->tenant->name ?? '-' }}</td>
-                        <td>{{ $payment->booking->schedule->course->name ?? 'N/A' }}</td>
+                        <td>{{ $payment->booking?->course?->title ?? $payment->booking?->schedule?->course?->title ?? 'N/A' }}</td>
                         <td>Rp {{ number_format($payment->amount, 0, ',', '.') }}</td>
                         <td>
                             @php 

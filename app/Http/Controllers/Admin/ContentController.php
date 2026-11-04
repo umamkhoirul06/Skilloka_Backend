@@ -49,7 +49,7 @@ class ContentController extends Controller
             'title'        => 'required|string|max:255',
             'type'         => 'required|in:document,video,article,link',
             'content_url'  => 'nullable|string|max:500',
-            'file'         => 'nullable|file|max:20480', // Max 20MB
+            'file'         => 'nullable|file|mimes:pdf,doc,docx,ppt,pptx,xls,xlsx,zip,mp4,jpg,jpeg,png,webp|max:20480', // Max 20MB whitelist
             'body'         => 'nullable|string',
             'order_index'  => 'nullable|integer',
             'is_published' => 'nullable',
@@ -105,7 +105,7 @@ class ContentController extends Controller
             'title'        => 'required|string|max:255',
             'type'         => 'required|in:document,video,article,link',
             'content_url'  => 'nullable|string|max:500',
-            'file'         => 'nullable|file|max:20480',
+            'file'         => 'nullable|file|mimes:pdf,doc,docx,ppt,pptx,xls,xlsx,zip,mp4,jpg,jpeg,png,webp|max:20480',
             'body'         => 'nullable|string',
             'order_index'  => 'nullable|integer',
             'is_published' => 'nullable',

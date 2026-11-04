@@ -34,11 +34,11 @@ class AdminDashboardController extends Controller
             ->count();
 
         $confirmedBookings = Booking::where('tenant_id', $tenantId)
-            ->whereIn('status', ['paid', 'confirmed', 'ongoing', 'completed'])
+            ->whereIn('status', ['paid', 'confirmed', 'ongoing', 'completed', 'Selesai'])
             ->count();
 
         $totalRevenue = Booking::where('tenant_id', $tenantId)
-            ->whereIn('status', ['paid', 'confirmed', 'ongoing', 'completed'])
+            ->whereIn('status', ['paid', 'confirmed', 'ongoing', 'completed', 'Selesai'])
             ->sum('total_price');
 
         $recentBookings = Booking::with(['user', 'course'])

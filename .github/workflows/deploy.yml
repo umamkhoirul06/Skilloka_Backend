@@ -26,12 +26,15 @@ jobs:
       image: ${{ steps.meta.outputs.tags }}
     steps:
       - uses: actions/checkout@v4
+
       - uses: docker/setup-buildx-action@v3
+
       - uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
       - id: meta
         uses: docker/metadata-action@v5
         with:
@@ -39,6 +42,7 @@ jobs:
           tags: |
             type=sha,prefix=sha-
             type=raw,value=latest
+
       - uses: docker/build-push-action@v5
         with:
           context: .
@@ -49,7 +53,7 @@ jobs:
           cache-to: type=gha,mode=max
 
   deploy:
-    name: Deploy ke VPS
+    name: Deploy ke VPS Azure
     runs-on: ubuntu-latest
     needs: build-and-push
     steps:
@@ -58,22 +62,37 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
           script: |
             set -e
-            echo "🚀 Mulai deployment ke Azure..."
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            
+            echo "🚀 Mulai deployment ke Azure VPS..."
+
+            # Login ke GHCR
+            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
             cd /home/${{ secrets.SERVER_USER }}/skilloka_backend
-            
+
+            # Pull image terbaru dari GHCR
             docker pull ghcr.io/umamkhoirul06/skilloka_backend:latest
-            
-            docker compose down
+
+            # Update hanya container yang memiliki image baru (database tetap running)
             docker compose up -d --remove-orphans
-            
-            echo "⏳ Menunggu Database siap..."
-            sleep 10
-            
-            docker compose exec -T app php artisan optimize:clear
+
+            echo "⏳ Menyiapkan aplikasi..."
+            sleep 5
+
+            # Hapus cache bootstrap lama agar tidak crash
+            docker compose exec -T app rm -f /var/www/html/bootstrap/cache/config.php /var/www/html/bootstrap/cache/routes-v7.php /var/www/html/bootstrap/cache/services.php
+            docker compose exec -T app php artisan optimize:clear || true
+
+            # Jalankan migrasi database jika ada tabel baru
             docker compose exec -T app php artisan migrate --force --no-interaction
-            echo "✅ Deployment selesai!"
+
+            # Cache dan optimasi untuk production
+            docker compose exec -T app php artisan optimize
+            docker compose exec -T app php artisan storage:link || true
+
+            # Verifikasi status container
+            docker compose ps
+
+            echo "✅ Deployment selesai dengan sukses! https://skilloka.my.id"

@@ -18,7 +18,7 @@ class AttendanceController extends Controller
         $user = Auth::user();
         $courses = Course::where('tenant_id', $user->tenant_id)
             ->withCount(['bookings' => function ($q) {
-                $q->whereIn('status', ['paid', 'confirmed', 'ongoing', 'completed']);
+                $q->whereIn('status', ['paid', 'confirmed', 'ongoing', 'completed', 'Selesai']);
             }])
             ->latest()
             ->get();
@@ -48,8 +48,10 @@ class AttendanceController extends Controller
         if ($course) {
             $bookings = Booking::with('user')
                 ->where('course_id', $course->id)
-                ->whereIn('status', ['paid', 'confirmed', 'ongoing', 'completed'])
-                ->get();
+                ->whereIn('status', ['paid', 'confirmed', 'ongoing', 'completed', 'Selesai'])
+                ->latest()
+                ->get()
+                ->unique('user_id');
 
             // Fetch existing attendance for this session if exists
             $existingRecords = Attendance::where('course_id', $course->id)
@@ -138,7 +140,7 @@ class AttendanceController extends Controller
 
         $bookings = Booking::with('user')
             ->where('course_id', $course->id)
-            ->whereIn('status', ['paid', 'confirmed', 'ongoing', 'completed'])
+            ->whereIn('status', ['paid', 'confirmed', 'ongoing', 'completed', 'Selesai'])
             ->get();
 
         $recap = [];

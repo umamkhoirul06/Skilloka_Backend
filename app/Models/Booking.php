@@ -16,6 +16,10 @@ class Booking extends Model
         'lpk_id',
         'status',
         'total_price',
+        'amount',
+        'code',
+        'snap_token',
+        'payment_method',
         'booking_date',
         'tenant_id',
         'status_belajar',
@@ -40,7 +44,7 @@ class Booking extends Model
     }
 
     /**
-     * 🔥 FIX: Relasi ke tabel Payments agar Eager Loading di Admin Panel tidak crash
+     * Relasi ke tabel Payments
      */
     public function payment()
     {

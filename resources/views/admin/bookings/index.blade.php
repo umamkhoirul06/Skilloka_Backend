@@ -150,7 +150,7 @@
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-700 max-w-[200px] truncate">
-                                    {{ $booking->schedule->course->title ?? '-' }}
+                                    {{ $booking->course->title ?? $booking->schedule?->course?->title ?? '-' }}
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">

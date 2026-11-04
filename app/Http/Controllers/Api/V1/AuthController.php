@@ -100,7 +100,7 @@ class AuthController extends BaseController
 
         $channel = $request->channel ?? 'whatsapp';
 
-        // 🌟 LOGIKA BARU: AUTO-REGISTER LEBIH BERSIH
+        // 🌟 AUTO-REGISTER USER JIKA BELUM ADA
         $user = User::firstOrCreate(
             ['phone' => $request->phone],
             [
@@ -113,21 +113,29 @@ class AuthController extends BaseController
             $user->assignRole('student');
         }
 
-        // Generate OTP 4 digit
-        $otpCode = rand(1000, 9999);
+        // Generate OTP 4 digit aman secara kriptografis
+        $otpCode = (string) random_int(1000, 9999);
 
-        // Simpan ke cache 5 menit
+        // Simpan ke cache 5 menit dan reset attempt counter
         Cache::put('otp_' . $request->phone, $otpCode, now()->addMinutes(5));
+        Cache::forget('otp_attempts_' . $request->phone);
 
         $phone = $request->phone;
         $message = "🔔 *Skilloka OTP Login*\n\nKode OTP Anda: *{$otpCode}*\n\n_Berlaku 5 menit. Jangan bagikan ke siapapun._";
+
+        // Dev mode flag: dev_otp HANYA boleh keluar saat local/debug aktif
+        $isDev = !app()->isProduction() && (bool) config('app.debug');
 
         if ($channel === 'telegram') {
             $telegramToken = env('TELEGRAM_BOT_TOKEN', '');
             $telegramChatId = env('TELEGRAM_CHAT_ID', $phone);
 
             if (empty($telegramToken)) {
-                return $this->success(['dev_otp' => $otpCode], 'Telegram token belum diset, OTP via Telegram dilewati (OTP Dev: ' . $otpCode . ').');
+                $payload = $isDev ? ['dev_otp' => $otpCode] : null;
+                $msg = $isDev
+                    ? 'Telegram token belum diset (Dev Mode OTP: ' . $otpCode . ').'
+                    : 'Layanan Telegram belum dikonfigurasi.';
+                return $this->success($payload, $msg);
             }
 
             try {
@@ -138,7 +146,8 @@ class AuthController extends BaseController
                 ]);
 
                 if ($response->successful()) {
-                    return $this->success(['dev_otp' => $otpCode], 'OTP berhasil dikirim via Telegram.');
+                    $payload = $isDev ? ['dev_otp' => $otpCode] : null;
+                    return $this->success($payload, 'OTP berhasil dikirim via Telegram.');
                 } else {
                     return $this->error('Gagal mengirim Telegram.', 500);
                 }
@@ -148,28 +157,45 @@ class AuthController extends BaseController
         }
 
         // ─── WhatsApp Fonnte ───
-        $fonnteToken = env('FONNTE_TOKEN', 'i3wzy35ABcN9t7kLvp39');
+        $fonnteToken = env('FONNTE_TOKEN');
+
+        if (empty($fonnteToken)) {
+            $payload = $isDev ? ['dev_otp' => $otpCode] : null;
+            $msg = $isDev
+                ? 'Fonnte token belum diset (Dev Mode OTP: ' . $otpCode . ').'
+                : 'Layanan WhatsApp belum dikonfigurasi.';
+            return $this->success($payload, $msg);
+        }
 
         try {
             $response = Http::asForm()->withHeaders([
                 'Authorization' => $fonnteToken,
             ])->post('https://api.fonnte.com/send', [
-                        'target' => $phone,
-                        'message' => $message,
-                        'countryCode' => '62',
-                    ]);
+                'target' => $phone,
+                'message' => $message,
+                'countryCode' => '62',
+            ]);
 
             $responseData = $response->json();
 
             if ($response->successful() && isset($responseData['status']) && ($responseData['status'] === true || $responseData['status'] === 'true')) {
-                return $this->success(['dev_otp' => $otpCode], 'OTP berhasil dikirim via WhatsApp.');
+                $payload = $isDev ? ['dev_otp' => $otpCode] : null;
+                return $this->success($payload, 'OTP berhasil dikirim via WhatsApp.');
             } else {
                 $reason = $responseData['reason'] ?? $responseData['detail'] ?? 'Unknown error';
-                return $this->success(['dev_otp' => $otpCode], 'Gagal WA (' . $reason . '). Gunakan OTP Dev ini.');
+                $payload = $isDev ? ['dev_otp' => $otpCode] : null;
+                $msg = $isDev
+                    ? 'Gagal WA (' . $reason . '). Gunakan OTP Dev ini.'
+                    : 'Gagal mengirim OTP ke nomor WhatsApp Anda.';
+                return $this->success($payload, $msg);
             }
 
         } catch (\Exception $e) {
-            return $this->success(['dev_otp' => $otpCode], 'Kesalahan server WA. OTP Dev: ' . $otpCode);
+            $payload = $isDev ? ['dev_otp' => $otpCode] : null;
+            $msg = $isDev
+                ? 'Kesalahan server WA. OTP Dev: ' . $otpCode
+                : 'Terjadi gangguan saat menghubungkan ke gateway WhatsApp.';
+            return $this->success($payload, $msg);
         }
     }
 
@@ -181,10 +207,24 @@ class AuthController extends BaseController
             'otp_code' => 'required|string',
         ]);
 
+        $attemptsKey = 'otp_attempts_' . $request->phone;
+        $attempts = (int) Cache::get($attemptsKey, 0);
+
+        if ($attempts >= 5) {
+            Cache::forget('otp_' . $request->phone);
+            Cache::forget($attemptsKey);
+            return $this->error('Terlalu banyak percobaan OTP salah. Silakan request kode OTP baru.', 429);
+        }
+
         $cachedOtp = Cache::get('otp_' . $request->phone);
 
-        if (!$cachedOtp || $cachedOtp != $request->otp_code) {
-            return $this->error('Kode OTP salah atau sudah kedaluwarsa.', 400);
+        if (!$cachedOtp || (string) $cachedOtp !== (string) $request->otp_code) {
+            Cache::put($attemptsKey, $attempts + 1, now()->addMinutes(5));
+            $remaining = 5 - ($attempts + 1);
+            $msg = $remaining > 0
+                ? "Kode OTP salah atau sudah kedaluwarsa. Sisa percobaan: {$remaining}."
+                : "Terlalu banyak percobaan OTP salah. Silakan request kode OTP baru.";
+            return $this->error($msg, 400);
         }
 
         $user = User::where('phone', $request->phone)->first();
@@ -194,8 +234,9 @@ class AuthController extends BaseController
         }
 
         Cache::forget('otp_' . $request->phone);
+        Cache::forget($attemptsKey);
 
-        // Hapus token lama agar tidak menumpuk (Opsional tapi bagus)
+        // Hapus token lama agar tidak menumpuk
         $user->tokens()->delete();
         $token = $user->createToken('auth_token')->plainTextToken;
 

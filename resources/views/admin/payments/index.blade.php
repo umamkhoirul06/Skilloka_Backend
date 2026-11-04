@@ -60,7 +60,7 @@
                             </td>
                             <!-- COURSE -->
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-700">{{ Str::limit($payment->booking->schedule->course->title ?? '-', 25) }}</div>
+                                <div class="text-sm text-gray-700">{{ Str::limit($payment->booking?->course?->title ?? $payment->booking?->schedule?->course?->title ?? '-', 25) }}</div>
                             </td>
                             <!-- AMOUNT -->
                             <td class="px-6 py-4 whitespace-nowrap">

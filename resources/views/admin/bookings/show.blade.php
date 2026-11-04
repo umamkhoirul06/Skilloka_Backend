@@ -168,7 +168,7 @@
                             </p>
 
                             <p class="font-semibold text-gray-800">
-                                {{ $booking->schedule->course->title }}
+                                {{ $booking->course->title ?? $booking->schedule?->course?->title ?? '-' }}
                             </p>
 
                         </div>
@@ -182,7 +182,7 @@
                                 </p>
 
                                 <p class="font-semibold text-gray-800">
-                                    {{ $booking->schedule->start_date }}
+                                    {{ $booking->schedule?->start_date ? \Carbon\Carbon::parse($booking->schedule->start_date)->translatedFormat('d F Y') : 'Fleksibel / Belum diatur' }}
                                 </p>
 
                             </div>
@@ -194,7 +194,7 @@
                                 </p>
 
                                 <p class="font-semibold text-gray-800">
-                                    {{ $booking->schedule->end_date }}
+                                    {{ $booking->schedule?->end_date ? \Carbon\Carbon::parse($booking->schedule->end_date)->translatedFormat('d F Y') : 'Fleksibel / Belum diatur' }}
                                 </p>
 
                             </div>
@@ -230,7 +230,7 @@
                             </p>
 
                             <h2 class="text-3xl font-bold text-gray-800 break-words">
-                                Rp {{ number_format($booking->amount, 0, ',', '.') }}
+                                Rp {{ number_format($booking->total_price ?? $booking->amount ?? 0, 0, ',', '.') }}
                             </h2>
 
                         </div>

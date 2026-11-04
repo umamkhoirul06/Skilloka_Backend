@@ -33,6 +33,18 @@
                         </div>
                     </div>
 
+                    <!-- Jenjang filter -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Rekomendasi Jenjang</label>
+                        <select name="jenjang" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-brand-500 bg-white">
+                            <option value="">Semua Jenjang & Tujuan</option>
+                            <option value="sma" {{ request('jenjang') == 'sma' ? 'selected' : '' }}>Lulusan SMA (Persiapan Kerja)</option>
+                            <option value="smk" {{ request('jenjang') == 'smk' ? 'selected' : '' }}>Lulusan SMK (Kejuruan Teknik)</option>
+                            <option value="sarjana" {{ request('jenjang') == 'sarjana' ? 'selected' : '' }}>Mahasiswa / Sarjana (Digital & Manajerial)</option>
+                            <option value="umum" {{ request('jenjang') == 'umum' ? 'selected' : '' }}>Masyarakat Umum (Wirausaha)</option>
+                        </select>
+                    </div>
+
                     <!-- Category filter -->
                     <div>
                         <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Kategori Kejuruan</label>
@@ -51,9 +63,9 @@
                         <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Tingkat Kesulitan</label>
                         <select name="level" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-brand-500 bg-white">
                             <option value="">Semua Tingkat</option>
-                            <option value="Pemula" {{ request('level') == 'Pemula' ? 'selected' : '' }}>Pemula</option>
-                            <option value="Menengah" {{ request('level') == 'Menengah' ? 'selected' : '' }}>Menengah</option>
-                            <option value="Mahir" {{ request('level') == 'Mahir' ? 'selected' : '' }}>Mahir</option>
+                            <option value="beginner" {{ in_array(strtolower(request('level', '')), ['pemula', 'beginner']) ? 'selected' : '' }}>Pemula</option>
+                            <option value="intermediate" {{ in_array(strtolower(request('level', '')), ['menengah', 'intermediate']) ? 'selected' : '' }}>Menengah</option>
+                            <option value="advanced" {{ in_array(strtolower(request('level', '')), ['mahir', 'advanced']) ? 'selected' : '' }}>Mahir</option>
                         </select>
                     </div>
 
@@ -76,6 +88,35 @@
 
         <!-- COURSE LISTING GRID -->
         <div class="lg:col-span-3 space-y-6">
+            @if(request('jenjang'))
+                @php
+                    $jenjangInfo = [
+                        'sma' => ['title' => 'Lulusan SMA — Persiapan Kerja & Bisnis', 'desc' => 'Menampilkan program administrasi, bahasa asing, dan pemasaran digital.'],
+                        'smk' => ['title' => 'Lulusan SMK — Peningkatan Kejuruan Teknik', 'desc' => 'Menampilkan keahlian otomotif, pengelasan, manufaktur, dan teknologi.'],
+                        'sarjana' => ['title' => 'Mahasiswa / Sarjana — Digital & Manajerial', 'desc' => 'Menampilkan kompetensi coding, data analysis, dan kepemimpinan.'],
+                        'umum' => ['title' => 'Masyarakat Umum — Wirausaha & Keterampilan', 'desc' => 'Menampilkan keterampilan vokasi dan persiapan usaha mandiri.'],
+                    ];
+                    $currentJenjang = $jenjangInfo[strtolower(request('jenjang'))] ?? null;
+                @endphp
+                @if($currentJenjang)
+                    <div class="p-4 rounded-2xl bg-gradient-to-r from-brand-50 to-indigo-50 border border-brand-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-xl bg-brand-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                                <i class="fa-solid fa-graduation-cap"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-brand-950 font-outfit text-sm">{{ $currentJenjang['title'] }}</p>
+                                <p class="text-slate-500 text-[11px] mt-0.5">{{ $currentJenjang['desc'] }}</p>
+                            </div>
+                        </div>
+                        <a href="{{ route('public.courses', request()->except('jenjang')) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-brand-200 text-brand-700 hover:bg-brand-50 font-semibold transition flex-shrink-0 shadow-2xs">
+                            <span>Tampilkan Semua</span>
+                            <i class="fa-solid fa-xmark text-[10px]"></i>
+                        </a>
+                    </div>
+                @endif
+            @endif
+
             <div class="flex items-center justify-between text-xs text-slate-500 pb-2">
                 <span>Menampilkan <strong>{{ $courses->total() }}</strong> program pelatihan ditemukan</span>
             </div>
@@ -94,7 +135,7 @@
                                             {{ $course->category->name ?? 'Kejuruan' }}
                                         </span>
                                         <span class="text-[11px] font-semibold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200/50">
-                                            {{ $course->level }}
+                                            {{ $course->level_label ?? ucfirst($course->level) }}
                                         </span>
                                     </div>
                                     <h3 class="font-outfit text-base font-bold text-slate-900 group-hover:text-brand-600 transition-colors line-clamp-2">

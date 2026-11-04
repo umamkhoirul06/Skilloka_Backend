@@ -89,12 +89,19 @@ class ProfileController extends Controller
             'wa_number' => 'nullable|string|max:25',
             'facilities' => 'nullable|array',
             'gallery_images' => 'nullable|array',
-            'gallery_images.*' => 'image|mimes:jpeg,jpg,png|max:5120',
+            'gallery_images.*' => 'image|mimes:jpeg,jpg,png,webp|max:5120',
             // VALIDASI DILONGGARKAN AGAR BISA MENERIMA JSON STRING DARI FORM
             'contact_info' => 'nullable|string|max:1000',
             'logo' => 'nullable', // Relaxed to allow both file and Base64 string
             'cropped_logo' => 'nullable|string'
         ]);
+
+        // 🔒 Keamanan: Pastikan jika logo diunggah langsung sebagai file, wajib berupa gambar
+        if ($request->hasFile('logo')) {
+            $request->validate([
+                'logo' => 'file|image|mimes:jpeg,jpg,png,webp|max:5120',
+            ]);
+        }
 
         /*
         |--------------------------------------------------------------------------

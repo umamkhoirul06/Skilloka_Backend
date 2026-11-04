@@ -6,6 +6,8 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -29,9 +31,13 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\SecureHeaders::class,
         ]);
 
+        // Redirection untuk guest tanpa login di web agar selalu ke admin.login
+        $middleware->redirectGuestsTo(fn (Request $request) => route('admin.login'));
+
         $middleware->alias([
             'super-admin' => \App\Http\Middleware\EnsureSuperAdmin::class,
             'admin-lpk' => \App\Http\Middleware\EnsureAdminLpk::class,
+            'tenant' => \App\Http\Middleware\EnsureTenantContext::class,
 
             // 🔥 TAMBAHAN
             'approved' => \App\Http\Middleware\CheckUserApproved::class,
@@ -44,15 +50,47 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
 
-        // HANYA tangkap error 403 (Akses Ditolak)
+        // Tangkap error 401 (Unauthenticated) khusus API
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Unauthenticated. Sesi login telah berakhir atau token tidak valid.',
+                ], 401);
+            }
+        });
+
+        // Tangkap ModelNotFoundException khusus API
+        $exceptions->render(function (ModelNotFoundException $e, Request $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Data tidak ditemukan.',
+                ], 404);
+            }
+        });
+
+        // Tangkap error 403 (Akses Ditolak)
         $exceptions->render(function (HttpException $e, Request $request) {
             if ($e->getStatusCode() == 403) {
+                if ($request->expectsJson() || $request->is('api/*')) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => $e->getMessage() ?: 'Akses ditolak (Forbidden).',
+                    ], 403);
+                }
                 return response()->view('errors.403', [], 403);
             }
         });
 
         // Tangkap error 403 khusus Spatie
         $exceptions->render(function (UnauthorizedException $e, Request $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Anda tidak memiliki hak akses (Role/Permission) yang diperlukan.',
+                ], 403);
+            }
             return response()->view('errors.403', [], 403);
         });
 

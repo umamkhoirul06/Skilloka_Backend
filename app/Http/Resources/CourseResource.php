@@ -20,6 +20,19 @@ class CourseResource extends JsonResource
             // 🔥 FIX 1: Tambahkan Description agar HP tidak nampilin tulisan Dummy!
             'description' => $this->description,
 
+            // 🔥 Silabus Materi / Pokok Pembahasan yang diisi Admin LPK
+            'syllabus' => $this->syllabus,
+
+            // 🔥 Daftar materi digital jika sudah diunggah oleh LPK
+            'contents' => $this->relationLoaded('contents') || $this->contents ? $this->contents->map(function ($content) {
+                return [
+                    'id' => $content->id,
+                    'title' => $content->title,
+                    'type' => $content->type ?? 'document',
+                    'order_index' => $content->order_index,
+                ];
+            })->toArray() : [],
+
             'lpk' => $this->lpk ? [
                 'id' => $this->lpk->id,
                 'name' => $this->lpk->name,
@@ -38,6 +51,7 @@ class CourseResource extends JsonResource
             })->toArray() : [],
 
             'level' => $this->level,
+            'level_label' => $this->level_label,
 
             // 🔥 FIX 4: Pastikan facilities aman kalau wujudnya masih string JSON
             'facilities' => is_string($this->facilities)

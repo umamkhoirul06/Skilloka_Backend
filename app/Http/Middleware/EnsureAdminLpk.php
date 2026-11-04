@@ -27,6 +27,10 @@ class EnsureAdminLpk
 
         }
 
+        // Set konteks tenant untuk global scope model
+        if (Auth::user()->tenant_id) {
+            app()->instance('current_tenant_id', Auth::user()->tenant_id);
+        }
 
         return $next($request);
 

@@ -100,8 +100,61 @@ class PublicController extends Controller
             });
         }
 
+        // Filter Rekomendasi Sesuai Jenjang & Tujuan (PRD Bab 2.3 & 6.2)
+        if ($request->filled('jenjang')) {
+            $jenjang = strtolower(trim($request->jenjang));
+            $query->where(function ($jq) use ($jenjang) {
+                if ($jenjang === 'sma') {
+                    // Lulusan SMA: Persiapan Kerja & Bisnis (Bahasa Asing, Administrasi, Bisnis, Digital Dasar)
+                    $jq->whereHas('category', function ($cq) {
+                        $cq->whereIn('slug', ['bahasa-asing', 'bisnis-manajemen', 'teknologi-digital'])
+                           ->orWhereRaw('LOWER(name) LIKE ?', ['%bahasa%'])
+                           ->orWhereRaw('LOWER(name) LIKE ?', ['%bisnis%'])
+                           ->orWhereRaw('LOWER(name) LIKE ?', ['%administrasi%']);
+                    });
+                } elseif ($jenjang === 'smk') {
+                    // Lulusan SMK: Peningkatan Kejuruan Teknik (Otomotif, Pengelasan, Kelistrikan, IT)
+                    $jq->whereHas('category', function ($cq) {
+                        $cq->whereIn('slug', ['teknik-otomotif-manufaktur', 'teknologi-digital'])
+                           ->orWhereRaw('LOWER(name) LIKE ?', ['%teknik%'])
+                           ->orWhereRaw('LOWER(name) LIKE ?', ['%otomotif%'])
+                           ->orWhereRaw('LOWER(name) LIKE ?', ['%manufaktur%'])
+                           ->orWhereRaw('LOWER(name) LIKE ?', ['%las%']);
+                    });
+                } elseif ($jenjang === 'sarjana') {
+                    // Mahasiswa / Sarjana: Kompetensi Digital & Manajerial (Coding, Data Analysis, Kepemimpinan)
+                    $jq->whereHas('category', function ($cq) {
+                        $cq->whereIn('slug', ['teknologi-digital', 'bisnis-manajemen'])
+                           ->orWhereRaw('LOWER(name) LIKE ?', ['%digital%'])
+                           ->orWhereRaw('LOWER(name) LIKE ?', ['%teknologi%'])
+                           ->orWhereRaw('LOWER(name) LIKE ?', ['%data%'])
+                           ->orWhereRaw('LOWER(name) LIKE ?', ['%manajemen%']);
+                    });
+                } elseif ($jenjang === 'umum') {
+                    // Masyarakat Umum: Wirausaha & Keterampilan (Tata Boga, Menjahit, Perhotelan & Pariwisata)
+                    $jq->whereHas('category', function ($cq) {
+                        $cq->whereIn('slug', ['perhotelan-pariwisata', 'bisnis-manajemen'])
+                           ->orWhereRaw('LOWER(name) LIKE ?', ['%perhotelan%'])
+                           ->orWhereRaw('LOWER(name) LIKE ?', ['%pariwisata%'])
+                           ->orWhereRaw('LOWER(name) LIKE ?', ['%boga%'])
+                           ->orWhereRaw('LOWER(name) LIKE ?', ['%wirausaha%']);
+                    });
+                }
+            });
+        }
+
+        // Normalisasi Level Filter (Mendukung 'Pemula'/'beginner', 'Menengah'/'intermediate', 'Mahir'/'advanced')
         if ($request->filled('level')) {
-            $query->where('level', $request->level);
+            $levelMap = [
+                'pemula'       => 'beginner',
+                'menengah'     => 'intermediate',
+                'mahir'        => 'advanced',
+                'beginner'     => 'beginner',
+                'intermediate' => 'intermediate',
+                'advanced'     => 'advanced',
+            ];
+            $normalizedLevel = $levelMap[strtolower(trim($request->level))] ?? $request->level;
+            $query->where('level', $normalizedLevel);
         }
 
         if ($request->filled('sort')) {

@@ -12,12 +12,24 @@ class Course extends Model
 
     protected $guarded = ['id'];
 
+    protected $appends = ['level_label'];
+
     protected $casts = [
         'is_active' => 'boolean',
         'price' => 'decimal:2',
         'images' => 'array',
         'facilities' => 'array',
     ];
+
+    public function getLevelLabelAttribute(): string
+    {
+        return match (strtolower($this->level ?? '')) {
+            'beginner' => 'Pemula',
+            'intermediate' => 'Menengah',
+            'advanced' => 'Mahir',
+            default => ucfirst($this->level ?? 'Pemula'),
+        };
+    }
 
     public function category()
     {
