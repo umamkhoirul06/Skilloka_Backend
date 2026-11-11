@@ -271,11 +271,8 @@
     <div class="bg-slate-900 text-slate-300 text-xs py-2 px-4 border-b border-slate-800">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
             <div class="flex items-center gap-2">
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/25">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                    Aktif
-                </span>
-                <span>Wilayah Operasional Perdana: <strong>Kabupaten Indramayu & Sekitarnya</strong></span>
+                <i class="fa-solid fa-location-dot text-slate-400 text-xs"></i>
+                <span>Wilayah Operasional Perdana: <strong class="text-slate-100 font-semibold">Kabupaten Indramayu & Sekitarnya</strong></span>
             </div>
             <div class="hidden md:flex items-center gap-4 text-slate-400">
                 <a href="{{ route('public.for_lpk') }}" class="hover:text-white transition">Kemitraan LPK</a>
