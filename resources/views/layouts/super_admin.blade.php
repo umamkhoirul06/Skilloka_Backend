@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'Super Admin') - Skilloka Platform Control</title>
+    <title>@yield('title', 'Super Admin') - {{ $platformSetting->platform_name ?? 'Skilloka' }} Platform Control</title>
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
@@ -161,12 +161,12 @@
         </div>
 
         <!-- Super Admin Status Badge -->
-        <div class="p-3 mx-3 my-3 rounded-xl bg-emerald-950/40 border border-emerald-800/40">
+        <div class="p-3 mx-3 my-3 rounded-xl bg-slate-800/60 border border-slate-700/60">
             <div class="flex items-center gap-2.5">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span class="text-xs font-bold text-emerald-300">God Mode Active</span>
-                <span class="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-200">
-                    v3.0
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span class="text-xs font-semibold text-slate-300">Sistem Terpusat</span>
+                <span class="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
+                    Aktif
                 </span>
             </div>
         </div>
@@ -282,8 +282,8 @@
                         {{ strtoupper(substr($user->name ?? 'S', 0, 1)) }}
                     </div>
                     <div class="hidden md:block text-left">
-                        <div class="text-xs font-bold text-slate-800 leading-tight">{{ $user->name ?? 'Super Admin' }}</div>
-                        <div class="text-[11px] text-emerald-600 font-semibold">Master Platform</div>
+                        <div class="text-xs font-bold text-slate-800 leading-tight">{{ $user->name ?? 'Super Administrator' }}</div>
+                        <div class="text-[11px] text-emerald-600 font-semibold">Super Administrator</div>
                     </div>
                 </div>
             </div>
@@ -319,7 +319,7 @@
 
         <!-- FOOTER -->
         <footer class="py-4 px-6 border-t border-slate-200 bg-white text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2">
-            <div>&copy; {{ date('Y') }} Skilloka Platform &bull; Super Admin Master Control.</div>
+            <div>&copy; {{ date('Y') }} {{ $platformSetting->platform_name ?? 'Skilloka' }} Platform &bull; Super Admin Master Control.</div>
             <div class="text-slate-400">Pilot Wilayah: Kabupaten Indramayu</div>
         </footer>
     </div>

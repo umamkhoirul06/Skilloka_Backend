@@ -121,7 +121,7 @@ Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'role:admin_lpk'])
+Route::middleware(['auth', 'role:admin_lpk', 'tenant'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {

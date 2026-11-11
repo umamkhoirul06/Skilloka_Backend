@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'Admin Dashboard') - Skilloka LPK Portal</title>
+    <title>@yield('title', 'Admin Dashboard') - {{ $platformSetting->platform_name ?? 'Skilloka' }} LPK Portal</title>
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
@@ -349,7 +349,7 @@
 
         <!-- ADMIN FOOTER -->
         <footer class="py-4 px-6 border-t border-slate-200 bg-white text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2">
-            <div>&copy; {{ date('Y') }} Skilloka &bull; Platform Pelatihan Kerja Lembaga Pelatihan Kerja (LPK).</div>
+            <div>&copy; {{ date('Y') }} {{ $platformSetting->platform_name ?? 'Skilloka' }} &bull; Platform Pelatihan Kerja Lembaga Pelatihan Kerja (LPK).</div>
             <div class="text-slate-400">Wilayah Operasional: Kabupaten Indramayu</div>
         </footer>
     </div>

@@ -16,20 +16,53 @@ class AttendanceController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
+        $selectedCourseId = $request->query('course_id');
+
         $courses = Course::where('tenant_id', $user->tenant_id)
             ->withCount(['bookings' => function ($q) {
                 $q->whereIn('status', ['paid', 'confirmed', 'ongoing', 'completed', 'Selesai']);
             }])
+            ->withCount('attendances')
             ->latest()
             ->get();
 
-        $recentAttendances = Attendance::whereIn('course_id', $courses->pluck('id'))
+        $courseIds = $courses->pluck('id');
+
+        $attendancesQuery = Attendance::whereIn('course_id', $courseIds)
             ->with(['course', 'user', 'booking'])
             ->latest('session_date')
-            ->take(15)
-            ->get();
+            ->latest('created_at');
 
-        return view('admin.attendance.index', compact('courses', 'recentAttendances'));
+        if ($selectedCourseId && $courseIds->contains($selectedCourseId)) {
+            $attendancesQuery->where('course_id', $selectedCourseId);
+            $activeCourse = $courses->firstWhere('id', $selectedCourseId);
+        } else {
+            $selectedCourseId = null;
+            $activeCourse = null;
+        }
+
+        $recentAttendances = $attendancesQuery->paginate(15)->withQueryString();
+
+        // Rekap statistik kehadiran untuk kursus yang dipilih / seluruh kursus
+        $statsQuery = Attendance::whereIn('course_id', $courseIds);
+        if ($selectedCourseId) {
+            $statsQuery->where('course_id', $selectedCourseId);
+        }
+        $stats = [
+            'total'   => (clone $statsQuery)->count(),
+            'present' => (clone $statsQuery)->where('status', 'present')->count(),
+            'sick'    => (clone $statsQuery)->where('status', 'sick')->count(),
+            'excused' => (clone $statsQuery)->where('status', 'excused')->count(),
+            'absent'  => (clone $statsQuery)->where('status', 'absent')->count(),
+        ];
+
+        return view('admin.attendance.index', compact(
+            'courses',
+            'recentAttendances',
+            'selectedCourseId',
+            'activeCourse',
+            'stats'
+        ));
     }
 
     public function session(Request $request)

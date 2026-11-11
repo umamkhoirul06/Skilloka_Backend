@@ -21,7 +21,8 @@ class AdminDashboardController extends Controller
 
         $myLpk = \App\Models\Lpk::where('tenant_id', $tenantId)->first();
 
-        $totalStudents = User::where('tenant_id', $tenantId)->count();
+        // Total siswa: hanya menghitung pengguna mobile/peserta terdaftar (tidak termasuk admin LPK)
+        $totalStudents = User::studentsForTenant($tenantId)->count();
         $totalCourses = Course::where('tenant_id', $tenantId)->count();
         $activeCourses = Course::where('tenant_id', $tenantId)->where('is_active', true)->count();
 
@@ -145,7 +146,7 @@ class AdminDashboardController extends Controller
         $user = Auth::user();
         $tenantId = $user->tenant_id;
 
-        $totalStudents = User::where('tenant_id', $tenantId)->count();
+        $totalStudents = User::studentsForTenant($tenantId)->count();
         $totalCourses = Course::where('tenant_id', $tenantId)->count();
         $upcomingClasses = CourseSchedule::whereHas('course', fn($q) => $q->where('tenant_id', $tenantId))
             ->where('start_date', '>=', now())

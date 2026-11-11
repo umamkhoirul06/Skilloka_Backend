@@ -58,7 +58,15 @@ class BookingController extends Controller
     public function create()
     {
         $user = Auth::user();
-        $students = User::where('tenant_id', $user->tenant_id)
+        // Ambil hanya pengguna mobile / siswa (tidak termasuk admin LPK)
+        $students = User::students()
+            ->where(function ($query) use ($user) {
+                $query->whereHas('roles', function ($r) {
+                    $r->whereIn('name', ['student', 'user']);
+                })->orWhereHas('bookings', function ($q) use ($user) {
+                    $q->where('tenant_id', $user->tenant_id);
+                });
+            })
             ->whereIn('status', ['active', 'pending'])
             ->get();
         $schedules = CourseSchedule::with('course')

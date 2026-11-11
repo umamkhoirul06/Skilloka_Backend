@@ -448,7 +448,7 @@
                         <i class="fa-solid fa-location-dot text-brand-400 mr-2"></i> Kabupaten Indramayu, Jawa Barat, Indonesia
                     </p>
                     <p class="text-sm text-slate-400 mb-2">
-                        <i class="fa-solid fa-envelope text-brand-400 mr-2"></i> info@skilloka.my.id
+                        <i class="fa-solid fa-envelope text-brand-400 mr-2"></i> {{ $platformSetting->support_email ?? 'info@skilloka.my.id' }}
                     </p>
                     <p class="text-sm text-slate-400">
                         <i class="fa-solid fa-headset text-brand-400 mr-2"></i> 0895-4051-93300
@@ -457,7 +457,7 @@
             </div>
 
             <div class="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-                <p>&copy; {{ date('Y') }} Skilloka Platform. Hak Cipta Dilindungi Undang-Undang.</p>
+                <p>&copy; {{ date('Y') }} {{ $platformSetting->platform_name ?? 'Skilloka' }} Platform. Hak Cipta Dilindungi Undang-Undang.</p>
                 <div class="flex items-center gap-6">
                     <a href="{{ route('public.about') }}" class="hover:text-slate-400 transition">Kebijakan Privasi</a>
                     <a href="{{ route('public.about') }}" class="hover:text-slate-400 transition">Syarat & Ketentuan</a>

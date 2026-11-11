@@ -151,7 +151,7 @@
 
 {{-- FOOTER --}}
 <div class="footer">
-    <span>Dicetak: {{ now()->format('d M Y, H:i') }} &nbsp;|&nbsp; System Overlord - Skilloka</span>
+    <span>Dicetak: {{ now()->format('d M Y, H:i') }} &nbsp;|&nbsp; Super Administrator - Skilloka</span>
     <span>Skilloka LPK Report &copy; {{ now()->year }}</span>
 </div>
 

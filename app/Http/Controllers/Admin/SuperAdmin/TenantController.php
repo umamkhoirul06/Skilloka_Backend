@@ -17,36 +17,39 @@ class TenantController extends Controller
      */
     public function index(Request $request)
     {
-        $tenants = Tenant::with(['users', 'lpk'])
+        $search = $request->input('search');
 
+        $tenants = Tenant::with(['users', 'lpk.courses'])
             ->whereHas('lpk', function ($q) {
-
                 $q->where('status', 'active');
-
             })
-
-            ->when($request->search, function ($q) use ($request) {
-
-                $q->where(
-                    'lpk_name',
-                    'ilike',
-                    '%' . $request->search . '%'
-                );
-
+            ->when($search, function ($q) use ($search) {
+                $q->where(function ($sub) use ($search) {
+                    $sub->where('name', 'ilike', "%{$search}%")
+                        ->orWhereHas('lpk', function ($l) use ($search) {
+                            $l->where('name', 'ilike', "%{$search}%")
+                              ->orWhere('address', 'ilike', "%{$search}%")
+                              ->orWhere('nib', 'ilike', "%{$search}%");
+                        })
+                        ->orWhereHas('users', function ($u) use ($search) {
+                            $u->where('name', 'ilike', "%{$search}%")
+                              ->orWhere('email', 'ilike', "%{$search}%");
+                        });
+                });
             })
-
             ->latest()
+            ->paginate(10)
+            ->withQueryString();
 
-            ->get();
-
-
+        $stats = [
+            'total_lpk' => Tenant::whereHas('lpk', fn($q) => $q->where('status', 'active'))->count(),
+            'verified'  => \App\Models\Lpk::where('status_verifikasi', 'approved')->count(),
+            'courses'   => \App\Models\Course::count(),
+        ];
 
         return view(
-
             'super_admin.tenants.index',
-
-            compact('tenants')
-
+            compact('tenants', 'stats', 'search')
         );
     }
 
@@ -60,20 +63,14 @@ class TenantController extends Controller
         $tenant = Tenant::with([
                 'users',
                 'lpk.courses' => function ($query) {
-                    $query->withCount('bookings');
+                    $query->withCount('bookings')->with('category');
                 }
             ])
-
             ->findOrFail($id);
 
-
-
         return view(
-
             'super_admin.tenants.show',
-
             compact('tenant')
-
         );
     }
 

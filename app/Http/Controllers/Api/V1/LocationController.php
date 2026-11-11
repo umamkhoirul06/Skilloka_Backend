@@ -5,11 +5,25 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\BaseController;
 use App\Models\Location;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class LocationController extends BaseController
 {
+    /**
+     * GET /api/locations
+     * Mengambil daftar lokasi wilayah (Dioptimasi dengan cache untuk query standar).
+     */
     public function index(Request $request)
     {
+        $hasFilters = $request->has('parent_id') || $request->has('type') || $request->filled('search') || $request->boolean('hierarchy');
+
+        if (!$hasFilters) {
+            $locations = Cache::remember('api_default_locations', 600, function () {
+                return Location::all();
+            });
+            return $this->success($locations);
+        }
+
         $query = Location::query();
 
         if ($request->has('parent_id')) {
@@ -24,12 +38,8 @@ class LocationController extends BaseController
             $query->where('name', 'like', "%{$request->search}%");
         }
 
-        // If 'hierarchy' is requested, we can return a tree structure
         if ($request->boolean('hierarchy')) {
             $query->with('children');
-            // If starting from root (no parent_id), we might get too much.
-            // But for Indramayu app, maybe we just want the Indramayu regency and its children?
-            // Let's assume we filter by code or name if needed.
         }
 
         $locations = $query->get();

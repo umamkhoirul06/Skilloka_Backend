@@ -77,7 +77,8 @@ class LpkController extends BaseController
         $lpk = Lpk::with([
             'location',
             'courses' => function ($q) {
-                $q->where('is_active', true);
+                // ⚡ Performa: Eager load untuk mencegah N+1 query pada CourseResource
+                $q->where('is_active', true)->with(['category', 'schedules', 'contents']);
             }
         ])
             ->withCount('courses')

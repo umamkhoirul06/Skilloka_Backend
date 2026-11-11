@@ -19,17 +19,22 @@ class StudentController extends Controller
     {
         $tenantId = Auth::user()->tenant_id;
 
-        $students = User::whereHas('bookings', function ($q) use ($tenantId) {
-            $q->where('tenant_id', $tenantId)
-                ->whereHas('payment', function ($paymentQuery) {
-                    $paymentQuery->where('status', 'success');
-                });
-        })
+        $students = User::students()
+            ->whereHas('bookings', function ($q) use ($tenantId) {
+                $q->where('tenant_id', $tenantId)
+                    ->where(function ($sub) {
+                        $sub->whereHas('payment', function ($paymentQuery) {
+                            $paymentQuery->where('status', 'success');
+                        })->orWhereIn('status', ['paid', 'confirmed', 'ongoing', 'completed', 'Selesai']);
+                    });
+            })
             ->withCount([
                 'bookings' => function ($q) use ($tenantId) {
                     $q->where('tenant_id', $tenantId)
-                        ->whereHas('payment', function ($paymentQuery) {
-                            $paymentQuery->where('status', 'success');
+                        ->where(function ($sub) {
+                            $sub->whereHas('payment', function ($paymentQuery) {
+                                $paymentQuery->where('status', 'success');
+                            })->orWhereIn('status', ['paid', 'confirmed', 'ongoing', 'completed', 'Selesai']);
                         });
                 }
             ])
@@ -48,8 +53,10 @@ class StudentController extends Controller
 
         $hasPaidBooking = $student->bookings()
             ->where('tenant_id', $tenantId)
-            ->whereHas('payment', function ($q) {
-                $q->where('status', 'success');
+            ->where(function ($sub) {
+                $sub->whereHas('payment', function ($q) {
+                    $q->where('status', 'success');
+                })->orWhereIn('status', ['paid', 'confirmed', 'ongoing', 'completed', 'Selesai']);
             })
             ->exists();
 
@@ -72,8 +79,10 @@ class StudentController extends Controller
         $student->load([
             'bookings' => function ($q) use ($tenantId) {
                 $q->where('tenant_id', $tenantId)
-                    ->whereHas('payment', function ($paymentQuery) {
-                        $paymentQuery->where('status', 'success');
+                    ->where(function ($sub) {
+                        $sub->whereHas('payment', function ($paymentQuery) {
+                            $paymentQuery->where('status', 'success');
+                        })->orWhereIn('status', ['paid', 'confirmed', 'ongoing', 'completed', 'Selesai']);
                     })
                     ->latest();
             }

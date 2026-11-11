@@ -153,6 +153,41 @@ protected $fillable = [
     }
     public function favorites()
     {
-    return $this->hasMany(Favorite::class);
+        return $this->hasMany(Favorite::class);
+    }
+
+    /*
+    =====================
+    SCOPES
+    =====================
+    */
+
+    /**
+     * Scope untuk memfilter user berstatus siswa (hanya user mobile, bukan admin LPK / super admin)
+     */
+    public function scopeStudents($query)
+    {
+        return $query->whereDoesntHave('roles', function ($q) {
+            $q->whereIn('name', ['admin_lpk', 'lpk-admin', 'super_admin', 'super-admin']);
+        });
+    }
+
+    /**
+     * Scope untuk memfilter siswa yang terdaftar pada tenant / LPK tertentu
+     * (memiliki pesanan/booking pada tenant tersebut atau terdaftar khusus dengan role student/user)
+     */
+    public function scopeStudentsForTenant($query, $tenantId)
+    {
+        return $query->students()
+            ->where(function ($q) use ($tenantId) {
+                $q->whereHas('bookings', function ($b) use ($tenantId) {
+                    $b->where('tenant_id', $tenantId);
+                })->orWhere(function ($sub) use ($tenantId) {
+                    $sub->where('tenant_id', $tenantId)
+                        ->whereHas('roles', function ($r) {
+                            $r->whereIn('name', ['student', 'user']);
+                        });
+                });
+            });
     }
 }

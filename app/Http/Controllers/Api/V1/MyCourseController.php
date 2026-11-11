@@ -32,7 +32,14 @@ class MyCourseController extends BaseController
             ->latest()
             ->get();
 
-        $result = $bookings->map(function ($booking) {
+        // ⚡ Performa: Bulk load presensi peserta untuk mencegah query berulang dalam loop (O(1))
+        $courseIds = $bookings->pluck('course_id')->filter()->unique();
+        $attendancesGrouped = Attendance::where('user_id', $user->id)
+            ->whereIn('course_id', $courseIds)
+            ->get()
+            ->groupBy('course_id');
+
+        $result = $bookings->map(function ($booking) use ($attendancesGrouped) {
             $course = $booking->course ?? optional($booking->schedule)->course;
             $lpk = $course ? ($course->lpk ?? optional($course->tenant)->lpk) : null;
             $schedule = $booking->schedule;
@@ -90,14 +97,10 @@ class MyCourseController extends BaseController
             $startDate = $formatCleanDate($startDateRaw);
             $endDate = $formatCleanDate($endDateRaw);
 
-            // Hitung progress nyata berdasarkan kehadiran
-            $totalAttendances = Attendance::where('user_id', $booking->user_id)
-                ->where('course_id', $booking->course_id)
-                ->count();
-            $presentAttendances = Attendance::where('user_id', $booking->user_id)
-                ->where('course_id', $booking->course_id)
-                ->whereIn('status', ['present', 'hadir'])
-                ->count();
+            // Hitung progress nyata berdasarkan kehadiran (dihitung in-memory tanpa query berulang)
+            $courseAttendances = $attendancesGrouped->get($booking->course_id, collect());
+            $totalAttendances = $courseAttendances->count();
+            $presentAttendances = $courseAttendances->whereIn('status', ['present', 'hadir'])->count();
 
             $realProgress = $totalAttendances > 0 
                 ? (int) round(($presentAttendances / $totalAttendances) * 100) 

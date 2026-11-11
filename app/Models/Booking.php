@@ -75,4 +75,59 @@ class Booking extends Model
     {
         return $this->total_price;
     }
+
+    /**
+     * Accessor untuk status pembayaran yang akurat dan konsisten
+     */
+    public function getPaymentStatusAttribute($value = null)
+    {
+        // 1. Jika ada nilai eksplisit pada field payment_status
+        if (!empty($value)) {
+            $val = strtolower($value);
+            if (in_array($val, ['paid', 'lunas', 'success', 'settlement', 'capture'])) {
+                return 'paid';
+            }
+        }
+
+        // 2. Cek dari relasi tabel payment
+        $payment = $this->relationLoaded('payment') ? $this->payment : $this->payment()->first();
+        if ($payment) {
+            $paymentStatus = strtolower($payment->status ?? '');
+            if (in_array($paymentStatus, ['paid', 'lunas', 'success', 'settlement', 'capture', 'verified'])) {
+                return 'paid';
+            }
+            if ($paymentStatus === 'pending') {
+                return 'pending';
+            }
+            if (in_array($paymentStatus, ['failed', 'deny', 'expire', 'cancel', 'batal'])) {
+                return 'failed';
+            }
+        }
+
+        // 3. Cek dari status booking
+        $bookingStatus = strtolower($this->status ?? '');
+        if (in_array($bookingStatus, ['selesai', 'paid', 'confirmed', 'completed', 'approved'])) {
+            return 'paid';
+        }
+
+        if (in_array($bookingStatus, ['dibatalkan', 'cancelled'])) {
+            return 'cancelled';
+        }
+
+        return 'unpaid';
+    }
+
+    /**
+     * Accessor untuk tanggal kedaluwarsa booking (default 24 jam dari booking dibuat)
+     */
+    public function getExpiresAtAttribute($value = null)
+    {
+        $raw = $value ?? ($this->attributes['expires_at'] ?? null);
+        if ($raw) {
+            return \Carbon\Carbon::parse($raw);
+        }
+
+        $baseDate = $this->booking_date ?? $this->created_at;
+        return $baseDate ? \Carbon\Carbon::parse($baseDate)->addHours(24) : null;
+    }
 }

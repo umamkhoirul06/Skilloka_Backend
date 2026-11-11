@@ -16,8 +16,8 @@ class CourseController extends BaseController
     {
         $query = Course::query()->where('is_active', true);
 
-        // Filter & Search Opsional
-        $courses = $query->with(['lpk', 'category'])
+        // ⚡ Performa: Eager load lpk, category, schedules, & contents untuk mencegah N+1 Query
+        $courses = $query->with(['lpk.location', 'category', 'schedules', 'contents'])
             ->when($request->category, function ($q) use ($request) {
                 $cat = trim($request->category);
                 $isUuid = \Illuminate\Support\Str::isUuid($cat);

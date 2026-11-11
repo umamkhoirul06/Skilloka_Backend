@@ -58,14 +58,18 @@
 
                         </div>
 
+                        @php
+                            $bStatus = trim(strtolower($booking->status ?? ''));
+                            $isApprovedStatus = in_array($bStatus, ['selesai', 'confirmed', 'paid', 'completed', 'approved']);
+                            $isCancelledStatus = in_array($bStatus, ['dibatalkan', 'cancelled']);
+                        @endphp
                         <span @class([
                             'px-4 py-1 rounded-full text-xs font-semibold',
-                            'bg-green-100 text-green-700' => $booking->status === 'approved',
-                            'bg-yellow-100 text-yellow-700' => $booking->status !== 'approved',
+                            'bg-emerald-100 text-emerald-700' => $isApprovedStatus,
+                            'bg-rose-100 text-rose-700' => $isCancelledStatus,
+                            'bg-amber-100 text-amber-700' => !$isApprovedStatus && !$isCancelledStatus,
                         ])>
-
                             {{ ucfirst($booking->status) }}
-
                         </span>
 
                     </div>
@@ -81,7 +85,7 @@
                                 </p>
 
                                 <p class="font-semibold text-gray-800">
-                                    {{ $booking->created_at->format('d M Y, H:i') }}
+                                    {{ $booking->created_at ? $booking->created_at->translatedFormat('d M Y, H:i') : '-' }}
                                 </p>
 
                             </div>
@@ -93,7 +97,7 @@
                                 </p>
 
                                 <p class="font-semibold text-gray-800">
-                                    {{ optional($booking->expires_at)->format('d M Y, H:i') ?? '-' }}
+                                    {{ $booking->expires_at ? $booking->expires_at->translatedFormat('d M Y, H:i') : ($booking->created_at ? $booking->created_at->copy()->addDay()->translatedFormat('d M Y, H:i') : '-') }}
                                 </p>
 
                             </div>
@@ -241,19 +245,33 @@
                                 Status
                             </span>
 
-                            <span @class([
-                                'px-4 py-1 rounded-full text-xs font-semibold',
-                                'bg-green-100 text-green-700' => $booking->payment_status === 'paid',
-                                'bg-red-100 text-red-700' => $booking->payment_status !== 'paid',
-                            ])>
+                            @php
+                                $paymentRaw = strtolower($booking->payment_status ?? ($booking->payment->status ?? ''));
+                                $isPaid = in_array($paymentRaw, ['paid', 'verified', 'success', 'settlement', 'capture', 'lunas'])
+                                    || in_array(strtolower($booking->status ?? ''), ['selesai', 'paid', 'confirmed', 'completed', 'approved']);
+                                $isPending = !$isPaid && (
+                                    $paymentRaw === 'pending'
+                                    || in_array(strtolower($booking->status ?? ''), ['menunggu', 'pending'])
+                                );
+                            @endphp
 
-                                {{ ucfirst($booking->payment_status ?? 'Unpaid') }}
-
-                            </span>
+                            @if($isPaid)
+                                <span class="px-4 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
+                                    Lunas
+                                </span>
+                            @elseif($isPending)
+                                <span class="px-4 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
+                                    Menunggu Pembayaran
+                                </span>
+                            @else
+                                <span class="px-4 py-1 rounded-full text-xs font-semibold bg-rose-100 text-rose-700">
+                                    Belum Bayar
+                                </span>
+                            @endif
 
                         </div>
 
-                        @if($booking->payment)
+                        @if($booking->payment || $booking->payment_method)
 
                             <div>
 
@@ -262,7 +280,7 @@
                                 </p>
 
                                 <p class="font-semibold text-gray-800">
-                                    {{ ucfirst($booking->payment->method) }}
+                                    {{ strtoupper($booking->payment->method ?? $booking->payment_method ?? '-') }}
                                 </p>
 
                             </div>
@@ -319,8 +337,8 @@
                             </div>
                         @endif
 
-                        {{-- 2. JIKA BOOKING SUDAH DI-ACC (Sekarang pakai kata 'selesai') --}}
-                        @if(trim(strtolower($booking->status)) == 'selesai')
+                        {{-- 2. JIKA BOOKING SUDAH DI-ACC / SELESAI / LUNAS --}}
+                        @if(in_array(trim(strtolower($booking->status)), ['selesai', 'confirmed', 'paid', 'approved', 'completed']))
                             @if($booking->payment && trim(strtolower($booking->payment->status)) == 'pending')
                                 <form action="{{ route('admin.payments.status', $booking->payment->id) }}" method="POST"
                                     class="w-full">
