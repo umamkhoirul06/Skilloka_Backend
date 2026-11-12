@@ -10,7 +10,7 @@
             <h1 class="text-2xl font-bold font-outfit text-gray-900">Sertifikat Kelulusan Pelatihan</h1>
             <p class="text-xs text-gray-500 mt-1">Terbitkan dan kelola sertifikat kompetensi resmi dengan nomor registrasi unik untuk peserta yang telah menyelesaikan pelatihan.</p>
         </div>
-        <a href="{{ route('admin.certificates.create') }}" class="shiny-btn shiny-btn-emerald px-4 py-2.5 text-white rounded-xl text-xs font-semibold shadow-md flex items-center gap-2">
+        <a href="{{ route('admin.certificates.create') }}" class="bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white px-4 py-2.5 rounded-xl text-xs font-semibold shadow-md shadow-emerald-500/25 flex items-center gap-2 transition cursor-pointer">
             <i class="fa-solid fa-award text-xs"></i>
             <span>Terbitkan Sertifikat Baru</span>
         </a>

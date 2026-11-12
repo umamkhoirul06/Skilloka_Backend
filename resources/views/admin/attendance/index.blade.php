@@ -10,7 +10,7 @@
             <h1 class="text-2xl font-bold font-outfit text-gray-900">Presensi & Kehadiran Siswa</h1>
             <p class="text-xs text-gray-500 mt-1">Catat kehadiran per sesi pertemuan dan pantau persentase kehadiran peserta untuk syarat penerbitan sertifikat.</p>
         </div>
-        <a href="{{ route('admin.attendance.session', $selectedCourseId ? ['course_id' => $selectedCourseId] : []) }}" class="shiny-btn shiny-btn-brand px-4 py-2.5 text-white rounded-xl text-xs font-semibold shadow-md shadow-brand-500/20 flex items-center gap-2">
+        <a href="{{ route('admin.attendance.session', $selectedCourseId ? ['course_id' => $selectedCourseId] : []) }}" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white px-4 py-2.5 rounded-xl text-xs font-semibold shadow-md shadow-blue-500/25 flex items-center gap-2 transition cursor-pointer">
             <i class="fa-solid fa-clipboard-check text-xs"></i>
             <span>{{ $activeCourse ? 'Input Presensi ' . Str::limit($activeCourse->title, 20) : 'Input Presensi Sesi Ini' }}</span>
         </a>

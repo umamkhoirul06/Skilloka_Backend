@@ -15,7 +15,7 @@
                 <p class="text-xs text-slate-500 mt-1">Kelola seluruh kurikulum, jadwal, dan penetapan harga pelatihan kejuruan LPK Anda.</p>
             </div>
             <a href="{{ route('admin.courses.create') }}"
-                class="shiny-btn shiny-btn-brand inline-flex items-center gap-2 px-4 py-2.5 text-white text-xs font-bold rounded-xl shadow-md shadow-brand-500/20">
+                class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl shadow-md shadow-blue-500/25 transition cursor-pointer">
                 <i class="fa-solid fa-plus text-xs"></i>
                 <span>Tambah Program Baru</span>
             </a>

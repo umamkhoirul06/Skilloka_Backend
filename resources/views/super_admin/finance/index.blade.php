@@ -15,7 +15,7 @@
         </div>
         <div class="flex items-center gap-2.5">
             <a href="{{ route('super.finance.pdf') }}" 
-               class="shiny-btn shiny-btn-dark px-4 py-2.5 rounded-xl text-white font-bold text-xs flex items-center gap-2">
+               class="bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 shadow-sm transition cursor-pointer">
                 <i class="fa-solid fa-file-pdf text-rose-400"></i>
                 <span>Unduh Rekap PDF</span>
             </a>
