@@ -73,33 +73,33 @@
         </div>
 
         <!-- Banner Info Row -->
-        <div class="px-6 pb-6 pt-0 relative">
-            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 -mt-12 sm:-mt-14 mb-4">
-                <div class="flex items-end gap-4">
-                    <!-- Logo Avatar -->
-                    <div class="relative">
+        <div class="px-6 pb-6 pt-3 relative">
+            <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-5">
+                <div class="flex flex-col sm:flex-row sm:items-end gap-5">
+                    <!-- Logo Avatar (Hanya avatar yang overlap ke banner) -->
+                    <div class="relative shrink-0 -mt-14 sm:-mt-16">
                         @if($lpk && !empty($lpk->logo))
                             <img src="{{ asset('storage/' . $lpk->logo) }}" 
                                  alt="{{ $lpk->name }}" 
-                                 class="w-24 h-24 rounded-2xl object-cover ring-4 ring-white shadow-md bg-white border border-slate-100">
+                                 class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover ring-4 ring-white shadow-md bg-white border border-slate-100">
                         @else
-                            <div class="w-24 h-24 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-blue-500 text-white font-outfit font-extrabold text-3xl flex items-center justify-center ring-4 ring-white shadow-md">
+                            <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-blue-500 text-white font-outfit font-extrabold text-3xl sm:text-4xl flex items-center justify-center ring-4 ring-white shadow-md">
                                 {{ strtoupper(substr($lpk->name ?? $tenant->name ?? 'L', 0, 1)) }}
                             </div>
                         @endif
-                        <span class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 ring-2 ring-white flex items-center justify-center text-white text-[9px]" title="Aktif">
+                        <span class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 ring-2 ring-white flex items-center justify-center text-white text-[10px] shadow-xs" title="Aktif">
                             <i class="fa-solid fa-check"></i>
                         </span>
                     </div>
 
-                    <!-- Title & Badges -->
-                    <div class="pt-2">
-                        <div class="flex flex-wrap items-center gap-2">
-                            <h2 class="font-outfit text-xl sm:text-2xl font-bold text-slate-900">
+                    <!-- Title & Badges (Berada sepenuhnya di area putih dengan kontras jelas) -->
+                    <div class="pb-1">
+                        <div class="flex flex-wrap items-center gap-2.5">
+                            <h2 class="font-outfit text-xl sm:text-2xl font-bold text-slate-900 tracking-tight leading-tight">
                                 {{ $lpk->name ?? $tenant->name ?? '-' }}
                             </h2>
                             <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                 Mitra Aktif
                             </span>
                             @if(($lpk->status_verifikasi ?? '') === 'approved' || ($lpk->is_verified ?? false))
@@ -109,25 +109,25 @@
                                 </span>
                             @endif
                         </div>
-                        <p class="text-xs text-slate-500 mt-1 flex items-center gap-2">
+                        <p class="text-xs text-slate-500 mt-1.5 flex flex-wrap items-center gap-2">
                             <span><i class="fa-solid fa-location-dot text-slate-400 mr-1"></i>{{ $tenant->city ?? 'Kabupaten Indramayu' }}</span>
                             <span class="text-slate-300">•</span>
-                            <span><i class="fa-solid fa-id-card text-slate-400 mr-1"></i>NIB: <strong>{{ $lpk->nib ?? '-' }}</strong></span>
+                            <span><i class="fa-solid fa-id-card text-slate-400 mr-1"></i>NIB: <strong class="text-slate-700 font-semibold">{{ $lpk->nib ?? '-' }}</strong></span>
                         </p>
                     </div>
                 </div>
 
                 <!-- Quick Stats Badges -->
-                <div class="flex items-center gap-3 pt-2">
-                    <div class="px-4 py-2 rounded-xl bg-slate-50 border border-slate-200/80 text-center min-w-[90px]">
+                <div class="flex items-center gap-3 shrink-0 pb-1">
+                    <div class="px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-center min-w-[95px] shadow-2xs">
                         <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Total Kursus</span>
-                        <div class="font-outfit font-extrabold text-lg text-slate-900 leading-tight mt-0.5">
+                        <div class="font-outfit font-extrabold text-xl text-slate-900 leading-tight mt-0.5">
                             {{ $totalCourses }}
                         </div>
                     </div>
-                    <div class="px-4 py-2 rounded-xl bg-slate-50 border border-slate-200/80 text-center min-w-[90px]">
+                    <div class="px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-center min-w-[95px] shadow-2xs">
                         <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Pendaftar</span>
-                        <div class="font-outfit font-extrabold text-lg text-indigo-600 leading-tight mt-0.5">
+                        <div class="font-outfit font-extrabold text-xl text-indigo-600 leading-tight mt-0.5">
                             {{ $totalBookings }}
                         </div>
                     </div>
