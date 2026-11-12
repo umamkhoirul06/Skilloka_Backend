@@ -47,7 +47,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <button type="submit" class="shiny-btn shiny-btn-brand px-5 py-2.5 sm:py-3 rounded-xl text-white font-bold text-sm shadow-md shadow-brand-500/25 flex items-center justify-center gap-2">
+                        <button type="submit" class="shiny-btn shiny-btn-brand bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white px-5 py-2.5 sm:py-3 rounded-xl font-bold text-sm shadow-md shadow-brand-500/25 flex items-center justify-center gap-2 transition">
                             <span>Cari</span>
                             <i class="fa-solid fa-arrow-right text-xs"></i>
                         </button>
@@ -620,11 +620,11 @@
                 Jelajahi kursus terbaik di Kabupaten Indramayu atau daftarkan lembaga pelatihan Anda untuk menjangkau generasi siap kerja.
             </p>
             <div class="flex flex-wrap items-center justify-center gap-4">
-                <a href="{{ route('public.courses') }}" class="shiny-btn shiny-btn-dark px-7 py-3.5 rounded-xl font-bold text-sm text-white shadow-lg">
+                <a href="{{ route('public.courses') }}" class="shiny-btn shiny-btn-dark bg-slate-900 hover:bg-slate-800 text-white px-7 py-3.5 rounded-xl font-bold text-sm shadow-lg transition">
                     <span>Cari Program Kursus</span>
                     <i class="fa-solid fa-arrow-right text-xs ml-2"></i>
                 </a>
-                <a href="{{ route('lpk.register') }}" class="shiny-btn shiny-btn-brand px-7 py-3.5 rounded-xl font-bold text-sm text-white shadow-lg">
+                <a href="{{ route('lpk.register') }}" class="shiny-btn shiny-btn-brand bg-brand-600 hover:bg-brand-700 text-white px-7 py-3.5 rounded-xl font-bold text-sm shadow-lg shadow-brand-500/25 transition">
                     <span>Daftar Sebagai Mitra LPK</span>
                     <i class="fa-solid fa-building-columns text-xs ml-2"></i>
                 </a>

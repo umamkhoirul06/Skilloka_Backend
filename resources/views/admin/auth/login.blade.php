@@ -213,7 +213,7 @@
                     <!-- Submit Button -->
                     <div class="pt-1.5">
                         <button type="submit"
-                            class="shiny-btn shiny-btn-brand w-full py-3 px-5 rounded-xl text-white font-bold text-xs shadow-md shadow-brand-500/20 flex items-center justify-center gap-2 cursor-pointer">
+                            class="shiny-btn shiny-btn-brand bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white w-full py-3 px-5 rounded-xl font-bold text-xs shadow-md shadow-brand-500/25 flex items-center justify-center gap-2 cursor-pointer transition-all">
                             <span>Masuk ke Dashboard</span>
                             <i class="fa-solid fa-arrow-right text-[10px]"></i>
                         </button>

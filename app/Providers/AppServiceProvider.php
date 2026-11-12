@@ -20,8 +20,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // 🔥 INI YANG BENAR: Memaksa HTTPS untuk semua link dan form submit di VPS
-        if (config('app.env') === 'production') {
+        // 🔥 Memaksa skema HTTPS untuk semua asset() dan route() di VPS, Azure App Service, Nginx, & Cloudflare
+        if (
+            config('app.env') === 'production' ||
+            request()->server('HTTP_X_FORWARDED_PROTO') === 'https' ||
+            request()->isSecure() ||
+            (request()->header('X-Forwarded-Proto') === 'https') ||
+            str_contains(request()->header('Host', ''), 'azurewebsites.net')
+        ) {
             URL::forceScheme('https');
         }
 

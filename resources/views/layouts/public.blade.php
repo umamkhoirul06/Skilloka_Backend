@@ -316,11 +316,11 @@
                 <div class="hidden sm:flex items-center gap-3">
                     @auth
                         @if(auth()->user()->hasRole('super_admin'))
-                            <a href="{{ route('super.dashboard') }}" class="shiny-btn shiny-btn-dark px-4 py-2.5 rounded-xl text-sm font-semibold text-white shadow">
+                            <a href="{{ route('super.dashboard') }}" class="shiny-btn shiny-btn-dark bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-xl text-sm font-semibold shadow">
                                 <i class="fa-solid fa-gauge-high mr-1.5"></i> Dashboard Super Admin
                             </a>
                         @elseif(auth()->user()->hasRole('admin_lpk') || auth()->user()->hasRole('admin'))
-                            <a href="{{ route('admin.dashboard') }}" class="shiny-btn shiny-btn-brand px-4 py-2.5 rounded-xl text-sm font-semibold text-white shadow">
+                            <a href="{{ route('admin.dashboard') }}" class="shiny-btn shiny-btn-brand bg-brand-600 hover:bg-brand-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold shadow">
                                 <i class="fa-solid fa-gauge mr-1.5"></i> Dashboard LPK
                             </a>
                         @endif
@@ -328,7 +328,7 @@
                         <a href="{{ route('admin.login') }}" class="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:text-brand-600 hover:bg-slate-100/80 transition">
                             <i class="fa-solid fa-arrow-right-to-bracket mr-1.5 text-slate-400"></i> Masuk
                         </a>
-                        <a href="{{ route('lpk.register') }}" class="shiny-btn shiny-btn-brand px-5 py-2.5 rounded-full text-xs font-bold shadow-md shadow-brand-500/25">
+                        <a href="{{ route('lpk.register') }}" class="shiny-btn shiny-btn-brand bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-full text-xs font-bold shadow-md shadow-brand-500/25">
                             <i class="fa-solid fa-building-columns mr-1.5"></i> Daftarkan LPK
                         </a>
                     @endauth

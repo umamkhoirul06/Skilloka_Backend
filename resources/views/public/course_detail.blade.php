@@ -180,7 +180,7 @@
                         </p>
                     </div>
 
-                    <a href="https://wa.me/62895405193300?text=Halo%20Admin%20Skilloka,%20saya%20tertarik%20dengan%20kursus%20{{ urlencode($course->title) }}" target="_blank" class="shiny-btn shiny-btn-emerald w-full py-3.5 rounded-xl text-white font-bold text-xs shadow-md flex items-center justify-center gap-2">
+                    <a href="https://wa.me/62895405193300?text=Halo%20Admin%20Skilloka,%20saya%20tertarik%20dengan%20kursus%20{{ urlencode($course->title) }}" target="_blank" class="shiny-btn shiny-btn-emerald bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white w-full py-3.5 rounded-xl font-bold text-xs shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 transition">
                         <i class="fa-brands fa-whatsapp text-sm"></i>
                         <span>Konsultasi / Daftar Kursus</span>
                     </a>
