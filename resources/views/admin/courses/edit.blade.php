@@ -82,14 +82,31 @@
                             Kategori Kejuruan <span class="text-red-500">*</span>
                         </label>
                         <select name="category_id" 
+                                id="category_id_select"
+                                onchange="toggleNewCategoryInput(this.value)"
                                 required 
                                 class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-xs text-gray-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white transition">
+                            <option value="">-- Pilih Kategori --</option>
                             @foreach($categories as $cat)
                                 <option value="{{ $cat->id }}" {{ old('category_id', $course->category_id) == $cat->id ? 'selected' : '' }}>
                                     {{ $cat->name }}
                                 </option>
                             @endforeach
+                            <option value="__new__" {{ old('category_id') === '__new__' ? 'selected' : '' }} class="font-bold text-indigo-600 bg-indigo-50/50">
+                                + Tambah Kategori / Kejuruan Baru...
+                            </option>
                         </select>
+                        <div id="new_category_container" class="{{ old('category_id') === '__new__' ? '' : 'hidden' }} mt-2">
+                            <label class="block text-[11px] font-semibold text-indigo-700 mb-1">
+                                Tulis Nama Kejuruan Baru <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" 
+                                   name="new_category_name" 
+                                   id="new_category_name"
+                                   value="{{ old('new_category_name') }}"
+                                   placeholder="Contoh: Pertanian & Hidroponik Modern" 
+                                   class="w-full px-3.5 py-2 rounded-xl border border-indigo-200 text-xs text-gray-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-indigo-50/30 transition">
+                        </div>
                     </div>
 
                     {{-- Level --}}
@@ -306,4 +323,20 @@
         </form>
     </div>
 </div>
+
+<script>
+    function toggleNewCategoryInput(val) {
+        const container = document.getElementById('new_category_container');
+        const input = document.getElementById('new_category_name');
+        if (!container || !input) return;
+        if (val === '__new__') {
+            container.classList.remove('hidden');
+            input.setAttribute('required', 'required');
+            input.focus();
+        } else {
+            container.classList.add('hidden');
+            input.removeAttribute('required');
+        }
+    }
+</script>
 @endsection
