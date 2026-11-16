@@ -13,11 +13,14 @@ class LpkResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'legal_name' => $this->legal_name,
+            'description' => $this->description,
             'address' => $this->address,
-            'logo_url' => $this->logo ? asset('storage/' . $this->logo) : null,
-            'images' => collect($this->images ?? [])->map(
-                fn($img) => asset('storage/' . $img)
-            )->toArray(),
+            'phone' => $this->phone,
+            'wa_number' => $this->wa_number,
+            'nib' => $this->nib,
+            'logo_url' => $this->logo_url,
+            'initials' => $this->initials,
+            'images' => $this->gallery_images,
             'rating' => (float) ($this->rating ?? 0),
             'review_count' => (int) ($this->review_count ?? 0),
             'is_verified' => (bool) $this->is_verified,

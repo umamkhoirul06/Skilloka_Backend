@@ -44,13 +44,33 @@
                     <div class="lpk-accent {{ $color['accent'] }}"></div>
                     <div>
                         <div class="flex items-start justify-between gap-3 mb-4">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-tr {{ $color['gradient'] }} text-white font-bold flex items-center justify-center text-lg shadow-md">
-                                {{ strtoupper(substr($lpk->name, 0, 1)) }}
+                            <div class="relative w-14 h-14 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200/80 shadow-md flex-shrink-0 flex items-center justify-center">
+                                @if($lpk->logo_url)
+                                    <img src="{{ $lpk->logo_url }}" 
+                                         alt="{{ $lpk->name }}" 
+                                         class="w-full h-full object-cover"
+                                         onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden'); this.nextElementSibling.classList.add('flex');">
+                                    <div class="w-full h-full bg-gradient-to-tr {{ $color['gradient'] }} text-white font-black hidden items-center justify-center text-base tracking-wider">
+                                        {{ $lpk->initials }}
+                                    </div>
+                                @else
+                                    <div class="w-full h-full bg-gradient-to-tr {{ $color['gradient'] }} text-white font-black flex items-center justify-center text-base tracking-wider">
+                                        {{ $lpk->initials }}
+                                    </div>
+                                @endif
                             </div>
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold badge-verified shadow-sm">
-                                <i class="fa-solid fa-circle-check text-emerald-500"></i>
-                                Terverifikasi
-                            </span>
+                            <div class="flex flex-col items-end gap-1.5">
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold badge-verified shadow-sm">
+                                    <i class="fa-solid fa-circle-check text-emerald-500"></i>
+                                    Terverifikasi
+                                </span>
+                                @if(count($lpk->gallery_images) > 0)
+                                    <span class="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
+                                        <i class="fa-solid fa-camera text-slate-400"></i>
+                                        {{ count($lpk->gallery_images) }} Foto
+                                    </span>
+                                @endif
+                            </div>
                         </div>
 
                         <h3 class="font-outfit text-lg font-bold text-slate-900 mb-1.5">{{ $lpk->name }}</h3>

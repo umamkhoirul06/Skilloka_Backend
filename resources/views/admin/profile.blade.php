@@ -133,6 +133,16 @@
             <p class="text-sm text-gray-500">WhatsApp LPK</p>
             <p class="font-semibold text-gray-900 mt-1">{{ $lpk->wa_number ?: '-' }}</p>
         </div>
+
+        <div class="md:col-span-2">
+            <p class="text-sm text-gray-500">Alamat Lengkap LPK</p>
+            <p class="font-semibold text-gray-900 mt-1">{{ $lpk->address ?: 'Alamat belum diatur' }}</p>
+        </div>
+
+        <div class="md:col-span-2">
+            <p class="text-sm text-gray-500">Deskripsi & Profil Lembaga</p>
+            <p class="font-normal text-gray-700 mt-1 text-sm leading-relaxed whitespace-pre-line">{{ $lpk->description ?: 'Deskripsi lembaga belum diatur.' }}</p>
+        </div>
     </div>
 
     <div class="border-t border-gray-100 pt-6">
@@ -330,6 +340,24 @@
                                             value="{{ old('wa_number', $lpk->wa_number ?? '') }}"
                                             class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-shadow">
                                     </div>
+                                </div>
+
+                                {{-- Alamat Lengkap LPK --}}
+                                <div class="mt-6">
+                                    <label class="block text-sm font-semibold text-gray-900 mb-2">Alamat Lengkap Operasional LPK</label>
+                                    <input type="text" name="address"
+                                        value="{{ old('address', $lpk->address ?? '') }}"
+                                        placeholder="Contoh: Jl. Mayor Dasuki No. 45, Jatibarang, Indramayu"
+                                        class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-shadow">
+                                </div>
+
+                                {{-- Deskripsi & Profil LPK --}}
+                                <div class="mt-6">
+                                    <label class="block text-sm font-semibold text-gray-900 mb-2">Deskripsi & Profil Lembaga LPK</label>
+                                    <textarea name="description" rows="4"
+                                        placeholder="Tuliskan profil lembaga, fokus kejuruan, keunggulan pelatihan, dan fasilitas lembaga..."
+                                        class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-shadow">{{ old('description', $lpk->description ?? '') }}</textarea>
+                                    <p class="text-xs text-gray-500 mt-1">Deskripsi ini akan ditampilkan di halaman publik LPK dan detail profil lembaga.</p>
                                 </div>
 
                                 {{-- Fasilitas LPK (DIPERBAIKI DENGAN NORMALISASI) --}}

@@ -42,8 +42,20 @@
 
                 <!-- Provider LPK -->
                 <div class="flex items-center gap-3 pt-2">
-                    <div class="w-10 h-10 rounded-xl bg-slate-800 text-white font-bold flex items-center justify-center text-sm shadow">
-                        {{ strtoupper(substr($course->lpk->name ?? 'L', 0, 1)) }}
+                    <div class="relative w-11 h-11 rounded-xl overflow-hidden bg-slate-800 text-white font-bold flex-shrink-0 flex items-center justify-center text-sm shadow">
+                        @if($course->lpk && $course->lpk->logo_url)
+                            <img src="{{ $course->lpk->logo_url }}" 
+                                 alt="{{ $course->lpk->name }}" 
+                                 class="w-full h-full object-cover"
+                                 onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden'); this.nextElementSibling.classList.add('flex');">
+                            <div class="w-full h-full bg-slate-800 text-white font-black hidden items-center justify-center text-xs tracking-wider">
+                                {{ $course->lpk->initials }}
+                            </div>
+                        @else
+                            <div class="w-full h-full bg-slate-800 text-white font-black flex items-center justify-center text-xs tracking-wider">
+                                {{ $course->lpk ? $course->lpk->initials : 'LPK' }}
+                            </div>
+                        @endif
                     </div>
                     <div>
                         <div class="text-xs text-slate-400">Diselenggarakan oleh:</div>

@@ -87,6 +87,8 @@ class ProfileController extends Controller
             'legal_name' => 'nullable|string|max:255',
             'phone_lpk' => 'nullable|string|max:25',
             'wa_number' => 'nullable|string|max:25',
+            'address' => 'nullable|string|max:500',
+            'description' => 'nullable|string|max:3000',
             'facilities' => 'nullable|array',
             'gallery_images' => 'nullable|array',
             'gallery_images.*' => 'image|mimes:jpeg,jpg,png,webp|max:5120',
@@ -134,6 +136,12 @@ class ProfileController extends Controller
             }
             if ($request->has('wa_number')) {
                 $lpk->wa_number = $request->wa_number;
+            }
+            if ($request->has('address')) {
+                $lpk->address = $request->address;
+            }
+            if ($request->has('description')) {
+                $lpk->description = $request->description;
             }
             if ($request->has('facilities')) {
                 $lpk->facilities = $request->facilities;
