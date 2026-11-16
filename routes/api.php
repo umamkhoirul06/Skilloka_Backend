@@ -23,10 +23,13 @@ use App\Http\Controllers\Admin\ProfileController;
 // ==========================================
 Route::post('/auth/register', [AuthController::class, 'register'])->middleware('throttle:10,1');
 Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
+Route::post('/auth/validate-luhn', [AuthController::class, 'validateLuhn'])->middleware('throttle:30,1');
 Route::post('/auth/request-otp', [AuthController::class, 'requestOtp'])->middleware('throttle:5,1');
 Route::post('/auth/verify-otp', [AuthController::class, 'verifyOtp'])->middleware('throttle:10,1');
 
-// Rute Kursus & LPK
+// Rute Kursus & LPK (Search & Autocomplete ditempatkan sebelum {id})
+Route::get('/courses/search', [CourseController::class, 'search']);
+Route::get('/courses/autocomplete', [CourseController::class, 'autocomplete']);
 Route::get('/courses', [CourseController::class, 'index']);
 Route::get('/courses/{id}', [CourseController::class, 'show']);
 Route::get('/lpks', [LpkController::class, 'index']);

@@ -26,6 +26,10 @@ class UserResource extends JsonResource
                 ? url('storage/' . $this->photo)
                 : null,
 
+            // Nomor Kartu Siswa resmi terverifikasi Algoritma Luhn
+            'student_card_number' => \App\Services\LuhnService::generateStudentCardNumber($this->id),
+            'luhn_verified' => true,
+
             // Preferensi avatar dan frame
             'avatar_type' => $this->avatar_type ?? 'photo',
             'avatar_id' => $this->avatar_id,

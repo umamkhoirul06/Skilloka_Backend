@@ -43,59 +43,58 @@
         </div>
 
         {{-- Profile Header Content --}}
-        <div class="px-6 sm:px-10 pb-8 pt-0 relative">
-            <div class="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 -mt-16 sm:-mt-20">
-                <div class="flex flex-col sm:flex-row items-start sm:items-end gap-5">
-                    {{-- Logo / Avatar --}}
-                    <div class="relative w-24 h-24 sm:w-32 sm:h-32 rounded-3xl overflow-hidden bg-white border-4 border-white shadow-xl flex-shrink-0 flex items-center justify-center">
+        <div class="px-6 sm:px-10 pb-7 pt-0 relative">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+                    {{-- Logo / Avatar: Hanya avatar yang naik ke atas banner --}}
+                    <div class="relative w-24 h-24 sm:w-28 sm:h-28 -mt-12 sm:-mt-14 rounded-2xl overflow-hidden bg-white border-4 border-white shadow-xl flex-shrink-0 flex items-center justify-center z-10">
                         @if($logoPhoto)
                             <img src="{{ $logoPhoto }}" 
                                  alt="{{ $lpk->name }}" 
                                  class="w-full h-full object-cover"
                                  onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden'); this.nextElementSibling.classList.add('flex');">
-                            <div class="w-full h-full bg-gradient-to-tr from-indigo-600 to-blue-600 text-white font-black hidden items-center justify-center text-3xl sm:text-4xl tracking-wider">
+                            <div class="w-full h-full bg-gradient-to-tr from-indigo-600 to-blue-600 text-white font-black hidden items-center justify-center text-3xl tracking-wider">
                                 {{ $initials }}
                             </div>
                         @else
-                            <div class="w-full h-full bg-gradient-to-tr from-indigo-600 to-blue-600 text-white font-black flex items-center justify-center text-3xl sm:text-4xl tracking-wider">
+                            <div class="w-full h-full bg-gradient-to-tr from-indigo-600 to-blue-600 text-white font-black flex items-center justify-center text-3xl tracking-wider">
                                 {{ $initials }}
                             </div>
                         @endif
                     </div>
 
-                    {{-- Title & Meta --}}
-                    <div class="space-y-1.5 pt-2">
-                        <div class="flex flex-wrap items-center gap-2">
-                            @if($lpk->legal_name)
-                                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                                    {{ $lpk->legal_name }}
-                                </span>
-                            @endif
-                        </div>
-                        <h1 class="font-outfit text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                    {{-- Title & Meta: Berada di area putih dengan kontras jelas --}}
+                    <div class="space-y-1 pt-3 sm:pt-4">
+                        @if($lpk->legal_name)
+                            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-100/80">
+                                <i class="fa-solid fa-landmark text-[10px]"></i>
+                                <span>{{ $lpk->legal_name }}</span>
+                            </div>
+                        @endif
+                        <h1 class="font-outfit text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
                             {{ $lpk->name }}
                         </h1>
-                        <p class="text-xs sm:text-sm text-slate-600 flex items-center gap-2">
-                            <i class="fa-solid fa-location-dot text-brand-600"></i>
+                        <p class="text-xs sm:text-sm text-slate-500 flex items-center gap-1.5">
+                            <i class="fa-solid fa-location-dot text-brand-600 text-xs"></i>
                             <span>{{ $lpk->address ?? 'Kabupaten Indramayu, Jawa Barat' }}</span>
                         </p>
                     </div>
                 </div>
 
-                {{-- Action Buttons --}}
-                <div class="flex flex-wrap items-center gap-3 w-full md:w-auto pt-2">
+                {{-- Action Buttons: Ukuran proporsional, icon WA pas dan rapi --}}
+                <div class="flex flex-wrap items-center gap-2.5 w-full md:w-auto pt-2 sm:pt-4">
                     @if($lpk->wa_number || $lpk->phone)
                         <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $lpk->wa_number ?? $lpk->phone) }}" 
                            target="_blank" 
-                           class="flex-1 md:flex-none px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm hover:shadow transition flex items-center justify-center gap-2">
-                            <i class="fa-brands fa-whatsapp text-base"></i>
+                           class="flex-1 md:flex-none px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm hover:shadow transition flex items-center justify-center gap-2">
+                            <i class="fa-brands fa-whatsapp text-sm"></i>
                             <span>Chat WhatsApp LPK</span>
                         </a>
                     @endif
                     @if($lpk->phone)
                         <a href="tel:{{ preg_replace('/[^0-9]/', '', $lpk->phone) }}" 
-                           class="px-4 py-3 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-bold transition flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-phone text-xs"></i>
+                           class="px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-phone text-xs text-slate-500"></i>
                             <span>Telepon</span>
                         </a>
                     @endif
