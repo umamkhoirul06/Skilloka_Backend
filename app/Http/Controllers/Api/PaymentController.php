@@ -83,7 +83,7 @@ class PaymentController extends Controller
                 'snap_token' => $snapToken,
             ]);
 
-            $isProd = (bool) env('MIDTRANS_IS_PRODUCTION', false);
+            $isProd = (bool) (config('services.midtrans.is_production') ?? env('MIDTRANS_IS_PRODUCTION', false));
             $redirectUrl = $isProd
                 ? "https://app.midtrans.com/snap/v2/vtweb/{$snapToken}"
                 : "https://app.sandbox.midtrans.com/snap/v2/vtweb/{$snapToken}";
@@ -154,14 +154,14 @@ class PaymentController extends Controller
                         'provider' => 'Skilloka Demo / Simulasi Expo',
                         'external_id' => 'DEMO-' . Str::uuid(),
                         'amount' => $booking->total_price,
-                        'status' => 'paid',
+                        'status' => 'success',
                         'paid_at' => now(),
                         'notes' => 'Pembayaran simulasi sukses untuk demo / expo.',
                     ]
                 );
 
                 $booking->update([
-                    'status' => 'Selesai',
+                    'status' => 'confirmed',
                     'payment_method' => $validated['method'],
                     'status_belajar' => 'sedang_belajar',
                     'qr_code_url' => $qrPath,

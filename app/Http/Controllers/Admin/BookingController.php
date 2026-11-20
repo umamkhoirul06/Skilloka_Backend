@@ -148,7 +148,7 @@ class BookingController extends Controller
                         'user_id'   => $booking->user_id,
                         'tenant_id' => $booking->tenant_id,
                         'amount'    => $coursePrice,
-                        'status'    => 'paid',
+                        'status'    => 'success',
                         'paid_at'   => now(),
                         'method'    => 'manual',
                         'provider'  => 'manual',

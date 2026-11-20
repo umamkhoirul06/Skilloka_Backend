@@ -9,17 +9,26 @@ class BookingResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        // Translasi status kembali ke bahasa Inggris agar Flutter (isPending, isCompleted, dll) tidak rusak
+        // Translasi status kembali ke format konsisten agar Flutter (isPending, isCompleted, dll) bekerja akurat
         $statusMap = [
             'Menunggu' => 'pending',
+            'pending' => 'pending',
+            'Menunggu Pembayaran' => 'pending',
+            'confirmed' => 'confirmed',
+            'paid' => 'paid',
+            'sedang_belajar' => 'ongoing',
             'Selesai' => 'completed',
+            'completed' => 'completed',
             'Dibatalkan' => 'cancelled',
+            'cancelled' => 'cancelled',
         ];
 
         return [
             'id' => $this->id,
             'code' => $this->id, // Menggunakan id sebagai code karena tabel baru tidak ada code
-            'status' => $statusMap[$this->status] ?? 'pending',
+            'status' => $statusMap[$this->status] ?? $this->status,
+            'booking_status' => $this->status,
+            'status_belajar' => $this->status_belajar ?? 'sedang_belajar',
             'amount' => (float) $this->total_price, // Diubah kembali ke amount
             'expires_at' => null,
             'created_at' => $this->booking_date,
