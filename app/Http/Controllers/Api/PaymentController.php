@@ -18,8 +18,9 @@ class PaymentController extends Controller
 {
     public function __construct()
     {
-        Config::$serverKey = config('services.midtrans.server_key', env('MIDTRANS_SERVER_KEY'));
-        Config::$isProduction = (bool) env('MIDTRANS_IS_PRODUCTION', false);
+        $serverKey = config('services.midtrans.server_key') ?: env('MIDTRANS_SERVER_KEY');
+        Config::$serverKey = $serverKey;
+        Config::$isProduction = (bool) (config('services.midtrans.is_production') ?? env('MIDTRANS_IS_PRODUCTION', false));
         Config::$isSanitized = true;
         Config::$is3ds = true;
     }
@@ -113,8 +114,8 @@ class PaymentController extends Controller
      */
     public function confirmDummy(Request $request)
     {
-        // 🔒 Keamanan: Cegah bypass pembayaran di server production
-        if (app()->isProduction()) {
+        // 🔒 Izinkan bypass pembayaran untuk simulasi demo / expo testing
+        if (app()->isProduction() && !$request->boolean('is_demo') && $request->header('X-Demo-Mode') !== 'true') {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Fitur pembayaran dummy dinonaktifkan di environment production.',
@@ -123,7 +124,7 @@ class PaymentController extends Controller
 
         $validated = $request->validate([
             'booking_id' => ['required', 'string', 'exists:bookings,id'],
-            'method' => ['required', 'in:transfer_bank,qris,e_wallet'],
+            'method' => ['required', 'string'],
         ]);
 
         $user = $request->user();
@@ -135,13 +136,14 @@ class PaymentController extends Controller
                     ->lockForUpdate()
                     ->firstOrFail();
 
-                $existingPayment = Payment::where('booking_id', $booking->id)
-                    ->lockForUpdate()
-                    ->first();
-
-                if ($existingPayment && $existingPayment->status === 'success') {
-                    abort(422, 'Booking ini sudah dibayar.');
-                }
+                $qrPath = 'qrs/booking_' . $booking->id . '.png';
+                $qrData = "SKILLOKA-PAYMENT-ID:" . $booking->id;
+                try {
+                    \Illuminate\Support\Facades\Storage::disk('public')->put(
+                        $qrPath,
+                        \SimpleSoftwareIO\QrCode\Facades\QrCode::format('png')->size(300)->generate($qrData)
+                    );
+                } catch (\Throwable $qrEx) {}
 
                 $payment = Payment::updateOrCreate(
                     ['booking_id' => $booking->id],
@@ -149,12 +151,12 @@ class PaymentController extends Controller
                         'user_id' => $booking->user_id,
                         'tenant_id' => $booking->tenant_id,
                         'method' => $validated['method'],
-                        'provider' => 'Skilloka Dummy',
-                        'external_id' => 'DUMMY-' . Str::uuid(),
+                        'provider' => 'Skilloka Demo / Simulasi Expo',
+                        'external_id' => 'DEMO-' . Str::uuid(),
                         'amount' => $booking->total_price,
-                        'status' => 'success',
+                        'status' => 'paid',
                         'paid_at' => now(),
-                        'notes' => 'Pembayaran dummy untuk pengembangan.',
+                        'notes' => 'Pembayaran simulasi sukses untuk demo / expo.',
                     ]
                 );
 
@@ -162,6 +164,7 @@ class PaymentController extends Controller
                     'status' => 'Selesai',
                     'payment_method' => $validated['method'],
                     'status_belajar' => 'sedang_belajar',
+                    'qr_code_url' => $qrPath,
                 ]);
 
                 return $payment;
@@ -169,7 +172,7 @@ class PaymentController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Pembayaran dummy berhasil.',
+                'message' => 'Pembayaran simulasi demo berhasil.',
                 'payment' => $payment,
             ]);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {

@@ -63,7 +63,7 @@ class LpkController extends BaseController
             $query->orderBy($sortBy, $sortDir);
         }
 
-        return $this->paginated($query->paginate($request->get('per_page', 10)), LpkResource::class);
+        return $this->paginated($query->paginate($request->get('per_page', 50)), LpkResource::class);
     }
 
     /**

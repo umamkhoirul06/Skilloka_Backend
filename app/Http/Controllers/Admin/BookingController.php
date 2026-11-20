@@ -113,7 +113,7 @@ class BookingController extends Controller
 
     public function updateStatus(Request $request, Booking $booking)
     {
-        $request->validate(['status' => 'required|in:confirmed,cancelled']);
+        $request->validate(['status' => 'required|in:confirmed,cancelled,Selesai,Dibatalkan']);
 
         if (Auth::user()->tenant_id != $booking->tenant_id && !Auth::user()->hasRole('super_admin')) {
             abort(403);
@@ -121,20 +121,24 @@ class BookingController extends Controller
 
         DB::beginTransaction();
         try {
-            if ($request->status == 'confirmed') {
+            if ($request->status == 'confirmed' || $request->status == 'Selesai') {
                 $qrPath = 'qrs/booking_' . $booking->id . '.png';
                 $qrData = "SKILLOKA-PAYMENT-ID:" . $booking->id;
 
-                Storage::disk('public')->put(
-                    $qrPath,
-                    QrCode::format('png')->size(300)->generate($qrData)
-                );
+                try {
+                    Storage::disk('public')->put(
+                        $qrPath,
+                        QrCode::format('png')->size(300)->generate($qrData)
+                    );
+                } catch (\Throwable $qrEx) {
+                    \Log::warning("Gagal generate QR Code: " . $qrEx->getMessage());
+                }
 
-
-$booking->update([
-    'status'      => 'confirmed',
-    'qr_code_url' => $qrPath,
-]);
+                $booking->update([
+                    'status'         => 'confirmed',
+                    'status_belajar' => 'sedang_belajar',
+                    'qr_code_url'    => $qrPath,
+                ]);
 
                 $coursePrice = $booking->course?->price ?? $booking->schedule?->course?->price ?? $booking->total_price ?? $booking->amount ?? 0;
 
@@ -144,13 +148,16 @@ $booking->update([
                         'user_id'   => $booking->user_id,
                         'tenant_id' => $booking->tenant_id,
                         'amount'    => $coursePrice,
-                        'status'    => 'pending',
+                        'status'    => 'paid',
+                        'paid_at'   => now(),
                         'method'    => 'manual',
                         'provider'  => 'manual',
                     ]
                 );
             } else {
-                $booking->update(['status' => 'Dibatalkan']);
+                $booking->update([
+                    'status' => 'Dibatalkan',
+                ]);
             }
 
             DB::commit();
